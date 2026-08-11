@@ -4,14 +4,33 @@
 The point of this script is to be boring. It grabs the feed, writes it
 over data/aws-status.rss, and tells you whether anything changed. Git
 keeps the history once the workflow commits the file.
+
+AWS re-renders the feed every few minutes and bumps lastBuildDate each
+time, so "changed" is decided by comparing the actual items, not the
+bytes. Otherwise we'd commit noise every single day.
 """
 
-import hashlib
 import sys
 import urllib.request
 
+from parse_snapshot import parse_snapshot_text
+
 FEED_URL = "https://status.aws.amazon.com/rss/all.rss"
 OUT_PATH = "data/aws-status.rss"
+
+
+def item_signatures(content):
+    """A comparable signature per item, ignoring feed-level noise."""
+    return {
+        (
+            item["guid"],
+            item["published"],
+            item["severity"],
+            item["title"],
+            item["description"],
+        )
+        for item in parse_snapshot_text(content)
+    }
 
 
 def main():
@@ -29,15 +48,19 @@ def main():
     except FileNotFoundError:
         pass
 
-    with open(OUT_PATH, "wb") as handle:
-        handle.write(body)
+    changed = True
+    if previous is not None:
+        changed = item_signatures(previous.decode("utf-8")) != item_signatures(
+            body.decode("utf-8")
+        )
 
-    digest = hashlib.sha256(body).hexdigest()[:16]
-    print(f"fetched {len(body)} bytes (sha {digest})")
-    if previous == body:
-        print("no change")
-        return 1
-    return 0
+    if changed:
+        with open(OUT_PATH, "wb") as handle:
+            handle.write(body)
+        print(f"changed: wrote {len(body)} bytes to {OUT_PATH}")
+        return 0
+    print("no change")
+    return 1
 
 
 if __name__ == "__main__":
