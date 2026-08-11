@@ -2,12 +2,16 @@
 """Fetch the AWS status feed and save a snapshot to data/.
 
 The point of this script is to be boring. It grabs the feed, writes it
-over data/aws-status.rss, and tells you whether anything changed. Git
+over data/aws-status.rss, and reports whether anything changed. Git
 keeps the history once the workflow commits the file.
 
 AWS re-renders the feed every few minutes and bumps lastBuildDate each
 time, so "changed" is decided by comparing the actual items, not the
 bytes. Otherwise we'd commit noise every single day.
+
+Exits 0 as long as the fetch itself worked; whether the feed changed
+is informational. The workflow looks at git status to decide if there
+is anything worth committing.
 """
 
 import sys
@@ -58,9 +62,9 @@ def main():
         with open(OUT_PATH, "wb") as handle:
             handle.write(body)
         print(f"changed: wrote {len(body)} bytes to {OUT_PATH}")
-        return 0
-    print("no change")
-    return 1
+    else:
+        print("no change")
+    return 0
 
 
 if __name__ == "__main__":

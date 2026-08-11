@@ -17,14 +17,27 @@ jobs:
       - name: Fetch feed
         run: python scripts/fetch_feed.py
 
+      - name: Check feed shape
+        run: python scripts/check_feed_shape.py
+
+      - name: Report what changed
+        run: |
+          if git status --porcelain | grep -q .; then
+            python scripts/diff_snapshots.py \
+              --previous <(git show HEAD:data/aws-status.rss) \
+              --current data/aws-status.rss
+          else
+            echo "feed unchanged"
+          fi
+
       - name: Commit snapshot
         run: |
-          if git status --porcelain | grep .; then
+          if git status --porcelain | grep -q .; then
             git config user.name "status-archive[bot]"
             git config user.email "status-archive[bot]@users.noreply.github.com"
             git add data/aws-status.rss
             git commit -m "data: archive AWS status feed snapshot"
             git push
           else
-            echo "feed unchanged, nothing to commit"
+            echo "nothing to commit"
           fi
