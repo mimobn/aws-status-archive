@@ -11,6 +11,7 @@ Rebuilding is deterministic: same history in, same output out.
 
 import json
 import os
+import sqlite3
 import subprocess
 import sys
 from datetime import datetime
@@ -19,6 +20,26 @@ from parse_snapshot import parse_snapshot_text
 
 SNAPSHOT_PATH = "data/aws-status.rss"
 OUT_PATH = "out/incidents.json"
+DB_PATH = "out/status.db"
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS updates (
+    guid TEXT PRIMARY KEY,
+    incident_key TEXT NOT NULL,
+    published TEXT NOT NULL,
+    severity TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS incidents (
+    incident_key TEXT PRIMARY KEY,
+    started_at TEXT,
+    last_update TEXT,
+    update_count INTEGER,
+    title TEXT
+);
+"""
 
 
 def snapshot_history():
@@ -89,6 +110,54 @@ def build_incidents(shas):
     return build_incidents_from_snapshots([snapshot_at(sha) for sha in shas])
 
 
+def write_db(incidents):
+    """Write incidents and their updates into SQLite.
+
+    The rebuild is the source of truth, so this wipes and rewrites the
+    tables. Running it twice in a row leaves the db byte-identical
+    except for the row order.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        conn.executescript(SCHEMA)
+        conn.execute("DELETE FROM updates")
+        conn.execute("DELETE FROM incidents")
+        for incident in incidents:
+            conn.execute(
+                "INSERT INTO incidents "
+                "(incident_key, started_at, last_update, update_count, title) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (
+                    incident["key"],
+                    iso(incident["started_at"]),
+                    iso(incident["last_update"]),
+                    incident["update_count"],
+                    incident["title"],
+                ),
+            )
+            for update in incident["updates"]:
+                conn.execute(
+                    "INSERT INTO updates "
+                    "(guid, incident_key, published, severity, title, description) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        update["guid"],
+                        incident["key"],
+                        iso(update["published"]),
+                        update["severity"],
+                        update["title"],
+                        update["description"],
+                    ),
+                )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def iso(value):
+    return value.isoformat() if value is not None else None
+
+
 def main():
     shas = snapshot_history()
     print(f"{len(shas)} snapshot(s) in history")
@@ -97,14 +166,17 @@ def main():
     incidents.sort(key=lambda incident: incident["started_at"] or datetime.min)
 
     for incident in incidents:
-        started = incident["started_at"].isoformat() if incident["started_at"] else None
         print(
-            f"{incident['update_count']:2d} updates  {started}  {incident['title'][:70]}"
+            f"{incident['update_count']:2d} updates  {iso(incident['started_at'])}  "
+            f"{incident['title'][:70]}"
         )
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as handle:
         json.dump(incidents, handle, indent=2, default=lambda value: value.isoformat())
+
+    write_db(incidents)
+    print(f"wrote {DB_PATH}")
 
 
 if __name__ == "__main__":
