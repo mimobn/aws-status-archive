@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title><![CDATA[Amazon Web Services Service Status]]></title>
+    <link>https://status.aws.amazon.com/</link>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 11 Aug 2026 08:38:28 PDT</lastBuildDate>
+    <generator>AWS Service Health Dashboard RSS Generator</generator>
+    <description><![CDATA[Receive the most recent update for events affecting the overall availability of Amazon Web Services. To receive personalized events about your specific AWS accounts and resources, try the aws.health source in EventBridge or the Health API.]]></description>
+    <ttl>5</ttl>
+
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Thu, 30 Apr 2026 00:25:54 PDT</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1777533954</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruption. The Middle East (UAE) Region (ME-CENTRAL-1) has suffered damage as a result of the conflict in the Middle East and is currently unable to reliably support customer applications. While some workloads continue to function normally, we strongly recommend customers migrate all accessible resources to other Regions and restore inaccessible resources from remote backups as soon as possible. Relevant billing operations are currently suspended while we restore normal operations in this AWS Region. This process is expected to take several months. ]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Thu, 30 Apr 2026 00:07:11 PDT</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1777532831</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruption. The Middle East (Bahrain) Region (ME-SOUTH-1) has suffered damage due to the conflict in the Middle East and is currently unavailable. Customers should recover their resources in other Regions from remote backups. Relevant billing operations are currently suspended while we restore normal operations in this AWS Region. This process is expected to take several months.  ]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Tue, 03 Mar 2026 08:40:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772556000</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruptions affecting the AWS Middle East (Bahrain) Region (ME-SOUTH-1). We continue to make progress on recovery efforts across multiple workstreams. With the immediate phase of this event now better understood, we are moving to a more targeted communication model. Going forward, updates will be delivered directly to affected customers through the AWS Personal Health Dashboard. Customers who require assistance with this event are encouraged to contact AWS Support through the AWS Management Console or the AWS Support Center.
+
+We continue to strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other Regions, and update their applications to direct traffic away from the affected Regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Tue, 03 Mar 2026 08:14:45 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772554485</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). We continue to make progress on recovery efforts across multiple workstreams.
+
+For Amazon S3, we are seeing continued improvement in PUT and LIST availability. Newly written objects are now able to be successfully retrieved, and we continue to work on reducing GET error rates for objects written prior to the event. Full recovery of GET operations for pre-existing data remains dependent on restoring the affected infrastructure. For Amazon DynamoDB, error rates remain elevated and our teams continue to focus on recovery; we expect to see improvement over the coming hours. As these foundational services recover, dependent services — including AWS Lambda, Amazon Kinesis, Amazon CloudWatch, and Amazon RDS — will follow. Amazon EC2 instance launches remain throttled in the ME-CENTRAL-1 Region and will be relaxed as foundational service recovery and capacity allow. The AWS Management Console is operational, though customers may continue to experience errors on certain pages as underlying services work through their recovery.
+
+With the immediate phase of this event now better understood, we are moving to a more targeted communication model. Going forward, updates will be delivered directly to affected customers through the AWS Personal Health Dashboard. Customers who require assistance with this event are encouraged to contact AWS Support through the AWS Management Console or the AWS Support Center.
+
+We continue to strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other Regions, and update their applications to direct traffic away from the affected Regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Tue, 03 Mar 2026 06:02:57 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772546577</guid>
+	  <description><![CDATA[Recovery efforts in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region are ongoing, with the situation remaining consistent with our last update. We have no change to expected timelines for fully restoring power and connectivity. While progress is being made, significant work remains before full restoration is complete. We continue to recommend customers launch replacement resources in one of the unaffected Availability Zones or an alternate AWS Region.
+
+Given the extended nature of this event, we continue to encourage customers to replicate Amazon S3 data and other critical workloads from ME-SOUTH-1 to another AWS Region using the guidance shared previously. We will provide our next update by 12:00 PM PST on March 3, or sooner if conditions change.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Tue, 03 Mar 2026 04:58:14 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772542694</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). The overall state of the region remains largely unchanged, though our teams continue to make progress on recovery efforts across multiple workstreams. 
+
+For Amazon S3, we are seeing continued improvement in PUT and LIST availability. Newly written objects are now able to be successfully retrieved, and we continue to work on reducing GET error rates for objects written prior to the event. Full recovery of GET operations for pre-existing data remains dependent on restoring the affected infrastructure. For Amazon DynamoDB, error rates remain elevated and our teams continue to focus on recovery; we expect to see improvement over the coming hours. As these foundational services recover, dependent services — including AWS Lambda, Amazon Kinesis, Amazon CloudWatch, and Amazon RDS will follow. Amazon EC2 instance launches remain throttled in the ME-CENTRAL-1 Region and will be relaxed as foundational service recovery and capacity allow. 
+
+The AWS Management Console is operational, though customers may continue to experience errors on certain pages as underlying services work through their recovery. We recommend that customers continue to retry requests where possible. 
+
+We strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other Regions, and update their applications to direct traffic away from the affected Regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements. 
+
+We will provide another update by March 3 at 10:00 AM PST, or sooner if new information becomes available. ]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Tue, 03 Mar 2026 03:10:38 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772536238</guid>
+	  <description><![CDATA[We continue to work toward restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. The overall state of the region remains largely unchanged from our previous update. At this time, we have no updated guidance on expected timelines for fully restoring power and connectivity. We are taking all necessary steps to support the recovery process. While progress is being made, significant work remains before full restoration is complete. 
+
+Given the ongoing uncertainty, we encourage customers to replicate their Amazon S3 data and other critical data from the ME-SOUTH-1 Region to another AWS Region, using the guidance provided in our previous update. We will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 6:00 AM PST on March 3, or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Tue, 03 Mar 2026 01:04:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772528640</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). The overall state of the region remains largely unchanged from our previous update. We continue to work closely with local authorities and are prioritizing the safety of our personnel throughout our recovery efforts. Teams continue to assess the damage to the affected facilities and are working to restore infrastructure impacted by the event.
+
+With respect to Amazon S3, we are seeing improvement in PUT and LIST availability. We continue to work on improving GET error rates, but full recovery will be dependent on restoring the affected infrastructure, which our teams continue to work toward.
+
+For Amazon DynamoDB, error rates remain elevated and our teams continue to focus on recovery efforts. We have not yet seen meaningful improvement in DynamoDB availability, but expect conditions to improve over the coming hours as recovery work progresses.
+
+Amazon EC2 instance launches remain throttled in the ME-CENTRAL-1 Region. We will begin relaxing these throttles as soon as we have fully recovered our foundational services and have sufficient capacity to support new launches safely.
+
+The AWS Management Console is now operational, though customers may continue to experience errors on certain pages and operations as the underlying services work through their recovery. We recommend customers continue to retry requests where possible.
+
+AWS Lambda, Amazon Kinesis, Amazon CloudWatch, Amazon RDS, and a number of other AWS services that were impacted by this event remain degraded. The availability of these services is dependent on the recovery of our foundational services — primarily Amazon S3 and Amazon DynamoDB — and we expect to see improvement across these services as that recovery progresses.
+
+Finally, even as we work to restore these facilities, the ongoing conflict in the region means that the broader operating environment in the Middle East remains unpredictable. We strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other regions, and update their applications to direct traffic away from the affected regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.
+
+We will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 5:00 AM PST on March 3, or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 22:27:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772519220</guid>
+	  <description><![CDATA[We continue to work towards restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. We have no updated guidance on expected recovery times, and still expect this to take at least a day to fully restore power and connectivity. AWS infrastructure is designed to be highly resilient, but given the uncertainty of the current situation, we encourage our customers to replicate Amazon S3 and critical data from the ME-SOUTH-1 Region to another AWS Region. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements. We will provide another update by March 3 at 3:00 AM PST, or sooner if new information becomes available. 
+
+For more information on Cross-Region Replication, refer [1]. For more information on S3 Batch Replication, see [2]. For a simple script to quickly set up and start S3 Replication, see [3]. If you have questions or concerns, please contact AWS Support [4].
+
+[1] <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html">https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html</a>
+[2] <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html">https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html</a>
+[3] <a href="https://github.com/awslabs/aws-support-tools/blob/master/S3/Setup_Replication/setup_replication.py">https://github.com/awslabs/aws-support-tools/blob/master/S3/Setup_Replication/setup_replication.py</a>
+[4] <a href="https://aws.amazon.com/support">https://aws.amazon.com/support</a>]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 21:13:38 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772514818</guid>
+	  <description><![CDATA[We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region with a focus on restoring functionality to foundational services. Since our last update we have made incremental progress in recovering the DynamoDB control plane which will not be visible to external customers but are required for the restoration of service. Similarly we have made progress with the S3 control plane. The recovery of these foundational services, when complete, will enable a broad range of dependent AWS services to recover. We still estimate that the recovery time is at least a day before we are able to fully restore power and connectivity. We will provide you with another update by March 3 2:00 AM PST, or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 16:22:31 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772497351</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1) and the AWS Middle East (Bahrain) Region (ME-SOUTH-1). Due to the ongoing conflict in the Middle East, both affected regions have experienced physical impacts to infrastructure as a result of drone strikes. In the UAE, two of our facilities were directly struck, while in Bahrain, a drone strike in close proximity to one of our facilities caused physical impacts to our infrastructure. These strikes have caused structural damage, disrupted power delivery to our infrastructure, and in some cases required fire suppression activities that resulted in additional water damage. We are working closely with local authorities and prioritizing the safety of our personnel throughout our recovery efforts.
+
+In the ME-CENTRAL-1 (UAE) Region, two of our three Availability Zones (mec1-az2 and mec1-az3) remain significantly impaired. The third Availability Zone (mec1-az1) continues to operate normally, though some services have experienced indirect impact due to dependencies on the affected zones. In the ME-SOUTH-1 (Bahrain) Region, one facility has been impacted. Across both regions, customers are experiencing elevated error rates and degraded availability for services including Amazon EC2, Amazon S3, Amazon DynamoDB, AWS Lambda, Amazon Kinesis, Amazon CloudWatch, Amazon RDS, and the AWS Management Console and CLI. We are working to restore full service availability as quickly as possible, though we expect recovery to be prolonged given the nature of the physical damage involved.
+
+In parallel with efforts to restore the physical infrastructure at the affected sites, we are pursuing multiple software-based recovery paths that do not depend on the underlying facilities being fully brought back online. For Amazon S3 and Amazon DynamoDB, we are actively working to restore data access and service availability through software mitigations, including deploying updates to enable S3 to operate within the current infrastructure constraints and remediating impaired DynamoDB tables to restore read and write availability for dependent services. Our focus on restoring these foundational services is deliberate, as recovery of Amazon S3 and Amazon DynamoDB will in turn enable a broad range of dependent AWS services to recover. For other affected service APIs, we are deploying targeted software updates to reduce error rates and restore functionality where possible, independent of the physical recovery timeline. We are also working to restore access to the AWS Management Console and CLI through network-level changes that route traffic away from the affected infrastructure. While these software-based mitigations can address many of the service-level impacts, some recovery actions are constrained by the physical state of the affected facilities — meaning that full restoration of certain services will require the underlying infrastructure to be repaired and brought back online. Across all services, our teams are working in parallel on both the physical restoration of the affected facilities and these software-based mitigations, with the goal of restoring as much customer access as possible as quickly as possible, even ahead of full infrastructure recovery. In addition, we are prioritizing the restoration of services and tools that enable customers to back up and migrate their data and applications out of the affected regions.
+
+Finally, even as we work to restore these facilities, the ongoing conflict in the region means that the broader operating environment in the Middle East remains unpredictable. We recommend that customers with workloads running in the Middle East consider taking action now to backup data and potentially migrate your workloads to alternate AWS Regions. We recommend customers exercise their disaster recovery plans, recover from remote backups stored in other regions, and update their applications to direct traffic away from the affected regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.
+
+We will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 9:00 PM PST on March 2, 2026, or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 16:19:48 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772497188</guid>
+	  <description><![CDATA[We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1) and the AWS Middle East (Bahrain) Region (ME-SOUTH-1). Due to the ongoing conflict in the Middle East, both affected regions have experienced physical impacts to infrastructure as a result of drone strikes. In the UAE, two of our facilities were directly struck, while in Bahrain, a drone strike in close proximity to one of our facilities caused physical impacts to our infrastructure. These strikes have caused structural damage, disrupted power delivery to our infrastructure, and in some cases required fire suppression activities that resulted in additional water damage. We are working closely with local authorities and prioritizing the safety of our personnel throughout our recovery efforts.
+
+In the ME-CENTRAL-1 (UAE) Region, two of our three Availability Zones (mec1-az2 and mec1-az3) remain significantly impaired. The third Availability Zone (mec1-az1) continues to operate normally, though some services have experienced indirect impact due to dependencies on the affected zones. In the ME-SOUTH-1 (Bahrain) Region, one facility has been impacted. Across both regions, customers are experiencing elevated error rates and degraded availability for services including Amazon EC2, Amazon S3, Amazon DynamoDB, AWS Lambda, Amazon Kinesis, Amazon CloudWatch, Amazon RDS, and the AWS Management Console and CLI. We are working to restore full service availability as quickly as possible, though we expect recovery to be prolonged given the nature of the physical damage involved.
+
+In parallel with efforts to restore the physical infrastructure at the affected sites, we are pursuing multiple software-based recovery paths that do not depend on the underlying facilities being fully brought back online. For Amazon S3 and Amazon DynamoDB, we are actively working to restore data access and service availability through software mitigations, including deploying updates to enable S3 to operate within the current infrastructure constraints and remediating impaired DynamoDB tables to restore read and write availability for dependent services. Our focus on restoring these foundational services is deliberate, as recovery of Amazon S3 and Amazon DynamoDB will in turn enable a broad range of dependent AWS services to recover. For other affected service APIs, we are deploying targeted software updates to reduce error rates and restore functionality where possible, independent of the physical recovery timeline. We are also working to restore access to the AWS Management Console and CLI through network-level changes that route traffic away from the affected infrastructure. While these software-based mitigations can address many of the service-level impacts, some recovery actions are constrained by the physical state of the affected facilities — meaning that full restoration of certain services will require the underlying infrastructure to be repaired and brought back online. Across all services, our teams are working in parallel on both the physical restoration of the affected facilities and these software-based mitigations, with the goal of restoring as much customer access as possible as quickly as possible, even ahead of full infrastructure recovery. In addition, we are prioritizing the restoration of services and tools that enable customers to back up and migrate their data and applications out of the affected regions.
+
+Finally, even as we work to restore these facilities, the ongoing conflict in the region means that the broader operating environment in the Middle East remains unpredictable. We recommend that customers with workloads running in the Middle East consider taking action now to backup data and potentially migrate your workloads to alternate AWS Regions. We recommend customers exercise their disaster recovery plans, recover from remote backups stored in other regions, and update their applications to direct traffic away from the affected regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.
+
+We will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 9:00 PM PST on March 2, 2026, or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 14:29:07 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772490547</guid>
+	  <description><![CDATA[We continue to work towards restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. We have no updated guidance on expected recovery times, and still expect this to take at least a day to fully restore power and connectivity. We continue to advise customers to launch replacement resources in one of the unaffected Availability Zones or an alternate AWS Region. At this time we recommend that customers that are capable of backing up data outside of the region consider doing so. You can view the current status of affected AWS services below. We will provide you with another update by 7:00 PM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 13:36:10 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772487370</guid>
+	  <description><![CDATA[We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. We have partially restored access to the AWS Management Console, however, some pages will continue to load unsuccessfully until we have recovered core services and power. In parallel to the power and recovery efforts, we are working to restore access to tools and utilities to allow customers to backup and migrate their data. We have no updated guidance on expected recovery times, and still expect this to take at least a day to fully restore power and connectivity. We continue advising customers enact their disaster recovery plans and recover from remote backups into alternate AWS Regions. We will provide you with another update by 6:00 PM PST, or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 10:52:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772477520</guid>
+	  <description><![CDATA[We continue to work towards restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. We currently expect our recovery efforts to take at least a day. Our current guidance regarding immediate recovery remains unchanged from our previous update. Customers are able to disassociate Elastic IP addresses from resources in the affected Availability Zone and associate those with resources in the unaffected Availability Zones. This can be done by specifying --allow-reassociation when attempting to associate the Elastic IP to the new resource. We will provide you with further updates by 2:00 PM PST or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 09:59:49 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772474389</guid>
+	  <description><![CDATA[We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. The impact is causing elevated errors rates for both the Management Console and CLI. Our current expectation is that recovery will take at least a day to complete. We continue to recommend customers enact their disaster recovery plans and recover from remote backups into alternate AWS Regions. We will continue to provide periodic updates on recovery efforts. Our next update will be by 2:00 PM PST or sooner if new information becomes available.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 06:23:19 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772461399</guid>
+	  <description><![CDATA[We continue to work toward restoring power in the impacted Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. Meanwhile, EC2 instance and networking APIs have been restored for the other Availability Zones. Additionally, we have made improvements to the availability of RDS multi-AZ databases while operating with the impaired Availability Zone. These improvements will help customers create database exports to preserve data, and we recommend customers with databases in the affected Availability Zone consider creating exports as a precautionary measure. EC2 Instances, EBS Volumes, and other resources impacted in the affected Availability Zone will require a longer recovery timeline, as power has not yet been restored. We are expecting recovery to take at least a day, as it requires repair of facilities, cooling and power systems, coordination with local authorities, and careful assessment to ensure the safety of our operators. If immediate recovery is required, we recommend customers restore from EBS Snapshots and/or launch replacement resources in one of the unaffected Availability Zones or an alternate AWS Region. We will provide an update by 11:00 AM PST on March 2, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 06:22:03 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772461323</guid>
+	  <description><![CDATA[We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. We are expecting recovery to take at least a day, as it requires repair of facilities, cooling and power systems, coordination with local authorities, and careful assessment to ensure the safety of our operators. EC2, Amazon DynamoDB and other AWS Services continue to experience significant error rates and elevated latencies.
+We recommend customers enact their disaster recovery plans and recover from remote backups into alternate AWS Regions, ideally in Europe. Further, we strongly advise customers to update their applications to ingest S3 data to an alternate AWS Region. We will provide an update by 11:00 AM PST on March 2, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 02:53:20 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772448800</guid>
+	  <description><![CDATA[We wanted to provide more information on Amazon S3 given that there are two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. Amazon S3 is a regional service and designed to withstand the total loss of a single Availability Zone while maintaining S3's durability and availability. When the mec1-az2 AZ was powered off at approximately 4:00 AM PST on Sunday, March 1, S3 continued to operate normally. As the second AZ became impaired, S3 error rates increased. With two Availability Zones significantly impacted, customers are seeing high failure rates for data ingest and egress. We strongly advise customers to update their applications to ingest S3 data to an alternate AWS Region. As soon as practically possible, we will begin the restoration of our two Availability Zones which will include a careful assessment of data health and any repair of storage if necessary.
+
+In addition, we can confirm that the AWS Management Console and command line interface (CLI) are disrupted by the failure of two Availability Zones. We continue to work towards recovery across all services, and we will provide an update by 6:00 AM PST on March 2, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 02:41:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772448060</guid>
+	  <description><![CDATA[We continue to work toward restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. At this time, some AWS services have shifted traffic away from the affected Availability Zone and are seeing recovery for their affected operations and workflows. EC2 Instances, EBS Volumes, and other resources impacted in the affected Availability Zone will require a longer recovery timeline. Power has not yet been restored to the affected Availability Zone. If immediate recovery is required, we recommend customers restore from EBS Snapshots and/or launch replacement resources in one of the unaffected Availability Zones or an alternate Region. In parallel, we are actively working on reducing the error rates and latencies that some customers are experiencing with EC2 APIs. For now, we recommend continuing to retry any failed API requests. We will provide an update by 6:00 AM PST on March 2, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Connectivity Issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 01:03:27 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772442207</guid>
+	  <description><![CDATA[We continue to work on a localized power issue affecting a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. In the impacted Availability Zone, EC2 Instances, DB Instances, EBS Volumes, and other AWS Services are also experiencing elevated error rates and latencies for some workflows. As part of our recovery effort, we have shifted traffic away from the impacted Availability Zone for most services. We recommend customers utilize one of the other Availability Zones in the ME-SOUTH-1 Region, as existing instances in other AZs remain unaffected by this issue. We are actively working to restore power and connectivity, at which time we will begin recovering affected resources. Currently, we expect recovery to take many hours. We will provide an update by 2:30 AM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Mon, 02 Mar 2026 00:52:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772441520</guid>
+	  <description><![CDATA[We continue to work on a localized power issue affecting multiple Availability Zones in the ME-CENTRAL-1 Region (mec1-az2 and mec1-az3). Customers are experiencing increased EC2 API errors and instance launch failures across the region, and it is not currently possible to launch new instances; existing instances in mec1-az1 should not be affected. Amazon DynamoDB and Amazon S3 are also experiencing significant error rates and elevated latencies. We are actively working to restore power and connectivity, after which we will begin recovery of affected resources; full recovery is still expected to be many hours away. We recommend that affected customers failover, and backup any critical data, to another AWS Region. We will provide an update by 2:00 AM PST, or sooner if the situation changes.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased connectivity issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 23:09:03 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772435343</guid>
+	  <description><![CDATA[We are investigating connectivity and power issues affecting APIs and instances in a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region due to a localized power issue. Existing instances in this zone will also be affected. Other AWS Services may also be experiencing increased errors and latencies for their workflows, and we are working to route requests away from this affected Availability Zone. We recommend customers make use of other Availability Zones at this time. During this time, we are also experiencing delays in propagating DNS changes for Route53 to pops (Points of Presence) in ME-SOUTH-1.  Targeting new launches using RunInstances in the remaining AZs should succeed. Existing instances in the other AZs are not affected.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 22:46:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772433960</guid>
+	  <description><![CDATA[We can confirm that a localized power issue has affected another Availability Zone in the ME-CENTRAL-1 Region (mec1-az3). Customers are also experiencing increased EC2 APIs and instance launch errors for the remaining zone (mec1-az1). At this point it is not possible to launch new instances in the region, although existing instances should not be affected in mec1-az1. Other AWS Services, such as DynamoDB and S3 are also experiencing significant error rates and latencies. We are actively working to restore power and connectivity, at which time we will begin to work to recover affected resources. As of this time, we expect recovery is multiple hours away. For customers that can, we recommend failing away to another AWS Region at this time. We will provide an update by 12:00 AM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 21:59:29 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772431169</guid>
+	  <description><![CDATA[We are investigating additional connectivity issues and error rates in the ME-CENTRAL-1 Region.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased connectivity issues and API Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 21:56:27 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-south-1_1772430987</guid>
+	  <description><![CDATA[We are investigating increased API error rates in a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 18:01:47 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772416907</guid>
+	  <description><![CDATA[We confirm the recovery of the AssociateAddress API requests. We have also applied a change that enables customers to disassociate Elastic IP addresses from resources that are impacted by the underlying power issue. With these mitigations, customers can now successfully create and associate new network addresses in the unaffected AZs as well as re-associate Elastic IPs from resources in the affected zone to resources in the unaffected zones. We still do not have an ETA for power restoration at this time. For customers that can, we recommend using alternate Availability Zones or other AWS Regions where applicable. We will provide another update by 10:00 PM, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 16:26:41 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772411201</guid>
+	  <description><![CDATA[We are seeing significant signs of recovery for AssociateAddress requests, and continue to work toward fully mitigating this issue. This combined with the earlier recovery of the AllocateAddress API means customers can now successfully create and associate new network addresses in the unaffected AZs. Other AWS Services are also now observing sustained improvement as a result of the EC2 Networking APIs recovery. We are now focusing on implementing a change that will allow customers to Disassociate Elastic IP addresses from resources that are impacted by the underlying power issue. We expect this specific mitigation to take another hour to complete. We do not have an ETA for power restoration at this time. For customers that can, we recommend using alternate Availability Zones or other AWS Regions where applicable. We will provide another update by 6:30 PM, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 14:28:19 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772404099</guid>
+	  <description><![CDATA[We are seeing positive signs of recovery for many of the EC2 APIs, such as Describes and AllocateAddress. We recognize that customers are still experiencing errors when attempting to call the AssociateAddress API, and are unable to disassociate addresses from resources that are affected by the underlying power issue. We continue to work on multiple parallel paths to mitigate both of these issues. We recommend continuing to retry requests wherever possible. We expect our current mitigation efforts for these specific issues to complete within the the two to three hours. As we progress with these mitigation efforts, customers will observe higher success rates for these operations. Additionally, we are investigating ways to speed up these specific mitigation efforts, but are ensuring we do so safely. As of this time, power restoration is still several hours away. We will provide another update by 5:30 PM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 12:14:03 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772396043</guid>
+	  <description><![CDATA[We are aware that some customers are experiencing errors when calling EC2 APIs, specifically networking related APIs (AllocateAddress, AssociateAddress, DescribeRouteTable, DescribeNetworkInterfaces). We are actively working on multiple paths to mitigate these issues. For customers experiencing throttling errors on the AllocateAddress APIs, we recommend retrying any failed API requests. We are deploying a configuration change to mitigate the AssociateAddress API errors and expect recovery in the next few hours. DescribeRouteTable and DescribeNetworkInterfaces API calls without specifying zone, Interface or Instance IDs are expected to fail until we restore the impacted zone. We recommend customers to pass these IDs explicitly in these API requests. For customers that can, we recommend considering using alternate AWS Regions. We will provide another update by 3:30 PM PST, or sooner if we have more to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service disruption: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 09:41:11 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772386871</guid>
+	  <description><![CDATA[We want to provide some additional information on the power issue in a single Availability Zone in the ME-CENTRAL-1 Region. At around 4:30 AM PST, one of our Availability Zones (mec1-az2) was impacted by objects that struck the data center, creating sparks and fire. The fire department shut off power to the facility and generators as they worked to put out the fire. We are still awaiting permission to turn the power back on, and once we have, we will ensure we restore power and connectivity safely. It will take several hours to restore connectivity to the impacted AZ. The other AZs in the region are functioning normally. Customers who were running their applications redundantly across the AZs are not impacted by this event. EC2 Instance launches will continue to be impaired in the impacted AZ. We recommend that customers continue to retry any failed API requests. If immediate recovery of an affected resource (EC2 Instance, EBS Volume, RDS DB Instance, etc.) is required, we recommend restoring from your most recent backup, by launching replacement resources in one of the unaffected zones, or an alternate AWS Region. We will provide an update by 12:30 PM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service degradation: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 08:59:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772384340</guid>
+	  <description><![CDATA[We continue to work toward restoring power in the affected Availability Zone in the ME-CENTRAL-1 Region (mec1-az2). In parallel, we are actively working on improving error rates and latencies that some customers are observing for EC2 Networking and EC2 Describe APIs. Due to increased demand in the unaffected Availability Zones, customers may experience longer than usual provisioning times or may need to retry requests for certain instance types, or pick an alternative instance type. We will provide an update by 10:30 AM PST, or sooner if we have additional information to share. ]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service degradation: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 07:09:13 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772377753</guid>
+	  <description><![CDATA[We wanted to provide some additional information on the isolated power issue. At this time, most AWS Services have weighted away from the affected Availability Zone (mec1-az2) and are seeing recovery for their affected operations and workflows. For EC2 Instances, EBS Volumes, and other resources that are impacted in the affected Zone, we will have a longer tail of recovery. At this time, power has not yet been restored to the affected AZ. For now, we recommend continuing to retry any failed API requests. If immediate recovery is required, we recommend customers restore from EBS Snapshots and/or replace affected resources by launching replacement resources in one of the unaffected zones, or an alternate region. As of this time, recovery is still several hours away. We will provide an update by 8:30 AM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 06:09:00 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772374140</guid>
+	  <description><![CDATA[We can confirm that a localized power issue has affected a single Availability Zone in the ME-CENTRAL-1 Region (mec1-az2). EC2 Instances, DB Instances, EBS Volumes, and others resources are currently unavailable and will experience connectivity issues at this time. Other AWS Services are also experiencing error rates and latencies for some workflows. We have weighed away traffic for most services at this time. We recommend customers utilize one of the other Availability Zones in the ME-CENTRAL-1 Region at this time, as existing instances in other AZ's remain unaffected by this issue. We are actively working to restore power and connectivity, at which time we will begin to work to recover affected resources. As of this time, we expect recovery is multiple hours away. We will provide an update by 7:15 AM PST, or sooner if we have additional information to share.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 05:19:12 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772371152</guid>
+	  <description><![CDATA[We are investigating connectivity and power issues affecting APIs and instances in a single Availability Zone (mec1-az2) in the ME-CENTRAL-1 Region due to a localized power issue. Existing instances in this zone will also be affected. Other AWS Services may also be experiencing increased errors and latencies for their workflows, and we are working to route requests away from this affected Availability Zone. We recommend customers make use of other Availability Zones at this time. Targeting new launches using RunInstances in the remaining AZs should succeed. Existing instances in the other AZs are not affected.]]></description>
+	 </item>
+
+	 <item>
+	  <title><![CDATA[Service impact: Increased Error Rates]]></title>
+	  <link>https://status.aws.amazon.com/</link>
+	  <pubDate>Sun, 01 Mar 2026 04:51:25 PST</pubDate>
+	  <guid isPermaLink="false">https://status.aws.amazon.com/#multipleservices-me-central-1_1772369485</guid>
+	  <description><![CDATA[We are investigating issues with AWS services in the ME-CENTRAL-1 Region.]]></description>
+	 </item>
+
+  </channel>
+</rss>
