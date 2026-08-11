@@ -1,0 +1,30 @@
+name: Archive
+
+on:
+  schedule:
+    - cron: '5 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch feed
+        run: python scripts/fetch_feed.py
+
+      - name: Commit snapshot
+        run: |
+          if git status --porcelain | grep .; then
+            git config user.name "status-archive[bot]"
+            git config user.email "status-archive[bot]@users.noreply.github.com"
+            git add data/aws-status.rss
+            git commit -m "data: archive AWS status feed snapshot"
+            git push
+          else
+            echo "feed unchanged, nothing to commit"
+          fi
