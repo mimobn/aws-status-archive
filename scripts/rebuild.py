@@ -49,13 +49,10 @@ def incident_key(guid):
     return guid.rsplit("_", 1)[0] if "_" in guid else guid
 
 
-def build_incidents(shas):
+def build_incidents_from_snapshots(snapshots):
+    """Merge a list of snapshot texts into incident timelines."""
     updates = {}
-    for sha in shas:
-        try:
-            content = snapshot_at(sha)
-        except subprocess.CalledProcessError:
-            continue
+    for content in snapshots:
         for item in parse_snapshot_text(content):
             updates[item["guid"]] = item
 
@@ -86,6 +83,10 @@ def build_incidents(shas):
             }
         )
     return incidents
+
+
+def build_incidents(shas):
+    return build_incidents_from_snapshots([snapshot_at(sha) for sha in shas])
 
 
 def main():
