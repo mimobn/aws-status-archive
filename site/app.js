@@ -253,6 +253,14 @@ function renderAll(incidents) {
   }
 }
 
+function renderError(message) {
+  const list = document.getElementById("incidentList");
+  const empty = document.getElementById("emptyState");
+  list.innerHTML = "";
+  empty.hidden = false;
+  empty.innerHTML = message;
+}
+
 async function main() {
   const updated = document.getElementById("updatedAt");
   try {
@@ -278,8 +286,14 @@ async function main() {
 
     updated.textContent = `Rendered at ${new Date().toUTCString().replace(" GMT", " UTC")} from the current archive.`;
   } catch (err) {
-    document.getElementById("incidentList").innerHTML =
-      `<p class="muted">Could not load the data: ${escapeHtml(String(err.message || err))}</p>`;
+    renderSidebar([], 0, null);
+    renderStats([]);
+    renderStrip([]);
+    renderError(
+      `Could not load the archive (${escapeHtml(String(err.message || err))}). ` +
+        "If you opened this page directly, serve it over HTTP with " +
+        "<code>parsed/incidents.json</code> in place and reload."
+    );
   }
 }
 
