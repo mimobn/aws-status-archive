@@ -43,6 +43,21 @@ A quirk of the feed: AWS re-renders `lastBuildDate` every few minutes, so
 bytes. Its format is also officially "subject to change", which is why the
 pipeline guards against feed drift before it parses anything.
 
+## Live status page
+
+A static version of the data lives at GitHub Pages:
+
+    https://mimobn.github.io/aws-status-archive/
+
+Every time a snapshot lands, the Pages workflow rebuilds `out/incidents.json`
+from the git archive and redeploys. What you see is exactly what the archive
+contains — nothing is seeded or faked. Right now the history is short, because
+the archive is young.
+
+To turn it on, the repo needs GitHub Pages enabled set to **deploy from GitHub
+Actions** (Settings → Pages). That's a one-time click; the daily Archive
+workflow keeps the page up to date from then on.
+
 ## Running it
 
 Needs Python 3.13+ and [uv](https://docs.astral.sh/uv/).
@@ -62,7 +77,8 @@ uv run uvicorn api.main:app --port 8000
 
 The API endpoints are `/healthz`, `/incidents`, `/incidents/{key}`,
 `/updates`, and `/metrics`. Open <http://localhost:8000/docs> for the
-interactive OpenAPI page.
+interactive OpenAPI page. (The FastAPI backend is for local use — the
+public page is the static site above, not this service.)
 
 Or skip all of that and run the whole thing in Docker:
 
