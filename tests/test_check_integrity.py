@@ -76,7 +76,7 @@ class TestIntegrityChecks(unittest.TestCase):
         build_db(
             path,
             [("k1", "2026-03-01T00:00:00Z", 1, "t")],
-            [("g1", "k1", "2026-03-01T00:00:00Z", "impact", "t", "d")],
+            [("g1", "k1", "2026-03-01T00:00:00Z", "impacted", "t", "d")],
         )
         conn = sqlite3.connect(path)
         results = run_checks(conn, one_incident_rebuild())
@@ -91,8 +91,8 @@ class TestIntegrityChecks(unittest.TestCase):
             path,
             [("k1", "2026-03-01T00:00:00Z", 1, "t")],
             [
-                ("g1", "k1", "2026-03-01T00:00:00Z", "impact", "t", "d"),
-                ("g2", "ghost-key", "2026-03-01T00:00:00Z", "impact", "t", "d"),
+                ("g1", "k1", "2026-03-01T00:00:00Z", "impacted", "t", "d"),
+                ("g2", "ghost-key", "2026-03-01T00:00:00Z", "impacted", "t", "d"),
             ],
         )
         conn = sqlite3.connect(path)
@@ -107,7 +107,7 @@ class TestIntegrityChecks(unittest.TestCase):
         build_db(
             path,
             [("k1", "2026-03-01T00:00:00Z", 1, "t")],
-            [("g1", "k1", "2026-03-01T00:00:00Z", "impact", "t", "d")],
+            [("g1", "k1", "2026-03-01T00:00:00Z", "impacted", "t", "d")],
         )
         conn = sqlite3.connect(path)
         # reference rebuild claims 2 incidents, db has 1

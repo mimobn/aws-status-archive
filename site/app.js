@@ -1,20 +1,20 @@
 const DATA_URL = "parsed/incidents.json";
 
 const SEVERITY_RANK = {
-  disruption: 4,
-  impact: 3,
-  degradation: 2,
+  disrupted: 4,
+  impacted: 3,
+  degraded: 2,
   informational: 1,
   operational: 0,
   unknown: -1,
 };
 
 const SEVERITY_LABEL = {
-  disruption: "Disruption",
-  impact: "Impact",
-  degradation: "Degradation",
+  disrupted: "Disrupted",
+  impacted: "Impacted",
+  degraded: "Degraded",
   informational: "Informational",
-  operational: "Operational",
+  operational: "Operating normally",
 };
 
 function fmtDate(iso) {

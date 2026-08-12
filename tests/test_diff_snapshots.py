@@ -68,7 +68,7 @@ class TestDiffIncidents(unittest.TestCase):
         entry = report["incidents_with_new_updates"][0]
         self.assertEqual(entry["incident_key"], BASE + "ec2")
         self.assertEqual(entry["new_updates"], 1)
-        self.assertEqual(entry["latest_severity"], "disruption")
+        self.assertEqual(entry["latest_severity"], "disrupted")
 
 
 if __name__ == "__main__":

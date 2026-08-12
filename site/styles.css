@@ -4,9 +4,9 @@
   --text: #1f2328;
   --muted: #6e7781;
   --border: #d8dee4;
-  --disruption: #bd1c26;
-  --impact: #d2691e;
-  --degradation: #d4a017;
+  --disrupted: #bd1c26;
+  --impacted: #d2691e;
+  --degraded: #d4a017;
   --informational: #0969da;
   --operational: #1a7f37;
   --none: #e8ecf0;
@@ -143,16 +143,16 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
-.stat-disruption {
-  color: var(--disruption);
+.stat-disrupted {
+  color: var(--disrupted);
 }
 
-.stat-impact {
-  color: var(--impact);
+.stat-impacted {
+  color: var(--impacted);
 }
 
-.stat-degradation {
-  color: var(--degradation);
+.stat-degraded {
+  color: var(--degraded);
 }
 
 /* --- Severity strip --- */
@@ -171,16 +171,16 @@ a {
   background: var(--none);
 }
 
-.cell-disruption {
-  background: var(--disruption);
+.cell-disrupted {
+  background: var(--disrupted);
 }
 
-.cell-impact {
-  background: var(--impact);
+.cell-impacted {
+  background: var(--impacted);
 }
 
-.cell-degradation {
-  background: var(--degradation);
+.cell-degraded {
+  background: var(--degraded);
 }
 
 .cell-informational {
@@ -225,16 +225,16 @@ a {
   background: var(--none);
 }
 
-.dot-disruption {
-  background: var(--disruption);
+.dot-disrupted {
+  background: var(--disrupted);
 }
 
-.dot-impact {
-  background: var(--impact);
+.dot-impacted {
+  background: var(--impacted);
 }
 
-.dot-degradation {
-  background: var(--degradation);
+.dot-degraded {
+  background: var(--degraded);
 }
 
 .dot-informational {
@@ -297,25 +297,25 @@ a {
   border: 1px solid;
 }
 
-.badge-disruption,
-.badge-impact,
-.badge-degradation {
+.badge-disrupted,
+.badge-impacted,
+.badge-degraded {
   color: #fff;
 }
 
-.badge-disruption {
-  background: var(--disruption);
-  border-color: var(--disruption);
+.badge-disrupted {
+  background: var(--disrupted);
+  border-color: var(--disrupted);
 }
 
-.badge-impact {
-  background: var(--impact);
-  border-color: var(--impact);
+.badge-impacted {
+  background: var(--impacted);
+  border-color: var(--impacted);
 }
 
-.badge-degradation {
-  background: var(--degradation);
-  border-color: var(--degradation);
+.badge-degraded {
+  background: var(--degraded);
+  border-color: var(--degraded);
 }
 
 .badge-informational {

@@ -13,10 +13,11 @@ from datetime import datetime, timezone
 
 # Severity comes from the title prefix. A single event moves between
 # these over its lifetime, so the label is per-update, not per-event.
+# The category names mirror what the AWS status page calls them.
 SEVERITIES = {
-    "Service disruption": "disruption",
-    "Service impact": "impact",
-    "Service degradation": "degradation",
+    "Service disruption": "disrupted",
+    "Service impact": "impacted",
+    "Service degradation": "degraded",
     "Informational message": "informational",
     "Service is operating normally": "operational",
 }

@@ -26,7 +26,7 @@ class TestParseSnapshot(unittest.TestCase):
     def test_classifies_severity(self):
         items = parse_snapshot_text(fixture_text())
         severities = {item["severity"] for item in items}
-        self.assertEqual(severities, {"disruption", "impact", "degradation"})
+        self.assertEqual(severities, {"disrupted", "impacted", "degraded"})
         self.assertNotIn("unknown", severities)
 
     def test_publishes_are_timezone_aware(self):
