@@ -1,86 +1,52 @@
 # status-archive
 
-AWS doesn't keep old status updates around. Their status feed
-([status.aws.amazon.com](https://status.aws.amazon.com)) only shows what's
-happening right now, and once an incident is resolved it quietly drops off.
-So if you wanted to know "was there a problem last month?" the answer was
-basically no.
+Ever wonder "was AWS down last week?" — well, AWS won't tell you. Their
+[status page](https://status.aws.amazon.com) only shows what's happening
+*right now*. Once an incident is resolved, it vanishes. No history, no archive.
 
-This project fixes that.
+This project fixes that by using git itself as the archive.
 
-The idea is simple: I grab a copy of the feed every day and commit it to
-git. Git keeps every version, so over time I end up with a full history
-even though AWS never stored one. Then a script replays that history,
-stitches the snapshots together, and turns them into something you can
-actually query.
+## The idea
 
-## How it works
+Every day, a GitHub Actions workflow grabs a snapshot of the AWS status feed
+and commits it to the repo. Over time, git's history *becomes* the missing
+record. A rebuild script then replays every snapshot, stitches them together
+into incidents, and writes them to a SQLite database and a JSON file.
 
-```
-GitHub Actions (daily)
-    │
-    ├─ fetch_feed.py        grabs https://status.aws.amazon.com/rss/all.rss
-    │                       and writes data/aws-status.rss (committed)
-    │
-    ├─ check_feed_shape.py  fails loudly if AWS changes the feed format
-    │
-    ├─ diff_snapshots.py    prints "what changed since yesterday"
-    │
-    └─ git commit           git history IS the archive
-                              │
-                              ▼
-    rebuild.py              replays every snapshot in history, merges the
-    │                       updates, groups them into incidents
-    │
-    └─ out/status.db        SQLite with incidents + their updates
-                              │
-                              ▼
-    api/main.py             FastAPI, read-only
-```
+The result: a browsable history of AWS incidents, complete with timelines,
+severity levels, and region breakdowns — all reconstructed from daily
+snapshots.
 
-A quirk of the feed: AWS re-renders `lastBuildDate` every few minutes, so
-"did anything change" is decided by comparing the actual items, not the
-bytes. Its format is also officially "subject to change", which is why the
-pipeline guards against feed drift before it parses anything.
+## Live page
 
-## Live status page
+The public site is here:
 
-A static version of the data lives at GitHub Pages:
+> **https://mimobn.github.io/aws-status-archive/**
 
-    https://mimobn.github.io/aws-status-archive/
+It's a static page that rebuilds automatically every time a new snapshot
+lands. What you see is exactly what the archive contains — nothing is
+seeded or faked.
 
-Every time a snapshot lands, the Pages workflow rebuilds `out/incidents.json`
-from the git archive and redeploys. What you see is exactly what the archive
-contains — nothing is seeded or faked. Right now the history is short, because
-the archive is young.
+## Quick start
 
-To turn it on, the repo needs GitHub Pages enabled set to **deploy from GitHub
-Actions** (Settings → Pages). That's a one-time click; the daily Archive
-workflow keeps the page up to date from then on.
-
-## Running it
-
-Needs Python 3.13+ and [uv](https://docs.astral.sh/uv/).
+You'll need Python 3.13+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
 
-# rebuild the database from the archived snapshots
+# Rebuild the database from archived snapshots
 uv run python scripts/rebuild.py
 
-# sanity-check the database against a fresh rebuild
+# Sanity-check the result
 uv run python scripts/check_integrity.py
 
-# run the API
+# Run the API locally
 uv run uvicorn api.main:app --port 8000
 ```
 
-The API endpoints are `/healthz`, `/incidents`, `/incidents/{key}`,
-`/updates`, and `/metrics`. Open <http://localhost:8000/docs> for the
-interactive OpenAPI page. (The FastAPI backend is for local use — the
-public page is the static site above, not this service.)
+Then open <http://localhost:8000/docs> for the interactive API docs.
 
-Or skip all of that and run the whole thing in Docker:
+### Docker
 
 ```bash
 docker build -t status-archive .
@@ -88,7 +54,20 @@ docker run -p 8000:8000 status-archive
 ```
 
 The image replays the history at build time, so a clone of the repo with
-its git history and nothing else is enough to produce a working container.
+its git history is all you need for a working container.
+
+## API
+
+The FastAPI backend is read-only and meant for local use. The public site
+is the static GitHub Pages version, not this service.
+
+| Endpoint | What it does |
+|---|---|
+| `GET /healthz` | Health check + counts |
+| `GET /incidents` | List all incidents |
+| `GET /incidents/{key}` | Incident detail with timeline |
+| `GET /updates` | Recent updates (filterable by severity) |
+| `GET /metrics` | Aggregate stats |
 
 ## Tests
 
@@ -96,18 +75,13 @@ its git history and nothing else is enough to produce a working container.
 uv run python -m unittest discover -s tests
 ```
 
-They cover parsing, incident grouping, snapshot diffs, the integrity
-checks, and the feed-shape guard, with real feed samples in `fixtures/`.
+Covers parsing, incident grouping, snapshot diffs, integrity checks, and
+feed-shape validation — all with real feed samples in `fixtures/`.
 
-## The deal with the data
+## A note on the data
 
-Right now the archive is young, so the reconstructed history is short.
-The whole point is that it compounds: every daily snapshot adds another
-day to the record. Check back in a year.
+The archive is young, so the history is short. That's by design: every
+daily snapshot adds another day to the record. The longer it runs, the
+more valuable it gets.
 
-Built with Python, FastAPI, and SQLite. Python because it's nice for this
-kind of messy text scraping, SQLite because the data fits in a file, and
-FastAPI because it gives you a usable API for almost free.
-
-This is mostly a learning project, but if AWS ever breaks hard, it might
-come in handy too.
+Built with Python, FastAPI, and SQLite.
