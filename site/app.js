@@ -26,6 +26,16 @@ function dayKey(iso) {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
+const MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function fmtShortDate(day) {
+  const [y, m, d] = day.split("-").map(Number);
+  return `${MONTHS_SHORT[m - 1]} ${d}, ${y}`;
+}
+
 function worstSeverity(candidates) {
   let worst = "unknown";
   let worstRank = -1;
@@ -147,12 +157,13 @@ function renderStrip(incidents) {
   strip.hidden = false;
   strip.innerHTML = "";
 
-  const start = new Date(firstDay);
-  const end = new Date(lastDay);
-  let cursor = new Date(start);
+  const [startY, startM, startD] = firstDay.split("-").map(Number);
+  const [endY, endM, endD] = lastDay.split("-").map(Number);
+  const startMs = Date.UTC(startY, startM - 1, startD);
+  const endMs = Date.UTC(endY, endM - 1, endD);
 
-  for (let i = 0; cursor <= end; i++) {
-    const key = cursor.toISOString().slice(0, 10);
+  for (let ms = startMs; ms <= endMs; ms += 86400000) {
+    const key = new Date(ms).toISOString().slice(0, 10);
     const severities = byDay[key];
     const sev = severities ? worstSeverity(severities) : "none";
     const cell = document.createElement("span");
@@ -163,12 +174,11 @@ function renderStrip(incidents) {
       cell.title = `${key}: no record`;
     }
     strip.appendChild(cell);
-    cursor.setDate(cursor.getDate() + 1);
   }
 
   const labels = document.querySelectorAll(".strip-axis span");
-  labels[0].textContent = fmtDate(firstDay + "T00:00:00Z").slice(0, 11) + firstDay;
-  labels[2].textContent = lastDay;
+  labels[0].textContent = fmtShortDate(firstDay);
+  labels[2].textContent = fmtShortDate(lastDay);
 }
 
 function severityBadge(sev) {
