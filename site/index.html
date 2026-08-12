@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>status-archive — AWS incident history</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>status-archive</h1>
+      <p class="subtitle">
+        AWS incident history, reconstructed from daily snapshots of the
+        <a href="https://status.aws.amazon.com/">status feed</a> that AWS
+        itself doesn't keep.
+      </p>
+    </header>
+
+    <section class="summary" id="summary">
+      <div class="summary-stats" id="summaryStats"></div>
+      <div class="strip-wrap">
+        <div class="strip" id="daysStrip" aria-hidden="true"></div>
+        <div class="strip-axis">
+          <span id="stripStart">…</span>
+          <span>per-day worst severity</span>
+          <span id="stripEnd">…</span>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="dot dot-disruption"></span>Disruption</span>
+          <span class="legend-item"><span class="dot dot-impact"></span>Impact</span>
+          <span class="legend-item"><span class="dot dot-degradation"></span>Degradation</span>
+          <span class="legend-item"><span class="dot dot-none"></span>No record</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="incidents">
+      <h2>Incidents</h2>
+      <div id="incidentList" class="incident-list"></div>
+      <p id="emptyState" class="muted" hidden>No incidents in the archive yet.</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>
+        Data comes from <code>parsed/incidents.json</code>, rebuilt from the
+        git snapshot archive on every deploy. Not affiliated with AWS.
+      </p>
+      <p class="muted" id="updatedAt"></p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
