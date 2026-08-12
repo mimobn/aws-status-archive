@@ -3,58 +3,93 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f8fa" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1117" />
     <title>status-archive — AWS incident history</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content="status-archive — AWS incident history" />
+    <meta property="og:description" content="AWS incident history reconstructed from daily snapshots of the AWS status feed." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="page-header">
-      <h1>status-archive</h1>
-      <p class="subtitle">
-        AWS incident history, reconstructed from daily snapshots of the
-        <a href="https://status.aws.amazon.com/">status feed</a> that AWS
-        itself doesn't keep.
-      </p>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="brand">
+        <img class="brand-mark" src="logo.svg" alt="" width="64" height="64" />
+        <div class="brand-text">
+          <h1>status-archive</h1>
+          <p class="subtitle">
+            AWS incident history, reconstructed from daily snapshots of the
+            <a href="https://status.aws.amazon.com/">status feed</a> that AWS
+            itself doesn't keep.
+          </p>
+        </div>
+      </div>
     </header>
 
     <div class="layout">
-      <nav class="sidebar" id="regionNav">
-        <h2 class="sidebar-title">Regions</h2>
-        <div id="regionList"></div>
-      </nav>
+      <aside class="sidebar">
+        <div class="panel sidebar-panel">
+          <h2 class="sidebar-title">Regions</h2>
+          <nav id="regionList" class="region-list"></nav>
+        </div>
+      </aside>
 
       <main class="main">
-        <section class="summary" id="summary">
+        <section class="panel hero-panel" id="heroPanel" data-animate>
+          <div class="panel-header">
+            <div>
+              <h3>AWS incident history</h3>
+              <span class="panel-sub" id="updatedAt">Loading…</span>
+            </div>
+          </div>
+
           <div class="summary-stats" id="summaryStats"></div>
-          <div class="strip-wrap">
-            <div class="strip" id="daysStrip" aria-hidden="true"></div>
-            <div class="strip-axis">
-              <span id="stripStart">…</span>
-              <span>per-day worst severity</span>
-              <span id="stripEnd">…</span>
-            </div>
-            <div class="legend">
-              <span class="legend-item"><span class="dot dot-disrupted"></span>Disrupted</span>
-              <span class="legend-item"><span class="dot dot-impacted"></span>Impacted</span>
-              <span class="legend-item"><span class="dot dot-degraded"></span>Degraded</span>
-              <span class="legend-item"><span class="dot dot-none"></span>No record</span>
-            </div>
+
+          <div class="strip-stage">
+            <div class="strip" id="daysStrip"></div>
+            <div class="strip-tooltip" id="stripTooltip" aria-hidden="true"></div>
+          </div>
+          <div class="strip-axis">
+            <span id="stripStart">…</span>
+            <span>per-day worst severity</span>
+            <span id="stripEnd">…</span>
+          </div>
+
+          <div class="legend">
+            <span class="legend-item"><span class="dot dot-disrupted"></span>Disrupted</span>
+            <span class="legend-item"><span class="dot dot-impacted"></span>Impacted</span>
+            <span class="legend-item"><span class="dot dot-degraded"></span>Degraded</span>
+            <span class="legend-item"><span class="dot dot-none"></span>No record</span>
           </div>
         </section>
 
-        <section class="incidents">
-          <h2>Incidents</h2>
+        <section class="panel incidents-panel" data-animate>
+          <div class="panel-header">
+            <div>
+              <h3>Incidents</h3>
+              <span class="panel-sub">Full timelines, newest events ordered by start date</span>
+            </div>
+          </div>
           <div id="incidentList" class="incident-list"></div>
-          <p id="emptyState" class="muted" hidden>No incidents in the archive yet.</p>
+          <p id="emptyState" class="empty-state" hidden>No incidents in the archive yet.</p>
         </section>
       </main>
     </div>
 
-    <footer class="page-footer">
+    <footer class="site-footer">
       <p>
         Data comes from <code>parsed/incidents.json</code>, rebuilt from the
         git snapshot archive on every deploy. Not affiliated with AWS.
       </p>
-      <p class="muted" id="updatedAt"></p>
     </footer>
 
     <script src="app.js"></script>

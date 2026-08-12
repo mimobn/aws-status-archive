@@ -18,6 +18,7 @@ const SEVERITY_LABEL = {
 };
 
 function fmtDate(iso) {
+  if (!iso) return "—";
   const d = new Date(iso);
   return d.toUTCString().replace(" GMT", " UTC");
 }
@@ -31,9 +32,16 @@ const MONTHS_SHORT = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
+const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 function fmtShortDate(day) {
   const [y, m, d] = day.split("-").map(Number);
   return `${MONTHS_SHORT[m - 1]} ${d}, ${y}`;
+}
+
+function fmtShortDay(day) {
+  const [y, m, d] = day.split("-").map(Number);
+  return `${fmtShortDate(day)} · ${DAY_KEYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}`;
 }
 
 function worstSeverity(candidates) {
@@ -50,7 +58,7 @@ function worstSeverity(candidates) {
 }
 
 function escapeHtml(text) {
-  return text
+  return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
@@ -122,8 +130,20 @@ function renderStats(incidents) {
 
   const updatesTotal = incidents.reduce((sum, i) => sum + i.updates.length, 0);
 
+  const dayMap = buildDayMap(incidents);
+  const { uptime, cleanDays, totalDays } = computeUptime(
+    incidents,
+    dayMap.byDay,
+    dayMap.firstDay,
+    dayMap.lastDay,
+  );
+  const uptimeStat = uptime === null
+    ? ""
+    : `<div class="stat"><span class="stat-num stat-operational">${(uptime * 100).toFixed(1)}%</span> uptime · ${cleanDays} quiet of ${totalDays} days</div>`;
+
   const el = document.getElementById("summaryStats");
   el.innerHTML = `
+    ${uptimeStat}
     <div class="stat"><span class="stat-num">${incidents.length}</span> incidents</div>
     <div class="stat"><span class="stat-num">${updatesTotal}</span> updates</div>
     ${bySeverity
@@ -135,18 +155,43 @@ function renderStats(incidents) {
   `;
 }
 
-function renderStrip(incidents) {
+function buildDayMap(incidents) {
   const byDay = {};
   let firstDay = null;
   let lastDay = null;
   for (const incident of incidents) {
     for (const update of incident.updates) {
       const key = dayKey(update.published);
-      (byDay[key] = byDay[key] || []).push(update.severity);
+      (byDay[key] = byDay[key] || []).push({ severity: update.severity, title: update.title });
       if (!firstDay || key < firstDay) firstDay = key;
       if (!lastDay || key > lastDay) lastDay = key;
     }
   }
+  return { byDay, firstDay, lastDay };
+}
+
+function computeUptime(incidents, byDay, firstDay, lastDay) {
+  if (!firstDay) return { uptime: null, activeDays: 0, totalDays: 0 };
+  const [sy, sm, sd] = firstDay.split("-").map(Number);
+  const [ey, em, ed] = lastDay.split("-").map(Number);
+  const startMs = Date.UTC(sy, sm - 1, sd);
+  const endMs = Date.UTC(ey, em - 1, ed);
+  const totalDays = Math.round((endMs - startMs) / 86400000) + 1;
+  let impactedDays = 0;
+  for (const key in byDay) {
+    if (worstSeverity(byDay[key].map((u) => u.severity)) !== "operational") {
+      impactedDays += 1;
+    }
+  }
+  const activeDays = Object.keys(byDay).length;
+  const cleanDays = totalDays - activeDays;
+  const impactedWeighted = impactedDays;
+  const uptime = Math.max(0, 1 - impactedWeighted / totalDays);
+  return { uptime, activeDays, cleanDays, totalDays };
+}
+
+function renderStrip(incidents) {
+  const { byDay, firstDay, lastDay } = buildDayMap(incidents);
 
   const strip = document.getElementById("daysStrip");
   if (!firstDay) {
@@ -162,27 +207,101 @@ function renderStrip(incidents) {
   const startMs = Date.UTC(startY, startM - 1, startD);
   const endMs = Date.UTC(endY, endM - 1, endD);
 
-  for (let ms = startMs; ms <= endMs; ms += 86400000) {
+  let index = 0;
+  for (let ms = startMs; ms <= endMs; ms += 86400000, index++) {
     const key = new Date(ms).toISOString().slice(0, 10);
-    const severities = byDay[key];
-    const sev = severities ? worstSeverity(severities) : "none";
+    const updates = byDay[key];
+    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "none";
     const cell = document.createElement("span");
-    cell.className = `cell cell-${sev}`;
-    if (severities) {
-      cell.title = `${key}: ${SEVERITY_LABEL[sev]} (${severities.length} update(s))`;
-    } else {
-      cell.title = `${key}: no record`;
-    }
+    cell.className = `bar bar-${sev}`;
+    cell.dataset.dayIndex = String(index);
+    cell.tabIndex = 0;
     strip.appendChild(cell);
   }
 
   const labels = document.querySelectorAll(".strip-axis span");
   labels[0].textContent = fmtShortDate(firstDay);
   labels[2].textContent = fmtShortDate(lastDay);
+
+  const days = [];
+  for (let ms = startMs; ms <= endMs; ms += 86400000) {
+    days.push(new Date(ms).toISOString().slice(0, 10));
+  }
+
+  return { days, byDay };
+}
+
+function attachStripTooltip(state) {
+  const strip = document.getElementById("daysStrip");
+  const tooltip = document.getElementById("stripTooltip");
+  const container = document.getElementById("heroPanel");
+
+  function positionTooltip(target) {
+    const panelRect = container.getBoundingClientRect();
+    const barRect = target.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const padding = 14;
+    let left = barRect.left - panelRect.left + barRect.width / 2;
+    left = Math.max(
+      tooltipRect.width / 2 + padding,
+      Math.min(left, panelRect.width - tooltipRect.width / 2 - padding),
+    );
+    let top = barRect.top - panelRect.top - tooltipRect.height - 10;
+    let arrow = "top";
+    if (top < padding) {
+      top = barRect.bottom - panelRect.top + 10;
+      arrow = "below";
+    }
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.dataset.arrow = arrow;
+    const tooltipLeft = left - tooltipRect.width / 2;
+    const arrowLeft = barRect.left - panelRect.left + barRect.width / 2 - tooltipLeft;
+    tooltip.style.setProperty("--arrow-left", `${arrowLeft}px`);
+  }
+
+  function show(target) {
+    const idx = Number(target.dataset.dayIndex);
+    if (Number.isNaN(idx)) return;
+    const day = state.days[idx];
+    if (!day) return;
+    const updates = state.byDay[day] || [];
+    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "none";
+    const count = updates.length;
+    tooltip.innerHTML = `
+      <div class="tooltip-date">${fmtShortDay(day)}</div>
+      <div class="tooltip-summary">
+        <span class="tooltip-dot ${severity}"></span>
+        <span>${SEVERITY_LABEL[severity] ?? (severity === "none" ? "No record" : severity)}</span>
+        ${updates.length ? `<span class="tooltip-duration">${count} update(s)</span>` : ""}
+      </div>
+    `;
+    tooltip.classList.add("active");
+    tooltip.setAttribute("aria-hidden", "false");
+    positionTooltip(target);
+  }
+
+  function hide() {
+    tooltip.classList.remove("active");
+    tooltip.setAttribute("aria-hidden", "true");
+  }
+
+  strip.addEventListener("pointerenter", (e) => {
+    show(e.target.closest(".bar") || e.target);
+  });
+  strip.addEventListener("pointermove", (e) => {
+    const bar = e.target.closest(".bar");
+    if (bar) positionTooltip(bar);
+  });
+  strip.addEventListener("pointerleave", hide);
+  strip.addEventListener("focusin", (e) => {
+    if (e.target.classList && e.target.classList.contains("bar")) show(e.target);
+  });
+  strip.addEventListener("focusout", hide);
 }
 
 function severityBadge(sev) {
-  const label = SEVERITY_LABEL[sev] ?? sev;
+  const label = SEVERITY_LABEL[sev] ?? (sev === "none" ? "No record" : sev);
   return `<span class="badge badge-${sev}">${label}</span>`;
 }
 
@@ -195,9 +314,9 @@ function renderIncident(incident) {
     .map(severityBadge)
     .join(" ");
 
-  const regionLabel = incident.region_name || incident.region;
-  const regionBadge = regionLabel
-    ? `<span class="incident-region">${escapeHtml(regionLabel)}</span>`
+  const regionLabelValue = incident.region_name || incident.region;
+  const regionBadge = regionLabelValue
+    ? `<span class="incident-region">${escapeHtml(regionLabelValue)}</span>`
     : "";
 
   const article = document.createElement("article");
@@ -247,7 +366,8 @@ function renderAll(incidents) {
 
   renderSidebar(allRegions, incidents.length, activeRegion);
   renderStats(filtered);
-  renderStrip(filtered);
+  const stripState = renderStrip(filtered);
+  attachStripTooltip(stripState || { days: [], byDay: {} });
 
   const list = document.getElementById("incidentList");
   const empty = document.getElementById("emptyState");
@@ -294,7 +414,15 @@ async function main() {
 
     window.addEventListener("hashchange", () => renderAll(incidents));
 
-    updated.textContent = `Rendered at ${new Date().toUTCString().replace(" GMT", " UTC")} from the current archive.`;
+    const counts = incidents.reduce(
+      (acc, i) => {
+        acc.incidents += 1;
+        acc.updates += i.updates.length;
+        return acc;
+      },
+      { incidents: 0, updates: 0 },
+    );
+    updated.textContent = `${counts.incidents} incidents · ${counts.updates} updates · rendered ${new Date().toUTCString().replace(" GMT", " UTC")}`;
   } catch (err) {
     renderSidebar([], 0, null);
     renderStats([]);
