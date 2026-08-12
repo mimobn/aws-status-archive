@@ -11,6 +11,7 @@ Rebuilding is deterministic: same history in, same output out.
 
 import json
 import os
+import re
 import sqlite3
 import subprocess
 import sys
@@ -22,8 +23,21 @@ SNAPSHOT_PATH = "data/aws-status.rss"
 OUT_PATH = "out/incidents.json"
 DB_PATH = "out/status.db"
 
+# Region codes look like me-central-1, us-east-1, us-gov-east-1, ...
+REGION_CODE_RE = re.compile(r"\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b", re.IGNORECASE)
+
+# Friendly names for the regions we've actually seen. Unknown codes keep
+# their raw value rather than pretending we know a name for them.
+REGION_NAMES = {
+    "me-central-1": "Middle East (UAE)",
+    "me-south-1": "Middle East (Bahrain)",
+}
+
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS updates (
+DROP TABLE IF EXISTS updates;
+DROP TABLE IF EXISTS incidents;
+
+CREATE TABLE updates (
     guid TEXT PRIMARY KEY,
     incident_key TEXT NOT NULL,
     published TEXT NOT NULL,
@@ -32,12 +46,14 @@ CREATE TABLE IF NOT EXISTS updates (
     description TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS incidents (
+CREATE TABLE incidents (
     incident_key TEXT PRIMARY KEY,
     started_at TEXT,
     last_update TEXT,
     update_count INTEGER,
-    title TEXT
+    title TEXT,
+    region TEXT,
+    region_name TEXT
 );
 """
 
@@ -70,6 +86,19 @@ def incident_key(guid):
     return guid.rsplit("_", 1)[0] if "_" in guid else guid
 
 
+def extract_region(key, description):
+    """Find the AWS region this incident lives in.
+
+    The description names it in parentheses (e.g. 'Region (ME-CENTRAL-1)');
+    fall back to matching the pattern against the incident key.
+    """
+    for text in (description, key):
+        match = REGION_CODE_RE.search(text)
+        if match:
+            return match.group(1).lower()
+    return None
+
+
 def build_incidents_from_snapshots(snapshots):
     """Merge a list of snapshot texts into incident timelines."""
     updates = {}
@@ -84,6 +113,10 @@ def build_incidents_from_snapshots(snapshots):
     incidents = []
     for key, items in by_key.items():
         items.sort(key=lambda item: item["published"] or datetime.min)
+        # Build a combined description from all updates for region extraction
+        combined_description = " ".join(item["description"] for item in items)
+        region = extract_region(key, combined_description)
+        region_name = REGION_NAMES.get(region) if region else None
         incidents.append(
             {
                 "key": key,
@@ -91,6 +124,8 @@ def build_incidents_from_snapshots(snapshots):
                 "last_update": items[-1]["published"],
                 "update_count": len(items),
                 "title": items[0]["title"].split(":", 1)[1].strip(),
+                "region": region,
+                "region_name": region_name,
                 "updates": [
                     {
                         "guid": item["guid"],
@@ -120,19 +155,19 @@ def write_db(incidents):
     conn = sqlite3.connect(DB_PATH)
     try:
         conn.executescript(SCHEMA)
-        conn.execute("DELETE FROM updates")
-        conn.execute("DELETE FROM incidents")
         for incident in incidents:
             conn.execute(
                 "INSERT INTO incidents "
-                "(incident_key, started_at, last_update, update_count, title) "
-                "VALUES (?, ?, ?, ?, ?)",
+                "(incident_key, started_at, last_update, update_count, title, region, region_name) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (
                     incident["key"],
-                    iso(incident["started_at"]),
-                    iso(incident["last_update"]),
+                    incident["started_at"],
+                    incident["last_update"],
                     incident["update_count"],
                     incident["title"],
+                    incident["region"],
+                    incident["region_name"],
                 ),
             )
             for update in incident["updates"]:
