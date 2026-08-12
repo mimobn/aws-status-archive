@@ -16,29 +16,38 @@
       </p>
     </header>
 
-    <section class="summary" id="summary">
-      <div class="summary-stats" id="summaryStats"></div>
-      <div class="strip-wrap">
-        <div class="strip" id="daysStrip" aria-hidden="true"></div>
-        <div class="strip-axis">
-          <span id="stripStart">…</span>
-          <span>per-day worst severity</span>
-          <span id="stripEnd">…</span>
-        </div>
-        <div class="legend">
-          <span class="legend-item"><span class="dot dot-disruption"></span>Disruption</span>
-          <span class="legend-item"><span class="dot dot-impact"></span>Impact</span>
-          <span class="legend-item"><span class="dot dot-degradation"></span>Degradation</span>
-          <span class="legend-item"><span class="dot dot-none"></span>No record</span>
-        </div>
-      </div>
-    </section>
+    <div class="layout">
+      <nav class="sidebar" id="regionNav">
+        <h2 class="sidebar-title">Regions</h2>
+        <div id="regionList"></div>
+      </nav>
 
-    <section class="incidents">
-      <h2>Incidents</h2>
-      <div id="incidentList" class="incident-list"></div>
-      <p id="emptyState" class="muted" hidden>No incidents in the archive yet.</p>
-    </section>
+      <main class="main">
+        <section class="summary" id="summary">
+          <div class="summary-stats" id="summaryStats"></div>
+          <div class="strip-wrap">
+            <div class="strip" id="daysStrip" aria-hidden="true"></div>
+            <div class="strip-axis">
+              <span id="stripStart">…</span>
+              <span>per-day worst severity</span>
+              <span id="stripEnd">…</span>
+            </div>
+            <div class="legend">
+              <span class="legend-item"><span class="dot dot-disruption"></span>Disruption</span>
+              <span class="legend-item"><span class="dot dot-impact"></span>Impact</span>
+              <span class="legend-item"><span class="dot dot-degradation"></span>Degradation</span>
+              <span class="legend-item"><span class="dot dot-none"></span>No record</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="incidents">
+          <h2>Incidents</h2>
+          <div id="incidentList" class="incident-list"></div>
+          <p id="emptyState" class="muted" hidden>No incidents in the archive yet.</p>
+        </section>
+      </main>
+    </div>
 
     <footer class="page-footer">
       <p>

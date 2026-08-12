@@ -29,10 +29,8 @@ a {
 }
 
 .page-header,
-.summary,
-.incidents,
 .page-footer {
-  max-width: 780px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -52,12 +50,75 @@ a {
   margin: 6px 0 0;
 }
 
-.summary,
-.incidents {
+/* --- Layout --- */
+
+.layout {
+  display: flex;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 16px;
+  gap: 20px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Sidebar --- */
+
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.sidebar-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.sidebar-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.1s;
+}
+
+.sidebar-item:hover {
+  background: var(--none);
+}
+
+.sidebar-item.active {
+  background: var(--informational);
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebar-item.active .sidebar-count {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.sidebar-count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Summary / Stats --- */
+
+.summary {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
-  margin-top: 16px;
   margin-bottom: 16px;
   padding: 16px;
 }
@@ -93,6 +154,8 @@ a {
 .stat-degradation {
   color: var(--degradation);
 }
+
+/* --- Severity strip --- */
 
 .strip {
   display: flex;
@@ -182,6 +245,16 @@ a {
   background: var(--operational);
 }
 
+/* --- Incidents --- */
+
+.incidents {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
 .incidents h2 {
   font-size: 18px;
   margin: 0 0 12px;
@@ -267,6 +340,19 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+.incident-region {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--none);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 7px;
+  margin-left: 6px;
+}
+
+/* --- Timeline --- */
+
 .timeline {
   list-style: none;
   margin: 0;
@@ -309,4 +395,34 @@ a {
   padding-top: 8px;
   padding-bottom: 40px;
   font-size: 13px;
+}
+
+/* --- Mobile --- */
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sidebar {
+    width: 100%;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-title {
+    display: none;
+  }
+
+  .sidebar-item {
+    white-space: nowrap;
+    padding: 5px 10px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
 }

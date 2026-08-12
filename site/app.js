@@ -1,6 +1,5 @@
 const DATA_URL = "parsed/incidents.json";
 
-// Worst-to-least. Higher rank wins when a day sees several severities.
 const SEVERITY_RANK = {
   disruption: 4,
   impact: 3,
@@ -40,12 +39,64 @@ function worstSeverity(candidates) {
   return worst;
 }
 
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 async function loadIncidents() {
   const resp = await fetch(DATA_URL);
   if (!resp.ok) {
     throw new Error(`could not load ${DATA_URL} (${resp.status})`);
   }
   return resp.json();
+}
+
+const REGION_CODE_RE = /\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b/i;
+
+const REGION_NAMES = {
+  "me-central-1": "Middle East (UAE)",
+  "me-south-1": "Middle East (Bahrain)",
+};
+
+function regionLabel(incident) {
+  if (incident.region_name) return incident.region_name;
+  if (incident.region) return REGION_NAMES[incident.region] || incident.region;
+  const match = incident.key.match(REGION_CODE_RE);
+  if (match) {
+    const code = match[1].toLowerCase();
+    return REGION_NAMES[code] || code.toUpperCase();
+  }
+  return null;
+}
+
+function buildRegionMap(incidents) {
+  const counts = {};
+  for (const inc of incidents) {
+    const label = regionLabel(inc);
+    if (label) {
+      counts[label] = (counts[label] || 0) + 1;
+    }
+  }
+  const entries = Object.entries(counts).sort((a, b) => a[0].localeCompare(b[0]));
+  return entries;
+}
+
+function renderSidebar(regions, total, activeRegion) {
+  const container = document.getElementById("regionList");
+  const items = [];
+
+  const allClass = activeRegion === null ? "sidebar-item active" : "sidebar-item";
+  items.push(`<a class="${allClass}" data-region="" href="#">All regions <span class="sidebar-count">${total}</span></a>`);
+
+  for (const [label, count] of regions) {
+    const cls = activeRegion === label ? "sidebar-item active" : "sidebar-item";
+    items.push(`<a class="${cls}" data-region="${escapeHtml(label)}" href="#${encodeURIComponent(label)}">${escapeHtml(label)} <span class="sidebar-count">${count}</span></a>`);
+  }
+
+  container.innerHTML = items.join("");
 }
 
 function renderStats(incidents) {
@@ -89,9 +140,12 @@ function renderStrip(incidents) {
 
   const strip = document.getElementById("daysStrip");
   if (!firstDay) {
+    strip.innerHTML = "";
     strip.hidden = true;
     return;
   }
+  strip.hidden = false;
+  strip.innerHTML = "";
 
   const start = new Date(firstDay);
   const end = new Date(lastDay);
@@ -123,7 +177,6 @@ function severityBadge(sev) {
 }
 
 function renderIncident(incident) {
-  const first = incident.updates[0];
   const updates = [...incident.updates].sort(
     (a, b) => new Date(a.published) - new Date(b.published)
   );
@@ -132,11 +185,16 @@ function renderIncident(incident) {
     .map(severityBadge)
     .join(" ");
 
+  const regionLabel = incident.region_name || incident.region;
+  const regionBadge = regionLabel
+    ? `<span class="incident-region">${escapeHtml(regionLabel)}</span>`
+    : "";
+
   const article = document.createElement("article");
   article.className = "incident";
   article.innerHTML = `
     <div class="incident-head">
-      <h3>${incident.title}</h3>
+      <h3>${escapeHtml(incident.title)}${regionBadge}</h3>
       <div class="incident-badges">${badges}</div>
     </div>
     <div class="incident-meta">
@@ -164,32 +222,64 @@ function renderIncident(incident) {
   return article;
 }
 
-function escapeHtml(text) {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+function getActiveRegion() {
+  const hash = location.hash.slice(1);
+  return hash ? decodeURIComponent(hash) : null;
+}
+
+function renderAll(incidents) {
+  const allRegions = buildRegionMap(incidents);
+  const activeRegion = getActiveRegion();
+
+  const filtered = activeRegion
+    ? incidents.filter((inc) => regionLabel(inc) === activeRegion)
+    : incidents;
+
+  renderSidebar(allRegions, incidents.length, activeRegion);
+  renderStats(filtered);
+  renderStrip(filtered);
+
+  const list = document.getElementById("incidentList");
+  const empty = document.getElementById("emptyState");
+  list.innerHTML = "";
+
+  if (filtered.length === 0) {
+    empty.hidden = false;
+  } else {
+    empty.hidden = true;
+    for (const incident of filtered) {
+      list.appendChild(renderIncident(incident));
+    }
+  }
 }
 
 async function main() {
-  const list = document.getElementById("incidentList");
-  const empty = document.getElementById("emptyState");
   const updated = document.getElementById("updatedAt");
   try {
     const incidents = await loadIncidents();
     incidents.sort((a, b) => new Date(a.started_at) - new Date(b.started_at));
-    renderStats(incidents);
-    renderStrip(incidents);
-    if (incidents.length === 0) {
-      empty.hidden = false;
-    } else {
-      for (const incident of incidents) {
-        list.appendChild(renderIncident(incident));
+
+    renderAll(incidents);
+
+    document.getElementById("regionList").addEventListener("click", (e) => {
+      const link = e.target.closest(".sidebar-item");
+      if (!link) return;
+      e.preventDefault();
+      const region = link.dataset.region || null;
+      if (region) {
+        location.hash = encodeURIComponent(region);
+      } else {
+        history.pushState("", "", location.pathname + location.search);
       }
-    }
+      renderAll(incidents);
+    });
+
+    window.addEventListener("hashchange", () => renderAll(incidents));
+
     updated.textContent = `Rendered at ${new Date().toUTCString().replace(" GMT", " UTC")} from the current archive.`;
   } catch (err) {
-    list.innerHTML = `<p class="muted">Could not load the data: ${escapeHtml(String(err.message || err))}</p>`;
+    document.getElementById("incidentList").innerHTML =
+      `<p class="muted">Could not load the data: ${escapeHtml(String(err.message || err))}</p>`;
   }
 }
 
