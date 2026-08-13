@@ -139,7 +139,7 @@ function renderStats(incidents) {
   );
   const uptimeStat = uptime === null
     ? ""
-    : `<div class="stat"><span class="stat-num stat-operational">${(uptime * 100).toFixed(1)}%</span> uptime · ${cleanDays} quiet of ${totalDays} days</div>`;
+    : `<div class="stat"><span class="stat-num stat-operational">${(uptime * 100).toFixed(1)}%</span> uptime · ${cleanDays} quiet of ${totalDays} recorded days</div>`;
 
   const el = document.getElementById("summaryStats");
   el.innerHTML = `
@@ -170,8 +170,12 @@ function buildDayMap(incidents) {
   return { byDay, firstDay, lastDay };
 }
 
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function computeUptime(incidents, byDay, firstDay, lastDay) {
-  if (!firstDay) return { uptime: null, activeDays: 0, totalDays: 0 };
+  if (!firstDay) return { uptime: null, activeDays: 0, cleanDays: 0, totalDays: 0 };
   const [sy, sm, sd] = firstDay.split("-").map(Number);
   const [ey, em, ed] = lastDay.split("-").map(Number);
   const startMs = Date.UTC(sy, sm - 1, sd);
@@ -184,9 +188,8 @@ function computeUptime(incidents, byDay, firstDay, lastDay) {
     }
   }
   const activeDays = Object.keys(byDay).length;
-  const cleanDays = totalDays - activeDays;
-  const impactedWeighted = impactedDays;
-  const uptime = Math.max(0, 1 - impactedWeighted / totalDays);
+  const cleanDays = totalDays - impactedDays;
+  const uptime = Math.max(0, 1 - impactedDays / totalDays);
   return { uptime, activeDays, cleanDays, totalDays };
 }
 
@@ -202,8 +205,11 @@ function renderStrip(incidents) {
   strip.hidden = false;
   strip.innerHTML = "";
 
+  const today = todayKey();
+  const stripEndDay = lastDay > today ? lastDay : today;
+
   const [startY, startM, startD] = firstDay.split("-").map(Number);
-  const [endY, endM, endD] = lastDay.split("-").map(Number);
+  const [endY, endM, endD] = stripEndDay.split("-").map(Number);
   const startMs = Date.UTC(startY, startM - 1, startD);
   const endMs = Date.UTC(endY, endM - 1, endD);
 
@@ -221,7 +227,7 @@ function renderStrip(incidents) {
 
   const labels = document.querySelectorAll(".strip-axis span");
   labels[0].textContent = fmtShortDate(firstDay);
-  labels[2].textContent = fmtShortDate(lastDay);
+  labels[2].textContent = lastDay === today ? "Today" : fmtShortDate(stripEndDay);
 
   const days = [];
   for (let ms = startMs; ms <= endMs; ms += 86400000) {
