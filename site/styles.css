@@ -319,6 +319,52 @@ a:hover {
   position: relative;
 }
 
+.strip-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.strip-btn {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.strip-btn:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.strip-btn[aria-label] {
+  min-width: 34px;
+}
+
+.strip-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.strip-btn-active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.strip-window-label {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
 .strip {
   display: flex;
   flex-wrap: wrap;

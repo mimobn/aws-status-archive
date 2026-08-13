@@ -54,6 +54,14 @@
 
           <div class="summary-stats" id="summaryStats"></div>
 
+          <div class="strip-controls" id="stripControls" hidden>
+            <button type="button" class="strip-btn" id="stripPrev" aria-label="Show earlier days">‹</button>
+            <button type="button" class="strip-btn" id="stripNext" aria-label="Show later days">›</button>
+            <button type="button" class="strip-btn" id="stripToday">Today</button>
+            <button type="button" class="strip-btn" id="stripAll">All time</button>
+            <span class="strip-window-label" id="stripWindowLabel"></span>
+          </div>
+
           <div class="strip-stage">
             <div class="strip" id="daysStrip"></div>
             <div class="strip-tooltip" id="stripTooltip" aria-hidden="true"></div>

@@ -174,6 +174,24 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function dayToMs(key) {
+  const [y, m, d] = key.split("-").map(Number);
+  return Date.UTC(y, m - 1, d);
+}
+
+function keyFromMs(ms) {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+function addDays(key, n) {
+  return keyFromMs(dayToMs(key) + n * 86400000);
+}
+
+const WINDOW_DAYS = 90;
+let stripWindowEnd = null;
+let stripShowAll = false;
+let stripFirstDay = null;
+
 function computeUptime(incidents, byDay, firstDay, lastDay) {
   if (!firstDay) return { uptime: null, activeDays: 0, cleanDays: 0, totalDays: 0 };
   const [sy, sm, sd] = firstDay.split("-").map(Number);
@@ -200,18 +218,35 @@ function renderStrip(incidents) {
   if (!firstDay) {
     strip.innerHTML = "";
     strip.hidden = true;
-    return;
+    updateStripControls({ historyBeyondWindow: false });
+    return { days: [], byDay: {} };
   }
   strip.hidden = false;
   strip.innerHTML = "";
+  stripFirstDay = firstDay;
 
   const today = todayKey();
-  const stripEndDay = lastDay > today ? lastDay : today;
+  const maxDay = lastDay > today ? lastDay : today;
+  const totalDays = Math.round((dayToMs(maxDay) - dayToMs(firstDay)) / 86400000) + 1;
+  const historyBeyondWindow = totalDays > WINDOW_DAYS;
 
-  const [startY, startM, startD] = firstDay.split("-").map(Number);
-  const [endY, endM, endD] = stripEndDay.split("-").map(Number);
-  const startMs = Date.UTC(startY, startM - 1, startD);
-  const endMs = Date.UTC(endY, endM - 1, endD);
+  if (!historyBeyondWindow) {
+    stripWindowEnd = maxDay;
+    stripShowAll = true;
+  }
+
+  if (stripWindowEnd === null || stripWindowEnd > maxDay) stripWindowEnd = maxDay;
+  if (stripWindowEnd < firstDay) stripWindowEnd = firstDay;
+  if (stripShowAll) stripWindowEnd = maxDay;
+
+  const endDay = stripWindowEnd;
+  let startDay = stripShowAll
+    ? firstDay
+    : addDays(endDay, -(WINDOW_DAYS - 1));
+  if (startDay < firstDay) startDay = firstDay;
+
+  const startMs = dayToMs(startDay);
+  const endMs = dayToMs(endDay);
 
   let index = 0;
   for (let ms = startMs; ms <= endMs; ms += 86400000, index++) {
@@ -226,15 +261,67 @@ function renderStrip(incidents) {
   }
 
   const labels = document.querySelectorAll(".strip-axis span");
-  labels[0].textContent = fmtShortDate(firstDay);
-  labels[2].textContent = lastDay === today ? "Today" : fmtShortDate(stripEndDay);
+  labels[0].textContent = fmtShortDate(startDay);
+  labels[2].textContent = endDay === maxDay ? "Today" : fmtShortDate(endDay);
 
   const days = [];
   for (let ms = startMs; ms <= endMs; ms += 86400000) {
     days.push(new Date(ms).toISOString().slice(0, 10));
   }
 
+  updateStripControls({ historyBeyondWindow });
   return { days, byDay };
+}
+
+function updateStripControls({ historyBeyondWindow }) {
+  const controls = document.getElementById("stripControls");
+  if (!historyBeyondWindow) {
+    controls.hidden = true;
+    return;
+  }
+  controls.hidden = false;
+
+  const prev = document.getElementById("stripPrev");
+  const next = document.getElementById("stripNext");
+  const todayBtn = document.getElementById("stripToday");
+  const allBtn = document.getElementById("stripAll");
+  const label = document.getElementById("stripWindowLabel");
+
+  prev.disabled = stripShowAll || stripWindowEnd <= addDays(stripFirstDay, WINDOW_DAYS - 1);
+  next.disabled = stripShowAll;
+  todayBtn.disabled = stripShowAll || stripWindowEnd >= todayKey();
+
+  allBtn.classList.toggle("strip-btn-active", stripShowAll);
+  label.textContent = stripShowAll
+    ? "All time"
+    : `Last ${WINDOW_DAYS} days`;
+}
+
+function attachStripControls(onChange) {
+  const prev = document.getElementById("stripPrev");
+  const next = document.getElementById("stripNext");
+  const todayBtn = document.getElementById("stripToday");
+  const allBtn = document.getElementById("stripAll");
+  if (!prev) return;
+
+  prev.addEventListener("click", () => {
+    if (!stripShowAll) stripWindowEnd = addDays(stripWindowEnd, -WINDOW_DAYS);
+    onChange();
+  });
+  next.addEventListener("click", () => {
+    if (!stripShowAll) stripWindowEnd = addDays(stripWindowEnd, WINDOW_DAYS);
+    onChange();
+  });
+  todayBtn.addEventListener("click", () => {
+    stripShowAll = false;
+    stripWindowEnd = todayKey();
+    onChange();
+  });
+  allBtn.addEventListener("click", () => {
+    stripShowAll = !stripShowAll;
+    if (stripShowAll) stripWindowEnd = null;
+    onChange();
+  });
 }
 
 function attachStripTooltip(state) {
@@ -419,6 +506,7 @@ async function main() {
     });
 
     window.addEventListener("hashchange", () => renderAll(incidents));
+    attachStripControls(() => renderAll(incidents));
 
     const counts = incidents.reduce(
       (acc, i) => {
