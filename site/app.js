@@ -292,9 +292,13 @@ function updateStripControls({ historyBeyondWindow }) {
   todayBtn.disabled = stripShowAll || stripWindowEnd >= todayKey();
 
   allBtn.classList.toggle("strip-btn-active", stripShowAll);
+  const beyondWindow =
+    stripFirstDay !== null && !stripShowAll && stripWindowEnd > addDays(stripFirstDay, WINDOW_DAYS - 1);
   label.textContent = stripShowAll
     ? "All time"
-    : `Last ${WINDOW_DAYS} days`;
+    : beyondWindow
+      ? `Last ${WINDOW_DAYS} days · earlier incidents outside this view`
+      : `Last ${WINDOW_DAYS} days`;
 }
 
 function attachStripControls(onChange) {

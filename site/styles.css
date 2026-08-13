@@ -176,6 +176,11 @@ a:hover {
   box-shadow: var(--shadow);
 }
 
+.hero-panel {
+  position: relative;
+  z-index: 3;
+}
+
 [data-animate] {
   animation: panel-in 0.5s var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
 }
