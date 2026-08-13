@@ -278,7 +278,7 @@ function attachStripTooltip(state) {
       <div class="tooltip-date">${fmtShortDay(day)}</div>
       <div class="tooltip-summary">
         <span class="tooltip-dot ${severity}"></span>
-        <span>${SEVERITY_LABEL[severity] ?? (severity === "none" ? "No record" : severity)}</span>
+        <span>${SEVERITY_LABEL[severity] ?? (severity === "none" ? "Operating normally" : severity)}</span>
         ${updates.length ? `<span class="tooltip-duration">${count} update(s)</span>` : ""}
       </div>
     `;
@@ -307,7 +307,7 @@ function attachStripTooltip(state) {
 }
 
 function severityBadge(sev) {
-  const label = SEVERITY_LABEL[sev] ?? (sev === "none" ? "No record" : sev);
+  const label = SEVERITY_LABEL[sev] ?? (sev === "none" ? "Operating normally" : sev);
   return `<span class="badge badge-${sev}">${label}</span>`;
 }
 

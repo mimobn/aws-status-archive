@@ -17,14 +17,14 @@
   --impacted: #cf222e;
   --disrupted: #82071e;
   --informational: #1f6feb;
-  --none: #dfe4ea;
+  --none: #2da44e;
 
   --bar-operational: rgba(45, 164, 78, 0.85);
   --bar-degraded: rgba(217, 119, 6, 0.85);
   --bar-impacted: rgba(207, 34, 46, 0.88);
   --bar-disrupted: rgba(130, 7, 30, 0.95);
   --bar-informational: rgba(31, 111, 235, 0.75);
-  --bar-none: rgba(223, 228, 234, 0.9);
+  --bar-none: rgba(45, 164, 78, 0.85);
 
   --tooltip-bg: #fffdf9;
   --tooltip-shadow: 0 20px 38px -28px rgba(28, 28, 28, 0.5);
@@ -52,14 +52,14 @@
     --impacted: #f85149;
     --disrupted: #ff7b72;
     --informational: #79c0ff;
-    --none: #21262d;
+--none: #3fb950;
 
-    --bar-operational: rgba(63, 185, 80, 0.85);
+  --bar-operational: rgba(63, 185, 80, 0.85);
     --bar-degraded: rgba(227, 179, 65, 0.85);
     --bar-impacted: rgba(248, 81, 73, 0.85);
     --bar-disrupted: rgba(255, 123, 114, 0.95);
     --bar-informational: rgba(121, 192, 255, 0.8);
-    --bar-none: rgba(48, 54, 61, 0.9);
+    --bar-none: rgba(63, 185, 80, 0.85);
 
     --tooltip-bg: #161b22;
     --tooltip-shadow: 0 24px 40px -28px rgba(0, 0, 0, 0.9);
@@ -364,12 +364,11 @@ a:hover {
 
 .bar.none {
   background: var(--bar-none);
-  cursor: default;
 }
 
 .bar.none:hover {
-  transform: none;
-  box-shadow: none;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.35);
 }
 
 .strip-axis {
