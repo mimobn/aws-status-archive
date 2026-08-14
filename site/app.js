@@ -429,7 +429,7 @@ function serviceChip(slug, svc) {
   );
 }
 
-function renderRegionBlock(region, label, services, aggregate) {
+function renderRegionBlock(label, services, aggregate) {
   const chips = Object.entries(services)
     .sort((a, b) =>
       (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0])
@@ -557,7 +557,7 @@ function renderRegionServiceStates(incidents) {
     }
 
     const aggregate = regionAggregate(services);
-    blocks.push(renderRegionBlock(code, label, services, aggregate));
+    blocks.push(renderRegionBlock(label, services, aggregate));
   }
 
   container.innerHTML = blocks.join("");
