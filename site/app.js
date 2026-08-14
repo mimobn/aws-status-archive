@@ -402,8 +402,7 @@ function severityBadge(sev) {
   return `<span class="badge badge-${sev}">${label}</span>`;
 }
 
-function regionAggregate(incident) {
-  const services = incident.services || {};
+function regionAggregate(services) {
   const entries = Object.values(services);
   const counts = {};
   let worst = "unknown";
@@ -417,30 +416,31 @@ function regionAggregate(incident) {
   return { counts, worst, total, impacted };
 }
 
-function renderRegionServices(incident) {
-  const services = incident.services || {};
-  const aggregate = regionAggregate(incident);
+function serviceChip(slug, svc) {
+  const sev = svc.current || "unknown";
+  const label =
+    SEVERITY_LABEL[sev] ?? (sev === "none" ? "Operating normally" : sev);
+  const title = `${label} · ${escapeHtml(svc.service_name || slug)}`;
+  return (
+    `<span class="service-chip" title="${title}" data-service="${escapeHtml(slug)}">` +
+    `<span class="dot dot-${sev}"></span>` +
+    `<span class="service-chip-name">${escapeHtml(svc.service_name || slug)}</span>` +
+    `</span>`
+  );
+}
+
+function renderRegionBlock(region, label, services, aggregate) {
   const chips = Object.entries(services)
     .sort((a, b) =>
       (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0])
     )
-    .map(([slug, svc]) => {
-      const sev = svc.current || "unknown";
-      const title = `${sev === "operational" ? "Operating normally" : svc.current} · ${escapeHtml(svc.service_name)}`;
-      return (
-        `<span class="service-chip" title="${title}" data-service="${escapeHtml(slug)}">` +
-        `<span class="dot dot-${sev}"></span>` +
-        `<span class="service-chip-name">${escapeHtml(svc.service_name || slug)}</span>` +
-        `</span>`
-      );
-    })
+    .map(([slug, svc]) => serviceChip(slug, svc))
     .join("");
 
   return `
-    <div class="region-services">
+    <div class="region-services-block">
       <div class="region-aggregate">
-        <span class="dot dot-operational"></span>
-        <span class="region-aggregate-label">Region availability</span>
+        <span class="region-aggregate-label">${escapeHtml(label)}</span>
         ${severityBadge(aggregate.worst)}
         <span class="region-aggregate-text">
           ${aggregate.impacted} of ${aggregate.total} services impacted
@@ -464,8 +464,6 @@ function renderIncident(incident) {
   const regionBadge = regionLabelValue
     ? `<span class="incident-region">${escapeHtml(regionLabelValue)}</span>`
     : "";
-
-  const servicesBlock = incident.services ? renderRegionServices(incident) : "";
 
   const article = document.createElement("article");
   article.className = "incident";
@@ -495,7 +493,6 @@ function renderIncident(incident) {
         )
         .join("")}
     </ul>
-    ${servicesBlock}
   `;
   return article;
 }
@@ -503,6 +500,67 @@ function renderIncident(incident) {
 function getActiveRegion() {
   const hash = location.hash.slice(1);
   return hash ? decodeURIComponent(hash) : null;
+}
+
+function worstSeverityFromUpdates(incident) {
+  let worst = "unknown";
+  for (const update of incident.updates || []) {
+    if ((SEVERITY_RANK[update.severity] ?? -1) > SEVERITY_RANK[worst]) {
+      worst = update.severity;
+    }
+  }
+  return worst;
+}
+
+function renderRegionServiceStates(incidents) {
+  const container = document.getElementById("regionServices");
+  if (!container) return;
+  const activeRegion = getActiveRegion();
+
+  const byRegion = {};
+  for (const inc of incidents) {
+    if (!inc.region) continue;
+    (byRegion[inc.region] = byRegion[inc.region] || []).push(inc);
+  }
+
+  const codes = Object.keys(byRegion).sort((a, b) =>
+    (regionLabel(byRegion[a][0]) || a).localeCompare(regionLabel(byRegion[b][0]) || b)
+  );
+
+  const blocks = [];
+  for (const code of codes) {
+    const regionIncidents = byRegion[code];
+    const label = regionLabel(regionIncidents[0]) || code;
+    if (activeRegion && label !== activeRegion) continue;
+
+    // Prefer the full per-service map (present on current ME events);
+    // otherwise fall back to the services named by the region's incidents.
+    const services = {};
+    let fullMap = false;
+    for (const inc of regionIncidents) {
+      if (inc.services) {
+        fullMap = true;
+        Object.assign(services, inc.services);
+      }
+    }
+    if (!fullMap) {
+      for (const inc of regionIncidents) {
+        const slug = inc.service;
+        const worst = worstSeverityFromUpdates(inc);
+        if (!services[slug] || (SEVERITY_RANK[worst] ?? -1) > SEVERITY_RANK[services[slug].current]) {
+          services[slug] = {
+            service_name: inc.service_name || slug,
+            current: worst,
+          };
+        }
+      }
+    }
+
+    const aggregate = regionAggregate(services);
+    blocks.push(renderRegionBlock(code, label, services, aggregate));
+  }
+
+  container.innerHTML = blocks.join("");
 }
 
 function renderAll(incidents) {
@@ -515,6 +573,7 @@ function renderAll(incidents) {
 
   renderSidebar(allRegions, incidents.length, activeRegion);
   renderStats(filtered);
+  renderRegionServiceStates(filtered);
   const stripState = renderStrip(filtered);
   attachStripTooltip(stripState || { days: [], byDay: {} });
 
@@ -577,6 +636,8 @@ async function main() {
     renderSidebar([], 0, null);
     renderStats([]);
     renderStrip([]);
+    const servicesContainer = document.getElementById("regionServices");
+    if (servicesContainer) servicesContainer.innerHTML = "";
     renderError(
       `Could not load the archive (${escapeHtml(String(err.message || err))}). ` +
         "If you opened this page directly, serve it over HTTP with " +

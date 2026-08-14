@@ -104,13 +104,20 @@ def event_log_updates(event):
 
 
 def extract_region(slug, catalog):
-    """Find the region code for a service slug (or None for global roads)."""
+    """Find the region code for a service slug (or None for global roads).
+
+    Prefer the catalog's region_id, which is authoritative; fall back to the
+    slug only for services absent from the catalog. The slug regex is greedy
+    and would otherwise misread prefixes like "sqs-" as part of the region.
+    """
+    row = catalog.get(slug) or {}
+    region_id = row.get("region_id")
+    if region_id:
+        return region_id.lower()
     match = REGION_CODE_RE.search(slug)
     if match:
         return match.group(1).lower()
-    row = catalog.get(slug) or {}
-    region_id = row.get("region_id")
-    return region_id.lower() if region_id else None
+    return None
 
 
 def day_start_ms(day):

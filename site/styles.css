@@ -729,10 +729,16 @@ a:hover {
 
 /* --- Region services --- */
 
-.region-services {
-  margin-top: 14px;
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
+.region-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.region-services-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
 }
 
 .region-aggregate {
