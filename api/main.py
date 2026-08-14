@@ -13,8 +13,13 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "..", "out", "status.db")
 
 app = FastAPI(
     title="status-archive",
-    description="AWS incident history reconstructed from daily feed snapshots.",
-    version="0.1.0",
+    description="AWS incident history reconstructed from the official Service Health JSON archives.",
+    version="0.2.0",
+)
+
+INCIDENT_COLUMNS = (
+    "incident_key, started_at, last_update, update_count, title, "
+    "region, region_name, service, service_name"
 )
 
 
@@ -31,6 +36,10 @@ def row_to_incident(row):
         "last_update": row[2],
         "update_count": row[3],
         "title": row[4],
+        "region": row[5],
+        "region_name": row[6],
+        "service": row[7],
+        "service_name": row[8],
     }
 
 
@@ -54,18 +63,18 @@ def healthz():
         conn = connect()
         incidents = conn.execute("SELECT count(*) FROM incidents").fetchone()[0]
         updates = conn.execute("SELECT count(*) FROM updates").fetchone()[0]
+        services = conn.execute("SELECT count(*) FROM services").fetchone()[0]
         conn.close()
     except sqlite3.Error as exc:
         raise HTTPException(status_code=503, detail=str(exc))
-    return {"ok": True, "incidents": incidents, "updates": updates}
+    return {"ok": True, "incidents": incidents, "updates": updates, "services": services}
 
 
 @app.get("/incidents")
 def incidents():
     conn = connect()
     rows = conn.execute(
-        "SELECT incident_key, started_at, last_update, update_count, title "
-        "FROM incidents ORDER BY started_at"
+        f"SELECT {INCIDENT_COLUMNS} FROM incidents ORDER BY started_at"
     ).fetchall()
     conn.close()
     return [row_to_incident(row) for row in rows]
@@ -75,8 +84,7 @@ def incidents():
 def incident(incident_key: str):
     conn = connect()
     row = conn.execute(
-        "SELECT incident_key, started_at, last_update, update_count, title "
-        "FROM incidents WHERE incident_key = ?",
+        f"SELECT {INCIDENT_COLUMNS} FROM incidents WHERE incident_key = ?",
         (incident_key,),
     ).fetchone()
     if row is None:
@@ -85,6 +93,11 @@ def incident(incident_key: str):
     updates = conn.execute(
         "SELECT guid, published, severity, title, description "
         "FROM updates WHERE incident_key = ? ORDER BY published",
+        (incident_key,),
+    ).fetchall()
+    services = conn.execute(
+        "SELECT service_slug, service_name, severity, max_severity "
+        "FROM services WHERE incident_key = ? ORDER BY service_name",
         (incident_key,),
     ).fetchall()
     conn.close()
@@ -98,6 +111,15 @@ def incident(incident_key: str):
             "description": u[4],
         }
         for u in updates
+    ]
+    incident_data["services"] = [
+        {
+            "service_slug": s[0],
+            "service_name": s[1],
+            "severity": s[2],
+            "max_severity": s[3],
+        }
+        for s in services
     ]
     return incident_data
 
@@ -135,6 +157,7 @@ def metrics():
     conn = connect()
     incidents = conn.execute("SELECT count(*) FROM incidents").fetchone()[0]
     updates = conn.execute("SELECT count(*) FROM updates").fetchone()[0]
+    services = conn.execute("SELECT count(*) FROM services").fetchone()[0]
     by_severity = conn.execute(
         "SELECT severity, count(*) FROM updates GROUP BY severity"
     ).fetchall()
@@ -142,5 +165,6 @@ def metrics():
     return {
         "incidents": incidents,
         "updates": updates,
+        "services": services,
         "updates_by_severity": dict(by_severity),
     }

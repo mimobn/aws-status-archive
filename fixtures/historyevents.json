@@ -1,0 +1,40 @@
+{
+  "multipleservices-me-central-1": [
+    {
+      "arn": "arn:aws:health:me-central-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_5E6B8_EF2498889B5",
+      "date": "1772369485",
+      "summary": "Increased Error Rates",
+      "status": "3",
+      "event_log": [
+        {
+          "message": "We are investigating issues with AWS services in the ME-CENTRAL-1 Region.",
+          "summary": "Increased Error Rates",
+          "status": "1",
+          "timestamp": 1772369485
+        },
+        {
+          "message": "We are seeing positive signs of recovery for many of the EC2 APIs.",
+          "summary": "Increased Error Rates",
+          "status": "3",
+          "timestamp": 1772404099
+        }
+      ]
+    }
+  ],
+  "multipleservices-me-south-1": [
+    {
+      "arn": "arn:aws:health:me-south-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_5E6B8_EF2498889B5",
+      "date": "1772430987",
+      "summary": "Increased Error Rates",
+      "status": "3",
+      "event_log": [
+        {
+          "message": "We are investigating increased API error rates in the ME-SOUTH-1 Region.",
+          "summary": "Increased connectivity issues and API Error Rates",
+          "status": "1",
+          "timestamp": 1772430987
+        }
+      ]
+    }
+  ]
+}

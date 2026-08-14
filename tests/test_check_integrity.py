@@ -26,6 +26,14 @@ CREATE TABLE IF NOT EXISTS incidents (
     update_count INTEGER,
     title TEXT
 );
+CREATE TABLE IF NOT EXISTS services (
+    incident_key TEXT NOT NULL,
+    service_slug TEXT NOT NULL,
+    service_name TEXT,
+    severity TEXT,
+    max_severity TEXT,
+    PRIMARY KEY (incident_key, service_slug)
+);
 """
 
 
@@ -70,6 +78,7 @@ class TestIntegrityChecks(unittest.TestCase):
         conn.close()
         failures = [name for name, ok, _ in results if not ok]
         self.assertIn("incidents table exists", failures)
+        self.assertIn("services table exists", failures)
 
     def test_clean_db_passes(self):
         path = "/tmp/opencode/test-clean.db"

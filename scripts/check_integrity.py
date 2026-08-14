@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Check that the rebuilt database is consistent and complete.
 
-The rebuild is supposed to be a lossless mirror of the snapshot
-archive. This verifies that:
+The rebuild is supposed to be a lossless mirror of the archived AWS
+Service Health JSON files. This verifies that:
 
-  * both tables exist,
+  * all three tables exist,
   * every incident has at least one update,
   * every update belongs to a known incident (no orphans),
   * every update guid is unique,
-  * the database matches a fresh in-memory rebuild from git history.
+  * the database matches a fresh in-memory rebuild from data/*.json.
 
 Exits nonzero if anything fails. Run after every rebuild, e.g. in CI.
 
@@ -16,10 +16,11 @@ Usage: python scripts/check_integrity.py [--db out/status.db]
 """
 
 import argparse
+import os
 import sqlite3
 import sys
 
-from rebuild import DB_PATH, build_incidents, snapshot_history
+from rebuild import DB_PATH, rebuild
 
 
 def run_checks(conn, incidents):
@@ -41,6 +42,7 @@ def run_checks(conn, incidents):
     }
     check("incidents table exists", "incidents" in tables)
     check("updates table exists", "updates" in tables)
+    check("services table exists", "services" in tables)
     if "incidents" not in tables or "updates" not in tables:
         return results
 
@@ -63,16 +65,27 @@ def run_checks(conn, incidents):
     ).fetchone()[0]
     check("update guids are unique", duplicate_guids == 0, f"{duplicate_guids} duplicate(s)")
 
+    orphan_services = conn.execute(
+        "SELECT count(*) FROM services s "
+        "LEFT JOIN incidents i ON s.incident_key = i.incident_key "
+        "WHERE i.incident_key IS NULL"
+    ).fetchone()[0]
+    check("no orphan services", orphan_services == 0, f"{orphan_services} orphan(s)")
+
     expected_incidents = len(incidents)
     expected_updates = sum(incident["update_count"] for incident in incidents)
+    expected_services = sum(len(incident.get("services") or {}) for incident in incidents)
 
     db_incidents = conn.execute("SELECT count(*) FROM incidents").fetchone()[0]
     db_updates = conn.execute("SELECT count(*) FROM updates").fetchone()[0]
+    db_services = conn.execute("SELECT count(*) FROM services").fetchone()[0]
 
     check("incident count matches rebuild", db_incidents == expected_incidents,
           f"db {db_incidents} vs rebuild {expected_incidents}")
     check("update count matches rebuild", db_updates == expected_updates,
           f"db {db_updates} vs rebuild {expected_updates}")
+    check("service count matches rebuild", db_services == expected_services,
+          f"db {db_services} vs rebuild {expected_services}")
 
     rebuilt_by_key = {incident["key"]: incident for incident in incidents}
     for key, started_at, update_count in conn.execute(
@@ -103,7 +116,7 @@ def main():
         return 1
 
     try:
-        incidents = build_incidents(snapshot_history())
+        incidents = rebuild()
         for name, ok, detail in run_checks(conn, incidents):
             print(f"[{'ok' if ok else 'FAIL'}] {name}" + (f" - {detail}" if detail and not ok else ""))
             if not ok:

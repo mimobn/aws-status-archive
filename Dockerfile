@@ -1,10 +1,7 @@
 FROM python:3.13-slim
 
-# git is needed at build time to replay the snapshot history that
-# reconstructs the incident database.
-RUN apt-get update && apt-get install -y --no-install-recommends git \
-    && rm -rf /var/lib/apt/lists/*
-
+# The archived JSON under data/ is committed to the repo, so the rebuild
+# just reads those files — no git session or network needed at build time.
 RUN pip install --no-cache-dir uv
 
 WORKDIR /app

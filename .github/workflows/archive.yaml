@@ -14,20 +14,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch feed
-        run: python scripts/fetch_feed.py
+      - name: Fetch AWS status archives
+        run: python scripts/fetch_archive.py
 
-      - name: Check feed shape
-        run: python scripts/check_feed_shape.py
+      - name: Check archive shape
+        run: python scripts/check_feed_shape.py --dir data
 
       - name: Report what changed
         run: |
           if git status --porcelain | grep -q .; then
+            prev=$(mktemp -d)
+            git show HEAD:data/historyevents.json > "$prev/historyevents.json" || true
             python scripts/diff_snapshots.py \
-              --previous <(git show HEAD:data/aws-status.rss) \
-              --current data/aws-status.rss
+              --previous "$prev" \
+              --current data \
+              --json || true
+            rm -rf "$prev"
           else
-            echo "feed unchanged"
+            echo "archives unchanged"
           fi
 
       - name: Commit snapshot
@@ -35,8 +39,8 @@ jobs:
           if git status --porcelain | grep -q .; then
             git config user.name "status-archive[bot]"
             git config user.email "status-archive[bot]@users.noreply.github.com"
-            git add data/aws-status.rss
-            git commit -m "data: archive AWS status feed snapshot"
+            git add data/
+            git commit -m "data: archive AWS status JSON snapshot"
             git push
           else
             echo "nothing to commit"

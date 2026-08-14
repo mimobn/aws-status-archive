@@ -402,6 +402,55 @@ function severityBadge(sev) {
   return `<span class="badge badge-${sev}">${label}</span>`;
 }
 
+function regionAggregate(incident) {
+  const services = incident.services || {};
+  const entries = Object.values(services);
+  const counts = {};
+  let worst = "unknown";
+  for (const svc of entries) {
+    const sev = svc.current || "unknown";
+    counts[sev] = (counts[sev] || 0) + 1;
+    if (SEVERITY_RANK[sev] > SEVERITY_RANK[worst]) worst = sev;
+  }
+  const total = entries.length;
+  const impacted = total - (counts.operational || 0);
+  return { counts, worst, total, impacted };
+}
+
+function renderRegionServices(incident) {
+  const services = incident.services || {};
+  const aggregate = regionAggregate(incident);
+  const chips = Object.entries(services)
+    .sort((a, b) =>
+      (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0])
+    )
+    .map(([slug, svc]) => {
+      const sev = svc.current || "unknown";
+      const title = `${sev === "operational" ? "Operating normally" : svc.current} · ${escapeHtml(svc.service_name)}`;
+      return (
+        `<span class="service-chip" title="${title}" data-service="${escapeHtml(slug)}">` +
+        `<span class="dot dot-${sev}"></span>` +
+        `<span class="service-chip-name">${escapeHtml(svc.service_name || slug)}</span>` +
+        `</span>`
+      );
+    })
+    .join("");
+
+  return `
+    <div class="region-services">
+      <div class="region-aggregate">
+        <span class="dot dot-operational"></span>
+        <span class="region-aggregate-label">Region availability</span>
+        ${severityBadge(aggregate.worst)}
+        <span class="region-aggregate-text">
+          ${aggregate.impacted} of ${aggregate.total} services impacted
+        </span>
+      </div>
+      <div class="service-grid">${chips}</div>
+    </div>
+  `;
+}
+
 function renderIncident(incident) {
   const updates = [...incident.updates].sort(
     (a, b) => new Date(a.published) - new Date(b.published)
@@ -415,6 +464,8 @@ function renderIncident(incident) {
   const regionBadge = regionLabelValue
     ? `<span class="incident-region">${escapeHtml(regionLabelValue)}</span>`
     : "";
+
+  const servicesBlock = incident.services ? renderRegionServices(incident) : "";
 
   const article = document.createElement("article");
   article.className = "incident";
@@ -444,6 +495,7 @@ function renderIncident(incident) {
         )
         .join("")}
     </ul>
+    ${servicesBlock}
   `;
   return article;
 }

@@ -1,79 +1,88 @@
 #!/usr/bin/env python3
-"""Describe what changed between two snapshots of the feed.
+"""Describe what changed between two archived JSON states.
 
-The feed only holds ongoing incidents, so the interesting things are:
-a new incident showing up, an incident getting a new update, or an
-incident dropping off entirely (usually meaning it was resolved).
-This is the machine-readable version of "what happened since the last
-check", which the workflow can use to alert.
+Compares two data/ snapshots of the AWS Service Health archives and
+reports new incidents, removed incidents, and incidents that picked up
+new updates in between. This is the machine-readable version of
+"what happened since the last check".
 
 Usage: compare a previous snapshot against a current one:
-    python scripts/diff_snapshots.py --previous old.rss --current new.rss
+    python scripts/diff_snapshots.py --previous old/ --current new/
+
+Each side is a directory containing services.json, historyevents.json
+and currentevents.json (the artifacts fetch_archive.py writes).
 """
 
 import argparse
 import json
+import os
 import sys
 
-from parse_snapshot import parse_snapshot_text
-from rebuild import incident_key
 
+def load_state(directory):
+    """Load the three JSON archives from a directory into incident keys."""
+    history_path = os.path.join(directory, "historyevents.json")
+    if not os.path.exists(history_path):
+        return {}
+    with open(history_path, encoding="utf-8") as handle:
+        history = json.load(handle)
 
-def group_by_incident(items):
-    groups = {}
-    for item in items:
-        groups.setdefault(incident_key(item["guid"]), []).append(item)
-    for updates in groups.values():
-        updates.sort(key=lambda update: update["published"])
-    return groups
+    incidents = {}
+    for slug, events in history.items():
+        if not events:
+            continue
+        for event in events:
+            event_dot = str(int(event["date"])) if event.get("date") else "0"
+            key = f"https://status.aws.amazon.com/#{slug}_{event_dot}"
+            incidents[key] = {
+                "updates": len(event.get("event_log") or []),
+                "title": event.get("summary") or slug,
+            }
+    return incidents
 
 
 def diff_incidents(previous, current):
-    """Diff two snapshot texts into a structured change report.
+    """Diff two archive states into a structured change report.
 
-    `previous` and `current` are raw feed XML strings. The report lists
-    new incidents, removed incidents, and incidents that picked up new
-    updates in between.
+    `previous` and `current` are dicts of {incident_key: {...}}. The
+    report lists new incidents, removed incidents, and incidents that
+    picked up new updates in between.
     """
-    prev_groups = group_by_incident(parse_snapshot_text(previous))
-    curr_groups = group_by_incident(parse_snapshot_text(current))
-
-    prev_keys = set(prev_groups)
-    curr_keys = set(curr_groups)
+    prev_keys = set(previous)
+    curr_keys = set(current)
 
     new = sorted(curr_keys - prev_keys)
     removed = sorted(prev_keys - curr_keys)
 
     with_new_updates = []
     for key in sorted(curr_keys & prev_keys):
-        prev_guids = {update["guid"] for update in prev_groups[key]}
-        added = [update for update in curr_groups[key] if update["guid"] not in prev_guids]
-        if added:
+        prev_count = previous[key]["updates"]
+        curr_count = current[key]["updates"]
+        if curr_count > prev_count:
             with_new_updates.append(
                 {
                     "incident_key": key,
-                    "new_updates": len(added),
-                    "latest_severity": added[-1]["severity"],
-                    "latest_title": added[-1]["title"],
+                    "new_updates": curr_count - prev_count,
+                    "title": current[key]["title"],
                 }
             )
 
     return {
-        "previous_items": sum(len(v) for v in prev_groups.values()),
-        "current_items": sum(len(v) for v in curr_groups.values()),
+        "previous_items": sum(v["updates"] for v in previous.values()),
+        "current_items": sum(v["updates"] for v in current.values()),
         "new_incidents": [
             {
                 "incident_key": key,
-                "updates": len(curr_groups[key]),
-                "title": curr_groups[key][0]["title"],
+                "updates": current[key]["updates"],
+                "title": current[key]["title"],
             }
             for key in new
         ],
         "removed_incidents": [
             {
                 "incident_key": key,
-                "updates": len(prev_groups[key]),
-                "title": prev_groups[key][0]["title"],
+                "updates": previous[key]["updates"],
+                "title": previous[key]["title"],
             }
             for key in removed
         ],
@@ -83,17 +92,12 @@ def diff_incidents(previous, current):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--previous", required=True, help="path to the previous snapshot")
-    parser.add_argument("--current", required=True, help="path to the current snapshot")
+    parser.add_argument("--previous", required=True, help="directory with the previous snapshot")
+    parser.add_argument("--current", required=True, help="directory with the current snapshot")
     parser.add_argument("--json", action="store_true", help="print the raw report as JSON")
     args = parser.parse_args()
 
-    with open(args.previous, "r", encoding="utf-8") as handle:
-        previous = handle.read()
-    with open(args.current, "r", encoding="utf-8") as handle:
-        current = handle.read()
-
-    report = diff_incidents(previous, current)
+    report = diff_incidents(load_state(args.previous), load_state(args.current))
 
     if args.json:
         print(json.dumps(report, indent=2))
@@ -107,7 +111,7 @@ def main():
     for incident in report["incidents_with_new_updates"]:
         print(
             f"UP   {incident['incident_key'].rsplit('#', 1)[-1]}  "
-            f"+{incident['new_updates']} update(s)  [{incident['latest_severity']}]"
+            f"+{incident['new_updates']} update(s)"
         )
 
     changed = report["new_incidents"] or report["removed_incidents"] or report["incidents_with_new_updates"]

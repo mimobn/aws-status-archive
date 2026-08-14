@@ -1,0 +1,29 @@
+[
+  {
+    "event_type_code": "AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE",
+    "launch_date": 1665100800,
+    "locale": ["ME"],
+    "region_id": "me-central-1",
+    "region_name": "UAE",
+    "service": "multipleservices-me-central-1",
+    "service_name": "Multiple services"
+  },
+  {
+    "event_type_code": "AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE",
+    "launch_date": 1665100800,
+    "locale": ["ME"],
+    "region_id": "me-south-1",
+    "region_name": "Bahrain",
+    "service": "multipleservices-me-south-1",
+    "service_name": "Multiple services"
+  },
+  {
+    "event_type_code": "AWS_EC2_OPERATIONAL_ISSUE",
+    "launch_date": 1661731200,
+    "locale": ["US"],
+    "region_id": "us-east-1",
+    "region_name": "N. Virginia",
+    "service": "ec2-us-east-1",
+    "service_name": "Amazon Elastic Compute Cloud"
+  }
+]

@@ -1,65 +1,97 @@
 #!/usr/bin/env python3
-"""Check that a snapshot still matches the shape we know how to parse.
+"""Check that the archived data still matches the shape we know how to parse.
 
-AWS warns the status feed "format is subject to change". If they ever
+AWS warns the status data "format is subject to change". If they ever
 rework it, this is what notices first: instead of parsing garbage into
 silently wrong incidents, we fail loudly and let a human look.
 
-It checks the root element, the version, and that every item carries
-the fields and title prefixes the pipeline depends on. An empty feed
-is fine - that just means nothing is broken right now.
+It checks each of the three JSON archives carries the fields the
+pipeline depends on. An empty history is fine - that just means nothing
+is broken right now.
 
-Usage: python scripts/check_feed_shape.py [--path data/aws-status.rss]
+Usage: python scripts/check_feed_shape.py [--dir data]
 """
 
 import argparse
+import json
+import os
 import sys
-import xml.etree.ElementTree as ET
 
-from parse_snapshot import SEVERITIES
+REQUIRED_FILES = ["services.json", "historyevents.json", "currentevents.json"]
 
-EXPECTED_ITEM_FIELDS = ["title", "pubDate", "guid", "description"]
+SERVICE_ROW_FIELDS = ["service", "service_name", "region_id", "region_name"]
+EVENT_FIELDS = ["arn", "date", "event_log", "status", "summary"]
+EVENT_LOG_FIELDS = ["timestamp", "status", "summary"]
+CURRENT_EVENT_FIELDS = [
+    "date",
+    "arn",
+    "event_log",
+    "impacted_service_status_changes",
+    "impacted_services",
+    "region_name",
+    "service",
+    "service_name",
+    "status",
+    "summary",
+]
 
 
-def check_shape(content):
+def check_shape(directory):
     """Return a list of shape problems; empty list means it looks fine."""
     errors = []
-    try:
-        root = ET.fromstring(content)
-    except ET.ParseError as exc:
-        return [f"not valid XML: {exc}"]
 
-    if root.tag != "rss":
-        errors.append(f"root tag is {root.tag!r}, expected 'rss'")
-    version = root.get("version")
-    if version not in (None, "2.0"):
-        errors.append(f"rss version is {version!r}, expected 2.0")
+    for filename in REQUIRED_FILES:
+        path = os.path.join(directory, filename)
+        if not os.path.exists(path):
+            errors.append(f"missing archive file: {filename}")
+            continue
+        with open(path, encoding="utf-8") as handle:
+            try:
+                data = json.load(handle)
+            except json.JSONDecodeError as exc:
+                errors.append(f"{filename} is not valid JSON: {exc}")
+                continue
 
-    channel = root.find("channel")
-    if channel is None:
-        errors.append("no <channel> element")
-        return errors
+        if filename == "services.json":
+            if not isinstance(data, list):
+                errors.append("services.json is not a list")
+            else:
+                for idx, row in enumerate(data[:100]):
+                    for field in SERVICE_ROW_FIELDS:
+                        if field not in row:
+                            errors.append(f"services.json row {idx} is missing {field!r}")
+                            break
+        elif filename == "historyevents.json":
+            if not isinstance(data, dict):
+                errors.append("historyevents.json is not an object")
+            else:
+                for slug, events in data.items():
+                    for idx, event in enumerate(events):
+                        for field in EVENT_FIELDS:
+                            if field not in event:
+                                errors.append(f"history events for {slug!r}: event {idx} is missing {field!r}")
+                        for entry in event.get("event_log") or []:
+                            for field in EVENT_LOG_FIELDS:
+                                if field not in entry:
+                                    errors.append(f"history event log for {slug!r}: missing {field!r}")
+        else:  # currentevents.json
+            if not isinstance(data, list):
+                errors.append("currentevents.json is not a list")
+            else:
+                for event in data:
+                    for field in CURRENT_EVENT_FIELDS:
+                        if field not in event:
+                            errors.append(f"current event is missing {field!r}")
 
-    items = channel.findall("item")
-    for idx, item in enumerate(items):
-        for field in EXPECTED_ITEM_FIELDS:
-            if item.find(field) is None:
-                errors.append(f"item {idx} is missing <{field}>")
-        title = item.findtext("title") or ""
-        if not any(title.startswith(prefix) for prefix in SEVERITIES):
-            errors.append(f"item {idx} title has no known severity prefix: {title[:40]!r}")
     return errors
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--path", default="data/aws-status.rss")
+    parser.add_argument("--dir", default="data")
     args = parser.parse_args()
 
-    with open(args.path, "r", encoding="utf-8") as handle:
-        content = handle.read()
-
-    errors = check_shape(content)
+    errors = check_shape(args.dir)
     if errors:
         for error in errors:
             print(f"[FAIL] {error}")

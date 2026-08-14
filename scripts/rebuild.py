@@ -1,39 +1,56 @@
 #!/usr/bin/env python3
-"""Rebuild incident timelines from the archived snapshots.
+"""Rebuild incident timelines from the archived AWS Service Health JSON.
 
-Git history holds every daily snapshot of the feed. This replays
-them in order, dedupes the updates by guid, groups them by incident
-key (the guid without its trailing timestamp), and writes out one
-timeline per incident.
+The archives recorded in data/ come straight from the state behind AWS's
+"Service history" table (see fetch_archive.py). Unlike the old RSS feeds,
+historyevents.json already carries ~12 months of incident history, so the
+rebuild no longer replays git history: it merges
 
-Rebuilding is deterministic: same history in, same output out.
+  * services.json      - the service/region catalog (display names)
+  * historyevents.json - every incident with its full update log
+  * currentevents.json - still-open events plus the per-service
+                         availability breakdown
+
+into out/incidents.json (the site's data file) and out/status.db (the
+API's mirror). The two Middle East multiple-service events keep their
+region-level incidents, enriched with the per-service map so the site
+can show each service's availability inside its region.
+
+Severity follows the AWS numeric status codes (0 operational, 1 impacted,
+2 degraded, 3 disrupted; see parse_status.py). Rebuilding is
+deterministic: same data in, same output out.
 """
 
 import json
 import os
-import re
 import sqlite3
-import subprocess
 import sys
 from datetime import datetime
 
-from parse_snapshot import parse_snapshot_text
+from parse_status import (
+    clean_title,
+    event_log_updates,
+    extract_region,
+    iso,
+    parse_current_text,
+    parse_history_text,
+    parse_services_text,
+    severity,
+)
 
-SNAPSHOT_PATH = "data/aws-status.rss"
-OUT_PATH = "out/incidents.json"
-DB_PATH = "out/status.db"
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "out", "incidents.json")
+DB_PATH = os.path.join(os.path.dirname(__file__), "..", "out", "status.db")
 
-# Region codes look like me-central-1, us-east-1, us-gov-east-1, ...
-REGION_CODE_RE = re.compile(r"\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b", re.IGNORECASE)
-
-# Friendly names for the regions we've actually seen. Unknown codes keep
-# their raw value rather than pretending we know a name for them.
+# Friendly names for the regions the site has historically shown. Unknown
+# region codes fall back to the short name in the services.json catalog.
 REGION_NAMES = {
     "me-central-1": "Middle East (UAE)",
     "me-south-1": "Middle East (Bahrain)",
 }
 
 SCHEMA = """
+DROP TABLE IF EXISTS services;
 DROP TABLE IF EXISTS updates;
 DROP TABLE IF EXISTS incidents;
 
@@ -53,113 +70,143 @@ CREATE TABLE incidents (
     update_count INTEGER,
     title TEXT,
     region TEXT,
-    region_name TEXT
+    region_name TEXT,
+    service TEXT,
+    service_name TEXT
+);
+
+CREATE TABLE services (
+    incident_key TEXT NOT NULL,
+    service_slug TEXT NOT NULL,
+    service_name TEXT,
+    severity TEXT,
+    max_severity TEXT,
+    PRIMARY KEY (incident_key, service_slug)
 );
 """
 
 
-def snapshot_history():
-    result = subprocess.run(
-        ["git", "log", "--format=%H", "--", SNAPSHOT_PATH],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    shas = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    shas.reverse()
-    return shas
+def load_archives():
+    """Read the three archived JSON files into parsed structures."""
+    with open(os.path.join(DATA_DIR, "services.json"), encoding="utf-8") as handle:
+        catalog, _ = parse_services_text(handle.read())
+    with open(os.path.join(DATA_DIR, "historyevents.json"), encoding="utf-8") as handle:
+        history = parse_history_text(handle.read())
+    with open(os.path.join(DATA_DIR, "currentevents.json"), encoding="utf-8") as handle:
+        current = parse_current_text(handle.read())
+    return catalog, history, current
 
 
-def snapshot_at(sha):
-    result = subprocess.run(
-        ["git", "show", f"{sha}:{SNAPSHOT_PATH}"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return result.stdout
+def build_services(current_event):
+    """Per-service availability for a still-open event.
 
-
-def incident_key(guid):
-    # guids look like ...#multipleservices-me-central-1_1777533954
-    # the timestamp suffix changes per update; the rest is the incident.
-    return guid.rsplit("_", 1)[0] if "_" in guid else guid
-
-
-def extract_region(key, description):
-    """Find the AWS region this incident lives in.
-
-    The description names it in parentheses (e.g. 'Region (ME-CENTRAL-1)');
-    fall back to matching the pattern against the incident key.
+    Returns a {service_slug: {...}} map with the display name, the current
+    severity, the worst severity reached, and the status transitions the
+    service went through during the event.
     """
-    for text in (description, key):
-        match = REGION_CODE_RE.search(text)
-        if match:
-            return match.group(1).lower()
-    return None
-
-
-def build_incidents_from_snapshots(snapshots):
-    """Merge a list of snapshot texts into incident timelines."""
-    updates = {}
-    for content in snapshots:
-        for item in parse_snapshot_text(content):
-            updates[item["guid"]] = item
-
-    by_key = {}
-    for item in updates.values():
-        by_key.setdefault(incident_key(item["guid"]), []).append(item)
-
-    incidents = []
-    for key, items in by_key.items():
-        items.sort(key=lambda item: item["published"] or datetime.min)
-        # Build a combined description from all updates for region extraction
-        combined_description = " ".join(item["description"] for item in items)
-        region = extract_region(key, combined_description)
-        region_name = REGION_NAMES.get(region) if region else None
-        incidents.append(
+    services = {}
+    for slug, info in (current_event.get("impacted_services") or {}).items():
+        services[slug] = {
+            "service_name": info.get("service_name"),
+            "current": severity(info.get("current")),
+            "max": severity(info.get("max")),
+        }
+    transitions = {}
+    for entry in current_event.get("impacted_service_status_changes") or []:
+        transitions.setdefault(entry.get("service"), []).append(
             {
-                "key": key,
-                "started_at": items[0]["published"],
-                "last_update": items[-1]["published"],
-                "update_count": len(items),
-                "title": items[0]["title"].split(":", 1)[1].strip(),
-                "region": region,
-                "region_name": region_name,
-                "updates": [
-                    {
-                        "guid": item["guid"],
-                        "published": item["published"],
-                        "severity": item["severity"],
-                        "title": item["title"],
-                        "description": item["description"],
-                    }
-                    for item in items
-                ],
+                "published": iso(entry.get("timestamp")),
+                "severity": severity(entry.get("current_status")),
+                "previous": severity(entry.get("previous_status")),
             }
         )
+    for slug, service in services.items():
+        service["transitions"] = sorted(
+            transitions.get(slug, []), key=lambda t: t["published"]
+        )
+    return services
+
+
+def build_incident(slug, event, catalog, current_event):
+    """Build one incident record from a history event and its catalog row."""
+    updates = event_log_updates(event)
+    started = updates[0]["published"] if updates else None
+    last = updates[-1]["published"] if updates else None
+    if started is None and event.get("date"):
+        started = iso(event["date"])
+    # Prefer the first update's summary: it carries the incident's own
+    # distinguishing title (e.g. "Increased Connectivity Issues" for
+    # Bahrain), whereas the event-level summary is generic.
+    title = updates[0]["title"] if updates else clean_title(event.get("summary"))
+
+    row = catalog.get(slug) or {}
+    region = extract_region(slug, catalog)
+    region_name = REGION_NAMES.get(region) if region else None
+    if not region_name:
+        region_name = row.get("region_name")
+
+    # A slug can carry several distinct events (e.g. ec2-us-east-1 appears
+    # four times), so suffix the key with the event's start so each incident
+    # has a stable, unique key.
+    event_dot = str(int(event["date"])) if event.get("date") else "0"
+
+    incident = {
+        "key": f"https://status.aws.amazon.com/#{slug}_{event_dot}",
+        "started_at": started,
+        "last_update": last,
+        "update_count": len(updates),
+        "title": title,
+        "service": slug,
+        "service_name": row.get("service_name"),
+        "region": region,
+        "region_name": region_name,
+        "updates": updates,
+    }
+    if current_event and current_event.get("impacted_services"):
+        incident["services"] = build_services(current_event)
+    return incident
+
+
+def build_incidents(catalog, history, current):
+    """Turn the archives into the site's incident list."""
+    current_by_slug = {event.get("service"): event for event in current}
+    incidents = []
+    for slug, events in history.items():
+        if not events:
+            continue
+        for event in events:
+            incidents.append(
+                build_incident(slug, event, catalog, current_by_slug.get(slug))
+            )
+    incidents.sort(key=lambda incident: incident["started_at"] or datetime.min)
     return incidents
 
 
-def build_incidents(shas):
-    return build_incidents_from_snapshots([snapshot_at(sha) for sha in shas])
+def rebuild():
+    """Load the archives and return the rebuilt incidents."""
+    catalog, history, current = load_archives()
+    return build_incidents(catalog, history, current)
+
+
+def with_guids(incident):
+    """Give each update the archive's stable guid (slug + unix timestamp)."""
+    for update in incident["updates"]:
+        if "guid" not in update:
+            ts = int(datetime.fromisoformat(update["published"]).timestamp())
+            update["guid"] = f"https://status.aws.amazon.com/#{incident['service']}_{ts}"
 
 
 def write_db(incidents):
-    """Write incidents and their updates into SQLite.
-
-    The rebuild is the source of truth, so this wipes and rewrites the
-    tables. Running it twice in a row leaves the db byte-identical
-    except for the row order.
-    """
+    """Mirror the rebuild into SQLite (wipe and rewrite)."""
     conn = sqlite3.connect(DB_PATH)
     try:
         conn.executescript(SCHEMA)
         for incident in incidents:
             conn.execute(
                 "INSERT INTO incidents "
-                "(incident_key, started_at, last_update, update_count, title, region, region_name) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "(incident_key, started_at, last_update, update_count, title, "
+                " region, region_name, service, service_name) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     incident["key"],
                     incident["started_at"],
@@ -168,6 +215,8 @@ def write_db(incidents):
                     incident["title"],
                     incident["region"],
                     incident["region_name"],
+                    incident["service"],
+                    incident["service_name"],
                 ),
             )
             for update in incident["updates"]:
@@ -178,10 +227,23 @@ def write_db(incidents):
                     (
                         update["guid"],
                         incident["key"],
-                        iso(update["published"]),
+                        update["published"],
                         update["severity"],
                         update["title"],
                         update["description"],
+                    ),
+                )
+            for slug, service in (incident.get("services") or {}).items():
+                conn.execute(
+                    "INSERT INTO services "
+                    "(incident_key, service_slug, service_name, severity, max_severity) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (
+                        incident["key"],
+                        slug,
+                        service.get("service_name"),
+                        service.get("current"),
+                        service.get("max"),
                     ),
                 )
         conn.commit()
@@ -189,30 +251,22 @@ def write_db(incidents):
         conn.close()
 
 
-def iso(value):
-    return value.isoformat() if value is not None else None
-
-
 def main():
-    shas = snapshot_history()
-    print(f"{len(shas)} snapshot(s) in history")
-
-    incidents = build_incidents(shas)
-    incidents.sort(key=lambda incident: incident["started_at"] or datetime.min)
-
+    incidents = rebuild()
     for incident in incidents:
+        with_guids(incident)
         print(
-            f"{incident['update_count']:2d} updates  {iso(incident['started_at'])}  "
+            f"{incident['update_count']:2d} updates  {incident['started_at']}  "
             f"{incident['title'][:70]}"
         )
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as handle:
-        json.dump(incidents, handle, indent=2, default=lambda value: value.isoformat())
+        json.dump(incidents, handle, indent=2, ensure_ascii=False)
 
     write_db(incidents)
     print(f"wrote {DB_PATH}")
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
