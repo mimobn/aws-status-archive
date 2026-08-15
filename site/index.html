@@ -1,19 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f8fa" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1117" />
-    <title>status-archive — AWS incident history</title>
+    <meta name="theme-color" content="#0f172a" />
+    <title>status-archive — AWS Incident History & Status Archive</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <meta property="og:title" content="status-archive — AWS incident history" />
-    <meta property="og:description" content="AWS incident history reconstructed from the official AWS Service Health archives." />
+    <meta property="og:title" content="status-archive — AWS Incident History" />
+    <meta
+      property="og:description"
+      content="Reconstructed AWS incident history & service status timeline, archived directly from official AWS Service Health data."
+    />
     <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -21,95 +23,236 @@
   <body>
     <div class="grain" aria-hidden="true"></div>
 
+    <!-- Site Header -->
     <header class="site-header">
-      <div class="brand">
-        <img class="brand-mark" src="logo.svg" alt="" width="64" height="64" />
-        <div class="brand-text">
-          <h1>status-archive</h1>
-          <p class="subtitle">
-            AWS incident history, reconstructed from the official
-            <a href="https://status.aws.amazon.com/">Service Health Dashboard</a>
-            archives that AWS itself doesn't persist.
-          </p>
+      <div class="header-inner">
+        <div class="brand">
+          <img class="brand-mark" src="logo.svg" alt="status-archive logo" width="52" height="52" />
+          <div class="brand-text">
+            <div class="brand-title-row">
+              <h1>status-archive</h1>
+              <span class="status-pill status-pill-active" id="liveStatusBadge">
+                <span class="status-pill-dot"></span>
+                <span>Archived Feed Active</span>
+              </span>
+            </div>
+            <p class="subtitle">
+              Comprehensive AWS incident history reconstructed from official
+              <a href="https://status.aws.amazon.com/" target="_blank" rel="noopener">Service Health Dashboard</a>
+              snapshots that AWS does not permanently retain.
+            </p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" class="action-btn" id="themeToggleBtn" aria-label="Toggle color theme" title="Toggle Theme (Light / Dark / Auto)">
+            <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="theme-icon theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+
+          <button type="button" class="action-btn" id="exportDataBtn" title="Export incident history as JSON or CSV">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Export</span>
+          </button>
+
+          <a href="https://github.com/mimobn/aws-status-archive" target="_blank" rel="noopener" class="action-btn action-btn-link" title="GitHub Repository">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+            </svg>
+          </a>
         </div>
       </div>
     </header>
 
+    <!-- Main App Container -->
     <div class="layout">
+      <!-- Mobile Region Filter Bar -->
+      <div class="mobile-region-bar" id="mobileRegionBar">
+        <button type="button" class="mobile-region-btn active" data-region="">All Regions</button>
+        <div class="mobile-region-scroll" id="mobileRegionList"></div>
+      </div>
+
+      <!-- Desktop Sidebar -->
       <aside class="sidebar">
         <div class="panel sidebar-panel">
-          <h2 class="sidebar-title">Regions</h2>
+          <div class="sidebar-header">
+            <h2 class="sidebar-title">Regions</h2>
+            <span class="region-total-badge" id="regionTotalBadge">0</span>
+          </div>
+          <div class="sidebar-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="sidebarSearchInput" placeholder="Filter regions..." aria-label="Filter regions" />
+          </div>
           <nav id="regionList" class="region-list"></nav>
         </div>
       </aside>
 
+      <!-- Main Content Area -->
       <main class="main">
+        <!-- Hero Overview Panel -->
         <section class="panel hero-panel" id="heroPanel" data-animate>
           <div class="panel-header">
             <div>
-              <h3>AWS incident history</h3>
-              <span class="panel-sub" id="updatedAt">Loading…</span>
+              <h3>AWS Health Overview</h3>
+              <span class="panel-sub" id="updatedAt">Loading data...</span>
+            </div>
+            <div class="panel-header-badges">
+              <span class="badge badge-info" id="activeWindowBadge">90-Day View</span>
             </div>
           </div>
 
+          <!-- KPI Summary Cards -->
           <div class="summary-stats" id="summaryStats"></div>
 
-          <div class="strip-controls" id="stripControls" hidden>
-            <button type="button" class="strip-btn" id="stripPrev" aria-label="Show earlier days">‹</button>
-            <button type="button" class="strip-btn" id="stripNext" aria-label="Show later days">›</button>
-            <button type="button" class="strip-btn" id="stripToday">Today</button>
-            <button type="button" class="strip-btn" id="stripAll">All time</button>
-            <span class="strip-window-label" id="stripWindowLabel"></span>
+          <!-- Interactive Day Strip & Controls -->
+          <div class="strip-container">
+            <div class="strip-header-row">
+              <div class="strip-controls" id="stripControls" hidden>
+                <button type="button" class="strip-btn" id="stripPrev" aria-label="Show earlier 90 days">‹ Prev 90d</button>
+                <button type="button" class="strip-btn" id="stripNext" aria-label="Show later 90 days">Next 90d ›</button>
+                <button type="button" class="strip-btn" id="stripToday">Today</button>
+                <button type="button" class="strip-btn" id="stripAll">All Time</button>
+              </div>
+              <span class="strip-window-label" id="stripWindowLabel"></span>
+            </div>
+
+            <div class="strip-stage" id="stripStage">
+              <div class="strip" id="daysStrip"></div>
+              <div class="strip-tooltip" id="stripTooltip" aria-hidden="true"></div>
+            </div>
+
+            <div class="strip-axis">
+              <span id="stripStart">…</span>
+              <span class="axis-title">Daily Worst Status Heatmap</span>
+              <span id="stripEnd">…</span>
+            </div>
           </div>
 
-          <div class="strip-stage">
-            <div class="strip" id="daysStrip"></div>
-            <div class="strip-tooltip" id="stripTooltip" aria-hidden="true"></div>
-          </div>
-          <div class="strip-axis">
-            <span id="stripStart">…</span>
-            <span>per-day worst severity</span>
-            <span id="stripEnd">…</span>
-          </div>
-
+          <!-- Legend Bar -->
           <div class="legend">
             <span class="legend-item"><span class="dot dot-disrupted"></span>Disrupted</span>
             <span class="legend-item"><span class="dot dot-impacted"></span>Impacted</span>
             <span class="legend-item"><span class="dot dot-degraded"></span>Degraded</span>
-            <span class="legend-item"><span class="dot dot-none"></span>Operating normally</span>
+            <span class="legend-item"><span class="dot dot-none"></span>Operating Normally</span>
           </div>
         </section>
 
+        <!-- Search & Filter Controls Panel -->
+        <section class="panel filter-panel" data-animate>
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="globalSearchInput" placeholder="Search incidents, services, or updates..." aria-label="Search incidents" />
+              <button type="button" class="search-clear-btn" id="searchClearBtn" hidden aria-label="Clear search">✕</button>
+            </div>
+
+            <div class="severity-filter-group">
+              <button type="button" class="sev-filter-btn active" data-severity="all">All Severities</button>
+              <button type="button" class="sev-filter-btn" data-severity="disrupted">Disrupted</button>
+              <button type="button" class="sev-filter-btn" data-severity="impacted">Impacted</button>
+              <button type="button" class="sev-filter-btn" data-severity="degraded">Degraded</button>
+            </div>
+          </div>
+
+          <!-- Active Filter Chips Tag Bar -->
+          <div class="active-filters-bar" id="activeFiltersBar" hidden>
+            <span class="active-filters-label">Active Filters:</span>
+            <div class="chips-container" id="activeChipsContainer"></div>
+            <button type="button" class="clear-all-btn" id="clearAllFiltersBtn">Clear All</button>
+          </div>
+        </section>
+
+        <!-- Service Status by Region Section -->
         <section class="panel services-panel" data-animate>
           <div class="panel-header">
             <div>
-              <h3>Service status by region</h3>
-              <span class="panel-sub">State of each service within each region, region aggregate on top</span>
+              <h3>Services Status Breakdown</h3>
+              <span class="panel-sub">Current status of services per region from archived snapshots</span>
+            </div>
+            <div class="services-header-controls">
+              <label class="toggle-switch">
+                <input type="checkbox" id="impactedOnlyToggle" />
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Impacted Only</span>
+              </label>
             </div>
           </div>
           <div id="regionServices" class="region-services-list"></div>
         </section>
 
+        <!-- Incidents List Section -->
         <section class="panel incidents-panel" data-animate>
           <div class="panel-header">
             <div>
-              <h3>Incidents</h3>
-              <span class="panel-sub">Full timelines, newest events ordered by start date</span>
+              <h3>Incident Log & Timeline</h3>
+              <span class="panel-sub" id="incidentListSubtitle">Full timelines, newest events first</span>
+            </div>
+            <div class="sort-controls">
+              <select id="incidentSortSelect" class="select-input" aria-label="Sort order">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="updates">Most Updates</option>
+              </select>
             </div>
           </div>
+
           <div id="incidentList" class="incident-list"></div>
-          <p id="emptyState" class="empty-state" hidden>No incidents in the archive yet.</p>
+
+          <div id="emptyState" class="empty-state" hidden>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <p class="empty-title">No matching incidents found</p>
+            <p class="empty-desc">Try clearing your filters or searching for another term.</p>
+            <button type="button" class="strip-btn strip-btn-active" id="emptyStateResetBtn">Reset All Filters</button>
+          </div>
         </section>
       </main>
     </div>
 
+    <!-- Site Footer -->
     <footer class="site-footer">
-      <p>
-        Data comes from <code>parsed/incidents.json</code>, rebuilt from the
-        archived AWS Service Health JSON on every deploy. Not affiliated with AWS.
-      </p>
+      <div class="footer-inner">
+        <p>
+          Data extracted from official <code>services.json</code>, <code>historyevents.json</code>, and <code>currentevents.json</code>.
+          Rebuilt and verified automatically on every git snapshot. Not affiliated with Amazon Web Services.
+        </p>
+        <p class="footer-links">
+          <a href="https://status.aws.amazon.com/" target="_blank" rel="noopener">Official AWS Status</a> ·
+          <a href="https://github.com/mimobn/aws-status-archive" target="_blank" rel="noopener">Source Code</a> ·
+          <a href="#" id="apiDocsLink">API Reference</a>
+        </p>
+      </div>
     </footer>
 
+    <!-- Toast Notification Overlay -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Main JavaScript App -->
     <script src="app.js"></script>
   </body>
 </html>

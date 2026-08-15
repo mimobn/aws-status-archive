@@ -264,8 +264,14 @@ def main():
     with open(OUT_PATH, "w", encoding="utf-8") as handle:
         json.dump(incidents, handle, indent=2, ensure_ascii=False)
 
+    site_parsed_path = os.path.join(os.path.dirname(__file__), "..", "site", "parsed", "incidents.json")
+    os.makedirs(os.path.dirname(site_parsed_path), exist_ok=True)
+    with open(site_parsed_path, "w", encoding="utf-8") as handle:
+        json.dump(incidents, handle, indent=2, ensure_ascii=False)
+
     write_db(incidents)
     print(f"wrote {DB_PATH}")
+    print(f"wrote {site_parsed_path}")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,9 @@
-const DATA_URL = "parsed/incidents.json";
+/**
+ * status-archive — Main Application Engine
+ * Renders AWS incident history, regions breakdown, timeline heatmap, and interactive filters.
+ */
+
+const DATA_URLS = ["parsed/incidents.json", "../out/incidents.json"];
 
 const SEVERITY_RANK = {
   disrupted: 4,
@@ -14,18 +19,8 @@ const SEVERITY_LABEL = {
   impacted: "Impacted",
   degraded: "Degraded",
   informational: "Informational",
-  operational: "Operating normally",
+  operational: "Operating Normally",
 };
-
-function fmtDate(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toUTCString().replace(" GMT", " UTC");
-}
-
-function dayKey(iso) {
-  return new Date(iso).toISOString().slice(0, 10);
-}
 
 const MONTHS_SHORT = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -34,144 +29,63 @@ const MONTHS_SHORT = [
 
 const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function fmtShortDate(day) {
-  const [y, m, d] = day.split("-").map(Number);
-  return `${MONTHS_SHORT[m - 1]} ${d}, ${y}`;
-}
-
-function fmtShortDay(day) {
-  const [y, m, d] = day.split("-").map(Number);
-  return `${fmtShortDate(day)} · ${DAY_KEYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}`;
-}
-
-function worstSeverity(candidates) {
-  let worst = "unknown";
-  let worstRank = -1;
-  for (const s of candidates) {
-    const rank = SEVERITY_RANK[s] ?? -1;
-    if (rank > worstRank) {
-      worstRank = rank;
-      worst = s;
-    }
-  }
-  return worst;
-}
-
-function escapeHtml(text) {
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-async function loadIncidents() {
-  const resp = await fetch(DATA_URL);
-  if (!resp.ok) {
-    throw new Error(`could not load ${DATA_URL} (${resp.status})`);
-  }
-  return resp.json();
-}
-
-const REGION_CODE_RE = /\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b/i;
-
 const REGION_NAMES = {
   "me-central-1": "Middle East (UAE)",
   "me-south-1": "Middle East (Bahrain)",
+  "us-east-1": "US East (N. Virginia)",
+  "us-east-2": "US East (Ohio)",
+  "us-west-1": "US West (N. California)",
+  "us-west-2": "US West (Oregon)",
+  "eu-west-1": "Europe (Ireland)",
+  "eu-central-1": "Europe (Frankfurt)",
+  "eu-west-2": "Europe (London)",
+  "ap-southeast-1": "Asia Pacific (Singapore)",
+  "ap-southeast-2": "Asia Pacific (Sydney)",
+  "ap-northeast-1": "Asia Pacific (Tokyo)",
 };
 
-function regionLabel(incident) {
-  if (incident.region_name) return incident.region_name;
-  if (incident.region) return REGION_NAMES[incident.region] || incident.region;
-  const match = incident.key.match(REGION_CODE_RE);
-  if (match) {
-    const code = match[1].toLowerCase();
-    return REGION_NAMES[code] || code.toUpperCase();
-  }
-  return null;
+const REGION_CODE_RE = /\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b/i;
+
+// State Store
+const state = {
+  allIncidents: [],
+  activeRegion: null,
+  activeSeverity: "all",
+  activeDate: null,
+  searchQuery: "",
+  regionSearchQuery: "",
+  impactedServicesOnly: false,
+  sortOrder: "newest",
+  theme: localStorage.getItem("theme") || "dark",
+  // Strip window state
+  windowDays: 90,
+  stripWindowEnd: null,
+  stripShowAll: false,
+  stripFirstDay: null,
+};
+
+// Date utilities
+function fmtDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toUTCString().replace(" GMT", " UTC");
 }
 
-function buildRegionMap(incidents) {
-  const counts = {};
-  for (const inc of incidents) {
-    const label = regionLabel(inc);
-    if (label) {
-      counts[label] = (counts[label] || 0) + 1;
-    }
-  }
-  const entries = Object.entries(counts).sort((a, b) => a[0].localeCompare(b[0]));
-  return entries;
+function fmtShortDate(dayStr) {
+  if (!dayStr) return "—";
+  const [y, m, d] = dayStr.split("-").map(Number);
+  return `${MONTHS_SHORT[m - 1]} ${d}, ${y}`;
 }
 
-function renderSidebar(regions, total, activeRegion) {
-  const container = document.getElementById("regionList");
-  const items = [];
-
-  const allClass = activeRegion === null ? "sidebar-item active" : "sidebar-item";
-  items.push(`<a class="${allClass}" data-region="" href="#">All regions <span class="sidebar-count">${total}</span></a>`);
-
-  for (const [label, count] of regions) {
-    const cls = activeRegion === label ? "sidebar-item active" : "sidebar-item";
-    items.push(`<a class="${cls}" data-region="${escapeHtml(label)}" href="#${encodeURIComponent(label)}">${escapeHtml(label)} <span class="sidebar-count">${count}</span></a>`);
-  }
-
-  container.innerHTML = items.join("");
+function fmtShortDay(dayStr) {
+  if (!dayStr) return "—";
+  const [y, m, d] = dayStr.split("-").map(Number);
+  const dateObj = new Date(Date.UTC(y, m - 1, d));
+  return `${fmtShortDate(dayStr)} · ${DAY_KEYS[dateObj.getUTCDay()]}`;
 }
 
-function renderStats(incidents) {
-  const counts = {};
-  for (const incident of incidents) {
-    for (const update of incident.updates) {
-      counts[update.severity] = (counts[update.severity] || 0) + 1;
-    }
-  }
-  const bySeverity = Object.entries(counts)
-    .filter(([, n]) => n > 0)
-    .sort((a, b) => (SEVERITY_RANK[b[0]] ?? -1) - (SEVERITY_RANK[a[0]] ?? -1));
-
-  const updatesTotal = incidents.reduce((sum, i) => sum + i.updates.length, 0);
-
-  const dayMap = buildDayMap(incidents);
-  const { uptime, cleanDays, totalDays } = computeUptime(
-    incidents,
-    dayMap.byDay,
-    dayMap.firstDay,
-    dayMap.lastDay,
-  );
-  const uptimeStat = uptime === null
-    ? ""
-    : `<div class="stat"><span class="stat-num stat-operational">${(uptime * 100).toFixed(1)}%</span> uptime · ${cleanDays} quiet of ${totalDays} recorded days</div>`;
-
-  const el = document.getElementById("summaryStats");
-  el.innerHTML = `
-    ${uptimeStat}
-    <div class="stat"><span class="stat-num">${incidents.length}</span> incidents</div>
-    <div class="stat"><span class="stat-num">${updatesTotal}</span> updates</div>
-    ${bySeverity
-      .map(
-        ([sev, n]) =>
-          `<div class="stat"><span class="stat-num stat-${sev}">${n}</span> ${SEVERITY_LABEL[sev] ?? sev}</div>`
-      )
-      .join("")}
-  `;
-}
-
-function buildDayMap(incidents) {
-  const byDay = {};
-  let firstDay = null;
-  let lastDay = null;
-  for (const incident of incidents) {
-    for (const update of incident.updates) {
-      const key = dayKey(update.published);
-      (byDay[key] = byDay[key] || []).push({ severity: update.severity, title: update.title });
-      if (!firstDay || key < firstDay) firstDay = key;
-      if (!lastDay || key > lastDay) lastDay = key;
-    }
-  }
-  return { byDay, firstDay, lastDay };
-}
-
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+function dayKey(iso) {
+  return new Date(iso).toISOString().slice(0, 10);
 }
 
 function dayToMs(key) {
@@ -187,319 +101,39 @@ function addDays(key, n) {
   return keyFromMs(dayToMs(key) + n * 86400000);
 }
 
-const WINDOW_DAYS = 90;
-let stripWindowEnd = null;
-let stripShowAll = false;
-let stripFirstDay = null;
-
-function computeUptime(incidents, byDay, firstDay, lastDay) {
-  if (!firstDay) return { uptime: null, activeDays: 0, cleanDays: 0, totalDays: 0 };
-  const [sy, sm, sd] = firstDay.split("-").map(Number);
-  const [ey, em, ed] = lastDay.split("-").map(Number);
-  const startMs = Date.UTC(sy, sm - 1, sd);
-  const endMs = Date.UTC(ey, em - 1, ed);
-  const totalDays = Math.round((endMs - startMs) / 86400000) + 1;
-  let impactedDays = 0;
-  for (const key in byDay) {
-    if (worstSeverity(byDay[key].map((u) => u.severity)) !== "operational") {
-      impactedDays += 1;
-    }
-  }
-  const activeDays = Object.keys(byDay).length;
-  const cleanDays = totalDays - impactedDays;
-  const uptime = Math.max(0, 1 - impactedDays / totalDays);
-  return { uptime, activeDays, cleanDays, totalDays };
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
 }
 
-function renderStrip(incidents) {
-  const { byDay, firstDay, lastDay } = buildDayMap(incidents);
-
-  const strip = document.getElementById("daysStrip");
-  if (!firstDay) {
-    strip.innerHTML = "";
-    strip.hidden = true;
-    updateStripControls({ historyBeyondWindow: false });
-    return { days: [], byDay: {} };
-  }
-  strip.hidden = false;
-  strip.innerHTML = "";
-  stripFirstDay = firstDay;
-
-  const today = todayKey();
-  const maxDay = lastDay > today ? lastDay : today;
-  const totalDays = Math.round((dayToMs(maxDay) - dayToMs(firstDay)) / 86400000) + 1;
-  const historyBeyondWindow = totalDays > WINDOW_DAYS;
-
-  if (!historyBeyondWindow) {
-    stripWindowEnd = maxDay;
-    stripShowAll = true;
-  }
-
-  if (stripWindowEnd === null || stripWindowEnd > maxDay) stripWindowEnd = maxDay;
-  if (stripWindowEnd < firstDay) stripWindowEnd = firstDay;
-  if (stripShowAll) stripWindowEnd = maxDay;
-
-  const endDay = stripWindowEnd;
-  let startDay = stripShowAll
-    ? firstDay
-    : addDays(endDay, -(WINDOW_DAYS - 1));
-  if (startDay < firstDay) startDay = firstDay;
-
-  const startMs = dayToMs(startDay);
-  const endMs = dayToMs(endDay);
-
-  let index = 0;
-  for (let ms = startMs; ms <= endMs; ms += 86400000, index++) {
-    const key = new Date(ms).toISOString().slice(0, 10);
-    const updates = byDay[key];
-    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "none";
-    const cell = document.createElement("span");
-    cell.className = `bar bar-${sev}`;
-    cell.dataset.dayIndex = String(index);
-    cell.tabIndex = 0;
-    strip.appendChild(cell);
-  }
-
-  const labels = document.querySelectorAll(".strip-axis span");
-  labels[0].textContent = fmtShortDate(startDay);
-  labels[2].textContent = endDay === maxDay ? "Today" : fmtShortDate(endDay);
-
-  const days = [];
-  for (let ms = startMs; ms <= endMs; ms += 86400000) {
-    days.push(new Date(ms).toISOString().slice(0, 10));
-  }
-
-  updateStripControls({ historyBeyondWindow });
-  return { days, byDay };
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
-function updateStripControls({ historyBeyondWindow }) {
-  const controls = document.getElementById("stripControls");
-  if (!historyBeyondWindow) {
-    controls.hidden = true;
-    return;
-  }
-  controls.hidden = false;
-
-  const prev = document.getElementById("stripPrev");
-  const next = document.getElementById("stripNext");
-  const todayBtn = document.getElementById("stripToday");
-  const allBtn = document.getElementById("stripAll");
-  const label = document.getElementById("stripWindowLabel");
-
-  prev.disabled = stripShowAll || stripWindowEnd <= addDays(stripFirstDay, WINDOW_DAYS - 1);
-  next.disabled = stripShowAll;
-  todayBtn.disabled = stripShowAll || stripWindowEnd >= todayKey();
-
-  allBtn.classList.toggle("strip-btn-active", stripShowAll);
-  const beyondWindow =
-    stripFirstDay !== null && !stripShowAll && stripWindowEnd > addDays(stripFirstDay, WINDOW_DAYS - 1);
-  label.textContent = stripShowAll
-    ? "All time"
-    : beyondWindow
-      ? `Last ${WINDOW_DAYS} days · earlier incidents outside this view`
-      : `Last ${WINDOW_DAYS} days`;
-}
-
-function attachStripControls(onChange) {
-  const prev = document.getElementById("stripPrev");
-  const next = document.getElementById("stripNext");
-  const todayBtn = document.getElementById("stripToday");
-  const allBtn = document.getElementById("stripAll");
-  if (!prev) return;
-
-  prev.addEventListener("click", () => {
-    if (!stripShowAll) stripWindowEnd = addDays(stripWindowEnd, -WINDOW_DAYS);
-    onChange();
-  });
-  next.addEventListener("click", () => {
-    if (!stripShowAll) stripWindowEnd = addDays(stripWindowEnd, WINDOW_DAYS);
-    onChange();
-  });
-  todayBtn.addEventListener("click", () => {
-    stripShowAll = false;
-    stripWindowEnd = todayKey();
-    onChange();
-  });
-  allBtn.addEventListener("click", () => {
-    stripShowAll = !stripShowAll;
-    if (stripShowAll) stripWindowEnd = null;
-    onChange();
-  });
-}
-
-function attachStripTooltip(state) {
-  const strip = document.getElementById("daysStrip");
-  const tooltip = document.getElementById("stripTooltip");
-  const container = document.getElementById("heroPanel");
-
-  function positionTooltip(target) {
-    const panelRect = container.getBoundingClientRect();
-    const barRect = target.getBoundingClientRect();
-    const tooltipRect = tooltip.getBoundingClientRect();
-    const padding = 14;
-    let left = barRect.left - panelRect.left + barRect.width / 2;
-    left = Math.max(
-      tooltipRect.width / 2 + padding,
-      Math.min(left, panelRect.width - tooltipRect.width / 2 - padding),
-    );
-    let top = barRect.top - panelRect.top - tooltipRect.height - 10;
-    let arrow = "top";
-    if (top < padding) {
-      top = barRect.bottom - panelRect.top + 10;
-      arrow = "below";
-    }
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    tooltip.dataset.arrow = arrow;
-    const tooltipLeft = left - tooltipRect.width / 2;
-    const arrowLeft = barRect.left - panelRect.left + barRect.width / 2 - tooltipLeft;
-    tooltip.style.setProperty("--arrow-left", `${arrowLeft}px`);
-  }
-
-  function show(target) {
-    const idx = Number(target.dataset.dayIndex);
-    if (Number.isNaN(idx)) return;
-    const day = state.days[idx];
-    if (!day) return;
-    const updates = state.byDay[day] || [];
-    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "none";
-    const count = updates.length;
-    tooltip.innerHTML = `
-      <div class="tooltip-date">${fmtShortDay(day)}</div>
-      <div class="tooltip-summary">
-        <span class="tooltip-dot ${severity}"></span>
-        <span>${SEVERITY_LABEL[severity] ?? (severity === "none" ? "Operating normally" : severity)}</span>
-        ${updates.length ? `<span class="tooltip-duration">${count} update(s)</span>` : ""}
-      </div>
-    `;
-    tooltip.classList.add("active");
-    tooltip.setAttribute("aria-hidden", "false");
-    positionTooltip(target);
-  }
-
-  function hide() {
-    tooltip.classList.remove("active");
-    tooltip.setAttribute("aria-hidden", "true");
-  }
-
-  strip.addEventListener("pointerenter", (e) => {
-    show(e.target.closest(".bar") || e.target);
-  });
-  strip.addEventListener("pointermove", (e) => {
-    const bar = e.target.closest(".bar");
-    if (bar) positionTooltip(bar);
-  });
-  strip.addEventListener("pointerleave", hide);
-  strip.addEventListener("focusin", (e) => {
-    if (e.target.classList && e.target.classList.contains("bar")) show(e.target);
-  });
-  strip.addEventListener("focusout", hide);
-}
-
-function severityBadge(sev) {
-  const label = SEVERITY_LABEL[sev] ?? (sev === "none" ? "Operating normally" : sev);
-  return `<span class="badge badge-${sev}">${label}</span>`;
-}
-
-function regionAggregate(services) {
-  const entries = Object.values(services);
-  const counts = {};
+function worstSeverity(candidates) {
   let worst = "unknown";
-  for (const svc of entries) {
-    const sev = svc.current || "unknown";
-    counts[sev] = (counts[sev] || 0) + 1;
-    if (SEVERITY_RANK[sev] > SEVERITY_RANK[worst]) worst = sev;
+  let worstRank = -1;
+  for (const s of candidates) {
+    const rank = SEVERITY_RANK[s] ?? -1;
+    if (rank > worstRank) {
+      worstRank = rank;
+      worst = s;
+    }
   }
-  const total = entries.length;
-  const impacted = total - (counts.operational || 0);
-  return { counts, worst, total, impacted };
+  return worst;
 }
 
-function serviceChip(slug, svc) {
-  const sev = svc.current || "unknown";
-  const label =
-    SEVERITY_LABEL[sev] ?? (sev === "none" ? "Operating normally" : sev);
-  const title = `${label} · ${escapeHtml(svc.service_name || slug)}`;
-  return (
-    `<span class="service-chip" title="${title}" data-service="${escapeHtml(slug)}">` +
-    `<span class="dot dot-${sev}"></span>` +
-    `<span class="service-chip-name">${escapeHtml(svc.service_name || slug)}</span>` +
-    `</span>`
-  );
-}
-
-function renderRegionBlock(label, services, aggregate) {
-  const chips = Object.entries(services)
-    .sort((a, b) =>
-      (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0])
-    )
-    .map(([slug, svc]) => serviceChip(slug, svc))
-    .join("");
-
-  return `
-    <div class="region-services-block">
-      <div class="region-aggregate">
-        <span class="region-aggregate-label">${escapeHtml(label)}</span>
-        ${severityBadge(aggregate.worst)}
-        <span class="region-aggregate-text">
-          ${aggregate.impacted} of ${aggregate.total} services impacted
-        </span>
-      </div>
-      <div class="service-grid">${chips}</div>
-    </div>
-  `;
-}
-
-function renderIncident(incident) {
-  const updates = [...incident.updates].sort(
-    (a, b) => new Date(a.published) - new Date(b.published)
-  );
-  const badges = [...new Set(updates.map((u) => u.severity))]
-    .sort((a, b) => (SEVERITY_RANK[b] ?? -1) - (SEVERITY_RANK[a] ?? -1))
-    .map(severityBadge)
-    .join(" ");
-
-  const regionLabelValue = incident.region_name || incident.region;
-  const regionBadge = regionLabelValue
-    ? `<span class="incident-region">${escapeHtml(regionLabelValue)}</span>`
-    : "";
-
-  const article = document.createElement("article");
-  article.className = "incident";
-  article.innerHTML = `
-    <div class="incident-head">
-      <h3>${escapeHtml(incident.title)}${regionBadge}</h3>
-      <div class="incident-badges">${badges}</div>
-    </div>
-    <div class="incident-meta">
-      <span>${fmtDate(updates[0].published)}</span>
-      <span>→</span>
-      <span>${fmtDate(updates[updates.length - 1].published)}</span>
-      <span class="muted">· ${updates.length} update(s)</span>
-    </div>
-    <ul class="timeline">
-      ${updates
-        .map(
-          (u) => `
-        <li>
-          <div class="timeline-meta">
-            <span class="dot dot-${u.severity}"></span>
-            <span class="timeline-time">${fmtDate(u.published)}</span>
-            ${severityBadge(u.severity)}
-          </div>
-          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
-        </li>`
-        )
-        .join("")}
-    </ul>
-  `;
-  return article;
-}
-
-function getActiveRegion() {
-  const hash = location.hash.slice(1);
-  return hash ? decodeURIComponent(hash) : null;
+function regionLabel(incident) {
+  if (incident.region_name) return incident.region_name;
+  if (incident.region) return REGION_NAMES[incident.region] || incident.region;
+  const match = incident.key ? incident.key.match(REGION_CODE_RE) : null;
+  if (match) {
+    const code = match[1].toLowerCase();
+    return REGION_NAMES[code] || code.toUpperCase();
+  }
+  return null;
 }
 
 function worstSeverityFromUpdates(incident) {
@@ -512,10 +146,370 @@ function worstSeverityFromUpdates(incident) {
   return worst;
 }
 
+// Data Fetching with Fallback
+async function loadIncidentsData() {
+  let lastErr = null;
+  for (const url of DATA_URLS) {
+    try {
+      const resp = await fetch(url);
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw new Error(lastErr ? lastErr.message : "Failed to load incidents dataset");
+}
+
+// Toast Notifications
+function showToast(message) {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span>${escapeHtml(message)}</span>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(8px)";
+    setTimeout(() => toast.remove(), 250);
+  }, 2600);
+}
+
+// Theme Management
+function initTheme() {
+  document.documentElement.setAttribute("data-theme", state.theme);
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      state.theme = state.theme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", state.theme);
+      localStorage.setItem("theme", state.theme);
+    });
+  }
+}
+
+// Build Day Map for Timeline Strip
+function buildDayMap(incidents) {
+  const byDay = {};
+  let firstDay = null;
+  let lastDay = null;
+  for (const incident of incidents) {
+    for (const update of incident.updates || []) {
+      const key = dayKey(update.published);
+      (byDay[key] = byDay[key] || []).push({
+        severity: update.severity,
+        title: update.title,
+        incidentTitle: incident.title,
+        incidentKey: incident.key,
+      });
+      if (!firstDay || key < firstDay) firstDay = key;
+      if (!lastDay || key > lastDay) lastDay = key;
+    }
+  }
+  return { byDay, firstDay, lastDay };
+}
+
+// Compute Overall Health Stats & Uptime
+function computeUptime(incidents, byDay, firstDay, lastDay) {
+  if (!firstDay || !lastDay) {
+    return { uptime: 1.0, activeDays: 0, cleanDays: 0, totalDays: 0, impactedDays: 0 };
+  }
+  const startMs = dayToMs(firstDay);
+  const endMs = dayToMs(lastDay);
+  const totalDays = Math.max(1, Math.round((endMs - startMs) / 86400000) + 1);
+
+  let impactedDays = 0;
+  for (const key in byDay) {
+    const worst = worstSeverity(byDay[key].map((u) => u.severity));
+    if (worst !== "operational" && worst !== "unknown") {
+      impactedDays += 1;
+    }
+  }
+  const cleanDays = totalDays - impactedDays;
+  const uptime = Math.max(0, 1 - impactedDays / totalDays);
+  return { uptime, activeDays: Object.keys(byDay).length, cleanDays, totalDays, impactedDays };
+}
+
+// Render KPI Summary Stats Cards
+function renderStatsCards(incidents) {
+  const container = document.getElementById("summaryStats");
+  if (!container) return;
+
+  const dayMap = buildDayMap(incidents);
+  const { uptime, cleanDays, totalDays, impactedDays } = computeUptime(
+    incidents,
+    dayMap.byDay,
+    dayMap.firstDay,
+    dayMap.lastDay
+  );
+
+  const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
+
+  // Region count
+  const regionsSet = new Set();
+  incidents.forEach((i) => {
+    const r = regionLabel(i);
+    if (r) regionsSet.add(r);
+  });
+
+  const uptimeFormatted = (uptime * 100).toFixed(1) + "%";
+
+  container.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Uptime</div>
+      <div class="stat-value stat-val-operational">${uptimeFormatted}</div>
+      <div class="stat-sub">${cleanDays} quiet / ${totalDays} days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Incidents</div>
+      <div class="stat-value">${incidents.length}</div>
+      <div class="stat-sub">${totalUpdates} status updates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Impacted Days</div>
+      <div class="stat-value ${impactedDays > 0 ? "stat-val-degraded" : "stat-val-operational"}">${impactedDays}</div>
+      <div class="stat-sub">Days with incidents</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Regions Recorded</div>
+      <div class="stat-value">${regionsSet.size}</div>
+      <div class="stat-sub">AWS global locations</div>
+    </div>
+  `;
+}
+
+// Render Regions Sidebar Navigation
+function renderSidebar(allIncidents) {
+  const container = document.getElementById("regionList");
+  const totalBadge = document.getElementById("regionTotalBadge");
+  const mobileList = document.getElementById("mobileRegionList");
+  if (!container) return;
+
+  const counts = {};
+  for (const inc of allIncidents) {
+    const label = regionLabel(inc);
+    if (label) {
+      counts[label] = (counts[label] || 0) + 1;
+    }
+  }
+
+  const entries = Object.entries(counts).sort((a, b) => a[0].localeCompare(b[0]));
+  if (totalBadge) totalBadge.textContent = entries.length;
+
+  const query = state.regionSearchQuery.toLowerCase();
+  const filteredEntries = entries.filter(([label]) => label.toLowerCase().includes(query));
+
+  const items = [];
+  const allActiveClass = state.activeRegion === null ? "sidebar-item active" : "sidebar-item";
+  items.push(`
+    <a class="${allActiveClass}" data-region="" href="#">
+      <span>All Regions</span>
+      <span class="sidebar-count">${allIncidents.length}</span>
+    </a>
+  `);
+
+  for (const [label, count] of filteredEntries) {
+    const isActive = state.activeRegion === label;
+    const cls = isActive ? "sidebar-item active" : "sidebar-item";
+    items.push(`
+      <a class="${cls}" data-region="${escapeHtml(label)}" href="#region=${encodeURIComponent(label)}">
+        <span class="region-item-name">${escapeHtml(label)}</span>
+        <span class="sidebar-count">${count}</span>
+      </a>
+    `);
+  }
+
+  container.innerHTML = items.join("");
+
+  // Mobile horizontal region tab buttons
+  if (mobileList) {
+    const mobileBtns = entries.map(([label]) => {
+      const activeCls = state.activeRegion === label ? "mobile-region-btn active" : "mobile-region-btn";
+      return `<button type="button" class="${activeCls}" data-region="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
+    });
+    mobileList.innerHTML = mobileBtns.join("");
+  }
+}
+
+// Render Heatmap Strip Timeline
+function renderDayStrip(incidents) {
+  const { byDay, firstDay, lastDay } = buildDayMap(incidents);
+  const strip = document.getElementById("daysStrip");
+  const controls = document.getElementById("stripControls");
+  const windowLabel = document.getElementById("stripWindowLabel");
+  const labels = document.querySelectorAll(".strip-axis span");
+
+  if (!strip || !firstDay) {
+    if (strip) strip.hidden = true;
+    if (controls) controls.hidden = true;
+    return { days: [], byDay: {} };
+  }
+
+  strip.hidden = false;
+  strip.innerHTML = "";
+  state.stripFirstDay = firstDay;
+
+  const today = todayKey();
+  const maxDay = lastDay > today ? lastDay : today;
+  const totalDays = Math.round((dayToMs(maxDay) - dayToMs(firstDay)) / 86400000) + 1;
+  const historyBeyondWindow = totalDays > state.windowDays;
+
+  if (!historyBeyondWindow) {
+    state.stripWindowEnd = maxDay;
+    state.stripShowAll = true;
+  }
+
+  if (state.stripWindowEnd === null || state.stripWindowEnd > maxDay) state.stripWindowEnd = maxDay;
+  if (state.stripWindowEnd < firstDay) state.stripWindowEnd = firstDay;
+  if (state.stripShowAll) state.stripWindowEnd = maxDay;
+
+  const endDay = state.stripWindowEnd;
+  let startDay = state.stripShowAll ? firstDay : addDays(endDay, -(state.windowDays - 1));
+  if (startDay < firstDay) startDay = firstDay;
+
+  const startMs = dayToMs(startDay);
+  const endMs = dayToMs(endDay);
+
+  const days = [];
+  let index = 0;
+
+  for (let ms = startMs; ms <= endMs; ms += 86400000, index++) {
+    const key = keyFromMs(ms);
+    days.push(key);
+    const updates = byDay[key];
+    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "none";
+
+    const cell = document.createElement("span");
+    const isSelected = state.activeDate === key;
+    // FIX: Uses correct class mapping bar-sev to match CSS!
+    cell.className = `bar bar-${sev}${isSelected ? " bar-selected" : ""}`;
+    cell.dataset.dayIndex = String(index);
+    cell.dataset.day = key;
+    cell.tabIndex = 0;
+    strip.appendChild(cell);
+  }
+
+  if (labels && labels.length >= 3) {
+    labels[0].textContent = fmtShortDate(startDay);
+    labels[2].textContent = endDay === maxDay ? "Today (" + fmtShortDate(endDay) + ")" : fmtShortDate(endDay);
+  }
+
+  // Update strip controls UI
+  if (controls) {
+    controls.hidden = !historyBeyondWindow;
+    const prevBtn = document.getElementById("stripPrev");
+    const nextBtn = document.getElementById("stripNext");
+    const todayBtn = document.getElementById("stripToday");
+    const allBtn = document.getElementById("stripAll");
+
+    if (prevBtn) prevBtn.disabled = state.stripShowAll || state.stripWindowEnd <= addDays(firstDay, state.windowDays - 1);
+    if (nextBtn) nextBtn.disabled = state.stripShowAll || state.stripWindowEnd >= maxDay;
+    if (todayBtn) todayBtn.disabled = state.stripShowAll || state.stripWindowEnd >= maxDay;
+    if (allBtn) allBtn.classList.toggle("strip-btn-active", state.stripShowAll);
+
+    if (windowLabel) {
+      windowLabel.textContent = state.stripShowAll
+        ? "All time view (" + totalDays + " days)"
+        : `Showing last ${state.windowDays} days`;
+    }
+  }
+
+  return { days, byDay };
+}
+
+// Tooltip Popover & Interactivity for Heatmap Strip
+function attachStripTooltip(stripState) {
+  const strip = document.getElementById("daysStrip");
+  const tooltip = document.getElementById("stripTooltip");
+  const stage = document.getElementById("stripStage");
+  if (!strip || !tooltip || !stage) return;
+
+  function positionTooltip(target) {
+    const stageRect = stage.getBoundingClientRect();
+    const barRect = target.getBoundingClientRect();
+
+    let left = barRect.left - stageRect.left + barRect.width / 2;
+    left = Math.max(110, Math.min(left, stageRect.width - 110));
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `-10px`;
+  }
+
+  function show(target) {
+    const day = target.dataset.day;
+    if (!day) return;
+
+    const updates = stripState.byDay[day] || [];
+    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "none";
+
+    const uniqueTitles = [...new Set(updates.map((u) => u.incidentTitle || u.title))].slice(0, 3);
+
+    const titleListHtml = uniqueTitles.length
+      ? `<ul class="tooltip-incidents-list">
+          ${uniqueTitles.map((t) => `<li>• ${escapeHtml(t)}</li>`).join("")}
+          ${updates.length > 3 ? `<li>+ ${updates.length - 3} more update(s)</li>` : ""}
+         </ul>`
+      : "";
+
+    tooltip.innerHTML = `
+      <div class="tooltip-date">${fmtShortDay(day)}</div>
+      <div class="tooltip-summary">
+        <span class="dot dot-${severity}"></span>
+        <span>${SEVERITY_LABEL[severity] ?? (severity === "none" ? "Operating Normally" : severity)}</span>
+        ${updates.length ? `<span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);">${updates.length} event(s)</span>` : ""}
+      </div>
+      ${titleListHtml}
+      <div style="margin-top:6px;font-size:0.7rem;color:var(--accent-primary);">Click bar to filter date</div>
+    `;
+
+    tooltip.classList.add("active");
+    tooltip.setAttribute("aria-hidden", "false");
+    positionTooltip(target);
+  }
+
+  function hide() {
+    tooltip.classList.remove("active");
+    tooltip.setAttribute("aria-hidden", "true");
+  }
+
+  // Mouse / Pointer listeners
+  strip.addEventListener("pointerover", (e) => {
+    const bar = e.target.closest(".bar");
+    if (bar) show(bar);
+  });
+  strip.addEventListener("pointerleave", hide);
+
+  strip.addEventListener("focusin", (e) => {
+    if (e.target.classList.contains("bar")) show(e.target);
+  });
+  strip.addEventListener("focusout", hide);
+
+  // Click on bar filters date!
+  strip.addEventListener("click", (e) => {
+    const bar = e.target.closest(".bar");
+    if (!bar) return;
+    const clickedDay = bar.dataset.day;
+    if (state.activeDate === clickedDay) {
+      state.activeDate = null; // toggle off
+    } else {
+      state.activeDate = clickedDay;
+    }
+    renderAll();
+  });
+}
+
+// Render Service Status breakdown block per region
 function renderRegionServiceStates(incidents) {
   const container = document.getElementById("regionServices");
   if (!container) return;
-  const activeRegion = getActiveRegion();
 
   const byRegion = {};
   for (const inc of incidents) {
@@ -528,21 +522,23 @@ function renderRegionServiceStates(incidents) {
   );
 
   const blocks = [];
+
   for (const code of codes) {
     const regionIncidents = byRegion[code];
     const label = regionLabel(regionIncidents[0]) || code;
-    if (activeRegion && label !== activeRegion) continue;
 
-    // Prefer the full per-service map (present on current ME events);
-    // otherwise fall back to the services named by the region's incidents.
+    if (state.activeRegion && label !== state.activeRegion) continue;
+
     const services = {};
     let fullMap = false;
+
     for (const inc of regionIncidents) {
       if (inc.services) {
         fullMap = true;
         Object.assign(services, inc.services);
       }
     }
+
     if (!fullMap) {
       for (const inc of regionIncidents) {
         const slug = inc.service;
@@ -556,94 +552,486 @@ function renderRegionServiceStates(incidents) {
       }
     }
 
-    const aggregate = regionAggregate(services);
-    blocks.push(renderRegionBlock(label, services, aggregate));
+    let serviceEntries = Object.entries(services).sort((a, b) =>
+      (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0])
+    );
+
+    if (state.impactedServicesOnly) {
+      serviceEntries = serviceEntries.filter(
+        ([, svc]) => svc.current && svc.current !== "operational" && svc.current !== "none"
+      );
+    }
+
+    if (serviceEntries.length === 0) continue;
+
+    let worst = "unknown";
+    let impactedCount = 0;
+    for (const [, svc] of serviceEntries) {
+      const cur = svc.current || "unknown";
+      if (SEVERITY_RANK[cur] > SEVERITY_RANK[worst]) worst = cur;
+      if (cur !== "operational" && cur !== "none" && cur !== "unknown") impactedCount++;
+    }
+
+    const chips = serviceEntries
+      .map(([slug, svc]) => {
+        const sev = svc.current || "unknown";
+        const sevLabel = SEVERITY_LABEL[sev] ?? sev;
+        return `
+          <span class="service-chip" title="${sevLabel} · ${escapeHtml(svc.service_name || slug)}">
+            <span class="dot dot-${sev}"></span>
+            <span class="service-chip-name">${escapeHtml(svc.service_name || slug)}</span>
+          </span>
+        `;
+      })
+      .join("");
+
+    const badgeCls = `badge badge-${worst}`;
+    const badgeLabel = SEVERITY_LABEL[worst] ?? worst;
+
+    blocks.push(`
+      <div class="region-services-block">
+        <div class="region-aggregate">
+          <span class="region-aggregate-label">${escapeHtml(label)}</span>
+          <span class="${badgeCls}">${badgeLabel}</span>
+          <span class="region-aggregate-text">${impactedCount} of ${serviceEntries.length} services impacted</span>
+        </div>
+        <div class="service-grid">${chips}</div>
+      </div>
+    `);
   }
 
   container.innerHTML = blocks.join("");
 }
 
-function renderAll(incidents) {
-  const allRegions = buildRegionMap(incidents);
-  const activeRegion = getActiveRegion();
+// Render Individual Incident Cards
+function renderIncidentCard(incident) {
+  const updates = [...(incident.updates || [])].sort(
+    (a, b) => new Date(a.published) - new Date(b.published)
+  );
 
-  const filtered = activeRegion
-    ? incidents.filter((inc) => regionLabel(inc) === activeRegion)
-    : incidents;
+  const worstSev = worstSeverityFromUpdates(incident);
+  const worstBadgeHtml = `<span class="badge badge-${worstSev}">${SEVERITY_LABEL[worstSev] ?? worstSev}</span>`;
 
-  renderSidebar(allRegions, incidents.length, activeRegion);
-  renderStats(filtered);
+  const regLabel = regionLabel(incident);
+  const regionBadge = regLabel
+    ? `<span class="incident-region">${escapeHtml(regLabel)}</span>`
+    : "";
+
+  // Duration calculation
+  let durationStr = "";
+  if (updates.length > 1) {
+    const startMs = new Date(updates[0].published).getTime();
+    const endMs = new Date(updates[updates.length - 1].published).getTime();
+    const diffMins = Math.round((endMs - startMs) / 60000);
+    if (diffMins > 0) {
+      const hrs = Math.floor(diffMins / 60);
+      const mins = diffMins % 60;
+      durationStr = ` · Duration: ${hrs > 0 ? `${hrs}h ` : ""}${mins}m`;
+    }
+  }
+
+  const article = document.createElement("article");
+  article.className = `incident sev-${worstSev}`;
+  article.id = `incident-${encodeURIComponent(incident.key)}`;
+
+  article.innerHTML = `
+    <div class="incident-head">
+      <div class="incident-title-row">
+        <h4>${escapeHtml(incident.title)}</h4>
+        ${regionBadge}
+      </div>
+      <div class="incident-badges">
+        ${worstBadgeHtml}
+        <button type="button" class="icon-btn copy-link-btn" data-key="${escapeHtml(incident.key)}" title="Copy permalink to incident">
+          🔗 Copy Link
+        </button>
+      </div>
+    </div>
+
+    <div class="incident-meta">
+      <span>${fmtDate(updates[0]?.published)}</span>
+      <span>→</span>
+      <span>${fmtDate(updates[updates.length - 1]?.published)}</span>
+      <span class="muted">· ${updates.length} update(s)${durationStr}</span>
+    </div>
+
+    <ul class="timeline">
+      ${updates
+        .map(
+          (u) => `
+        <li>
+          <div class="timeline-meta">
+            <span class="dot dot-${u.severity}"></span>
+            <span class="timeline-time">${fmtDate(u.published)}</span>
+            <span class="badge badge-${u.severity}">${SEVERITY_LABEL[u.severity] ?? u.severity}</span>
+          </div>
+          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
+        </li>`
+        )
+        .join("")}
+    </ul>
+  `;
+
+  return article;
+}
+
+// Active Filter Chips Bar
+function renderActiveFiltersBar() {
+  const container = document.getElementById("activeFiltersBar");
+  const chipsWrapper = document.getElementById("activeChipsContainer");
+  if (!container || !chipsWrapper) return;
+
+  const chips = [];
+
+  if (state.activeRegion) {
+    chips.push(`
+      <span class="filter-chip">
+        Region: ${escapeHtml(state.activeRegion)}
+        <span class="filter-chip-remove" data-remove="region">✕</span>
+      </span>
+    `);
+  }
+
+  if (state.activeSeverity !== "all") {
+    chips.push(`
+      <span class="filter-chip">
+        Severity: ${escapeHtml(SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity)}
+        <span class="filter-chip-remove" data-remove="severity">✕</span>
+      </span>
+    `);
+  }
+
+  if (state.activeDate) {
+    chips.push(`
+      <span class="filter-chip">
+        Date: ${fmtShortDate(state.activeDate)}
+        <span class="filter-chip-remove" data-remove="date">✕</span>
+      </span>
+    `);
+  }
+
+  if (state.searchQuery) {
+    chips.push(`
+      <span class="filter-chip">
+        Query: "${escapeHtml(state.searchQuery)}"
+        <span class="filter-chip-remove" data-remove="query">✕</span>
+      </span>
+    `);
+  }
+
+  if (chips.length > 0) {
+    container.hidden = false;
+    chipsWrapper.innerHTML = chips.join("");
+  } else {
+    container.hidden = true;
+    chipsWrapper.innerHTML = "";
+  }
+}
+
+// Apply Filters to Incident List
+function filterIncidents(incidents) {
+  return incidents.filter((inc) => {
+    // 1. Region Filter
+    if (state.activeRegion && regionLabel(inc) !== state.activeRegion) {
+      return false;
+    }
+
+    // 2. Severity Filter
+    if (state.activeSeverity !== "all") {
+      const worst = worstSeverityFromUpdates(inc);
+      if (worst !== state.activeSeverity) return false;
+    }
+
+    // 3. Date Filter (incident overlaps or has update on activeDate)
+    if (state.activeDate) {
+      const hasDate = (inc.updates || []).some(
+        (u) => dayKey(u.published) === state.activeDate
+      );
+      if (!hasDate) return false;
+    }
+
+    // 4. Global Search Query
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      const matchTitle = inc.title && inc.title.toLowerCase().includes(q);
+      const matchService = inc.service && inc.service.toLowerCase().includes(q);
+      const matchDesc = (inc.updates || []).some(
+        (u) => u.description && u.description.toLowerCase().includes(q)
+      );
+      if (!matchTitle && !matchService && !matchDesc) return false;
+    }
+
+    return true;
+  });
+}
+
+// Sort Filtered Incidents
+function sortIncidents(incidents) {
+  const sorted = [...incidents];
+  if (state.sortOrder === "newest") {
+    sorted.sort((a, b) => new Date(b.started_at || 0) - new Date(a.started_at || 0));
+  } else if (state.sortOrder === "oldest") {
+    sorted.sort((a, b) => new Date(a.started_at || 0) - new Date(b.started_at || 0));
+  } else if (state.sortOrder === "updates") {
+    sorted.sort((a, b) => (b.updates ? b.updates.length : 0) - (a.updates ? a.updates.length : 0));
+  }
+  return sorted;
+}
+
+// Primary Render Orchestrator
+function renderAll() {
+  const filtered = filterIncidents(state.allIncidents);
+  const sorted = sortIncidents(filtered);
+
+  renderSidebar(state.allIncidents);
+  renderStatsCards(filtered);
   renderRegionServiceStates(filtered);
-  const stripState = renderStrip(filtered);
-  attachStripTooltip(stripState || { days: [], byDay: {} });
+  renderActiveFiltersBar();
+
+  const stripState = renderDayStrip(filtered);
+  attachStripTooltip(stripState);
 
   const list = document.getElementById("incidentList");
   const empty = document.getElementById("emptyState");
+  const subtitle = document.getElementById("incidentListSubtitle");
+
+  if (subtitle) {
+    subtitle.textContent = `Showing ${sorted.length} of ${state.allIncidents.length} incidents`;
+  }
+
+  if (!list || !empty) return;
   list.innerHTML = "";
 
-  if (filtered.length === 0) {
+  if (sorted.length === 0) {
     empty.hidden = false;
   } else {
     empty.hidden = true;
-    for (const incident of filtered) {
-      list.appendChild(renderIncident(incident));
+    for (const incident of sorted) {
+      list.appendChild(renderIncidentCard(incident));
     }
   }
 }
 
-function renderError(message) {
-  const list = document.getElementById("incidentList");
-  const empty = document.getElementById("emptyState");
-  list.innerHTML = "";
-  empty.hidden = false;
-  empty.innerHTML = message;
+// Data Export Handler (CSV & JSON)
+function exportDataset() {
+  const filtered = filterIncidents(state.allIncidents);
+  const jsonBlob = new Blob([JSON.stringify(filtered, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(jsonBlob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `aws-status-archive-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`Exported ${filtered.length} incidents to JSON`);
 }
 
-async function main() {
-  const updated = document.getElementById("updatedAt");
-  try {
-    const incidents = await loadIncidents();
-    incidents.sort((a, b) => new Date(a.started_at) - new Date(b.started_at));
-
-    renderAll(incidents);
-
-    document.getElementById("regionList").addEventListener("click", (e) => {
+// Attach Event Listeners
+function setupEventListeners() {
+  // Region Selection Click (Desktop Sidebar)
+  const regionList = document.getElementById("regionList");
+  if (regionList) {
+    regionList.addEventListener("click", (e) => {
       const link = e.target.closest(".sidebar-item");
       if (!link) return;
       e.preventDefault();
       const region = link.dataset.region || null;
-      if (region) {
-        location.hash = encodeURIComponent(region);
-      } else {
-        history.pushState("", "", location.pathname + location.search);
-      }
-      renderAll(incidents);
+      state.activeRegion = region;
+      renderAll();
     });
+  }
 
-    window.addEventListener("hashchange", () => renderAll(incidents));
-    attachStripControls(() => renderAll(incidents));
+  // Mobile Region Tabs
+  const mobileList = document.getElementById("mobileRegionList");
+  if (mobileList) {
+    mobileList.addEventListener("click", (e) => {
+      const btn = e.target.closest(".mobile-region-btn");
+      if (!btn) return;
+      state.activeRegion = btn.dataset.region || null;
+      renderAll();
+    });
+  }
 
-    const counts = incidents.reduce(
-      (acc, i) => {
-        acc.incidents += 1;
-        acc.updates += i.updates.length;
-        return acc;
-      },
-      { incidents: 0, updates: 0 },
-    );
-    updated.textContent = `${counts.incidents} incidents · ${counts.updates} updates · rendered ${new Date().toUTCString().replace(" GMT", " UTC")}`;
-  } catch (err) {
-    renderSidebar([], 0, null);
-    renderStats([]);
-    renderStrip([]);
-    const servicesContainer = document.getElementById("regionServices");
-    if (servicesContainer) servicesContainer.innerHTML = "";
-    renderError(
-      `Could not load the archive (${escapeHtml(String(err.message || err))}). ` +
-        "If you opened this page directly, serve it over HTTP with " +
-        "<code>parsed/incidents.json</code> in place and reload."
-    );
+  // Sidebar Region Search Input
+  const sidebarSearch = document.getElementById("sidebarSearchInput");
+  if (sidebarSearch) {
+    sidebarSearch.addEventListener("input", (e) => {
+      state.regionSearchQuery = e.target.value;
+      renderSidebar(state.allIncidents);
+    });
+  }
+
+  // Global Search Input
+  const globalSearch = document.getElementById("globalSearchInput");
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (globalSearch) {
+    globalSearch.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value;
+      if (clearBtn) clearBtn.hidden = !e.target.value;
+      renderAll();
+    });
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      state.searchQuery = "";
+      if (globalSearch) globalSearch.value = "";
+      clearBtn.hidden = true;
+      renderAll();
+    });
+  }
+
+  // Severity Filter Buttons
+  const sevGroup = document.querySelector(".severity-filter-group");
+  if (sevGroup) {
+    sevGroup.addEventListener("click", (e) => {
+      const btn = e.target.closest(".sev-filter-btn");
+      if (!btn) return;
+      sevGroup.querySelectorAll(".sev-filter-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.activeSeverity = btn.dataset.severity || "all";
+      renderAll();
+    });
+  }
+
+  // Active Filter Chips Removal
+  const chipsContainer = document.getElementById("activeChipsContainer");
+  if (chipsContainer) {
+    chipsContainer.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest(".filter-chip-remove");
+      if (!removeBtn) return;
+      const type = removeBtn.dataset.remove;
+      if (type === "region") state.activeRegion = null;
+      if (type === "severity") state.activeSeverity = "all";
+      if (type === "date") state.activeDate = null;
+      if (type === "query") {
+        state.searchQuery = "";
+        const gs = document.getElementById("globalSearchInput");
+        if (gs) gs.value = "";
+      }
+      renderAll();
+    });
+  }
+
+  // Clear All Filters Button
+  const clearAllBtn = document.getElementById("clearAllFiltersBtn");
+  const emptyResetBtn = document.getElementById("emptyStateResetBtn");
+  const resetHandler = () => {
+    state.activeRegion = null;
+    state.activeSeverity = "all";
+    state.activeDate = null;
+    state.searchQuery = "";
+    const gs = document.getElementById("globalSearchInput");
+    if (gs) gs.value = "";
+    document.querySelectorAll(".sev-filter-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.severity === "all");
+    });
+    renderAll();
+  };
+  if (clearAllBtn) clearAllBtn.addEventListener("click", resetHandler);
+  if (emptyResetBtn) emptyResetBtn.addEventListener("click", resetHandler);
+
+  // Impacted Services Only Toggle
+  const impactedToggle = document.getElementById("impactedOnlyToggle");
+  if (impactedToggle) {
+    impactedToggle.addEventListener("change", (e) => {
+      state.impactedServicesOnly = e.target.checked;
+      renderAll();
+    });
+  }
+
+  // Incident Sort Select
+  const sortSelect = document.getElementById("incidentSortSelect");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", (e) => {
+      state.sortOrder = e.target.value;
+      renderAll();
+    });
+  }
+
+  // Export Button
+  const exportBtn = document.getElementById("exportDataBtn");
+  if (exportBtn) exportBtn.addEventListener("click", exportDataset);
+
+  // Copy Permalink Delegation
+  document.addEventListener("click", (e) => {
+    const copyBtn = e.target.closest(".copy-link-btn");
+    if (!copyBtn) return;
+    const key = copyBtn.dataset.key;
+    const linkUrl = `${window.location.origin}${window.location.pathname}#incident=${encodeURIComponent(key)}`;
+    navigator.clipboard.writeText(linkUrl).then(() => {
+      showToast("Incident permalink copied to clipboard!");
+    });
+  });
+
+  // Strip Navigation Controls
+  const prevBtn = document.getElementById("stripPrev");
+  const nextBtn = document.getElementById("stripNext");
+  const todayBtn = document.getElementById("stripToday");
+  const allBtn = document.getElementById("stripAll");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (!state.stripShowAll) state.stripWindowEnd = addDays(state.stripWindowEnd, -state.windowDays);
+      renderAll();
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      if (!state.stripShowAll) state.stripWindowEnd = addDays(state.stripWindowEnd, state.windowDays);
+      renderAll();
+    });
+  }
+  if (todayBtn) {
+    todayBtn.addEventListener("click", () => {
+      state.stripShowAll = false;
+      state.stripWindowEnd = todayKey();
+      renderAll();
+    });
+  }
+  if (allBtn) {
+    allBtn.addEventListener("click", () => {
+      state.stripShowAll = !state.stripShowAll;
+      if (state.stripShowAll) state.stripWindowEnd = null;
+      renderAll();
+    });
   }
 }
 
-main();
+// Application Entry Point
+async function init() {
+  initTheme();
+  setupEventListeners();
+
+  const updatedAtEl = document.getElementById("updatedAt");
+  try {
+    const incidents = await loadIncidentsData();
+    state.allIncidents = incidents;
+
+    renderAll();
+
+    if (updatedAtEl) {
+      const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
+      updatedAtEl.textContent = `${incidents.length} incidents · ${totalUpdates} updates · Data snapshot up-to-date`;
+    }
+  } catch (err) {
+    console.error("Initialization error:", err);
+    if (updatedAtEl) {
+      updatedAtEl.textContent = "Error loading archived data";
+    }
+    const list = document.getElementById("incidentList");
+    const empty = document.getElementById("emptyState");
+    if (list && empty) {
+      list.innerHTML = "";
+      empty.hidden = false;
+      empty.innerHTML = `
+        <div style="color:var(--impacted);font-weight:600;margin-bottom:8px;">Failed to load status archive dataset</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">${escapeHtml(err.message)}</div>
+      `;
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", init);
