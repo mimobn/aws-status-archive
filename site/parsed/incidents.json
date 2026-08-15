@@ -8,7 +8,7 @@
     "service": "ec2-ca-central-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "ca-central-1",
-    "region_name": "Canada-Central",
+    "region_name": "Canada (Central)",
     "updates": [
       {
         "published": "2025-08-12T09:42:00+00:00",
@@ -63,7 +63,7 @@
     "service": "dynamodb-us-gov-east-1",
     "service_name": "Amazon DynamoDB",
     "region": "us-gov-east-1",
-    "region_name": "US-East",
+    "region_name": "AWS GovCloud (US-East)",
     "updates": [
       {
         "published": "2025-08-13T17:56:06+00:00",
@@ -104,7 +104,7 @@
     "service": "dynamodb-us-gov-west-1",
     "service_name": "Amazon DynamoDB",
     "region": "us-gov-west-1",
-    "region_name": "US-West",
+    "region_name": "AWS GovCloud (US-West)",
     "updates": [
       {
         "published": "2025-08-13T17:56:57+00:00",
@@ -145,7 +145,7 @@
     "service": "internetconnectivity-us-east-1",
     "service_name": "AWS Internet Connectivity",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2025-08-21T19:38:16+00:00",
@@ -172,7 +172,7 @@
     "service": "iamidentitycenter-ap-southeast-2",
     "service_name": "AWS IAM Identity Center",
     "region": "ap-southeast-2",
-    "region_name": "Sydney",
+    "region_name": "Asia Pacific (Sydney)",
     "updates": [
       {
         "published": "2025-08-26T20:52:23+00:00",
@@ -281,7 +281,7 @@
     "service": "ec2-us-east-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2025-09-11T10:29:23+00:00",
@@ -308,7 +308,7 @@
     "service": "glue-us-east-1",
     "service_name": "AWS Glue",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2025-09-16T21:20:19+00:00",
@@ -342,7 +342,7 @@
     "service": "sqs-eu-north-1",
     "service_name": "Amazon Simple Queue Service",
     "region": "eu-north-1",
-    "region_name": "Stockholm",
+    "region_name": "Europe (Stockholm)",
     "updates": [
       {
         "published": "2025-09-25T21:56:37+00:00",
@@ -438,7 +438,7 @@
     "service": "multipleservices-us-east-1",
     "service_name": "Multiple services",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2025-10-20T07:11:00+00:00",
@@ -633,7 +633,7 @@
     "service": "multipleservices-us-east-1",
     "service_name": "Multiple services",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2025-10-28T22:36:42+00:00",
@@ -702,7 +702,7 @@
     "service": "ec2-eu-west-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "eu-west-1",
-    "region_name": "Ireland",
+    "region_name": "Europe (Ireland)",
     "updates": [
       {
         "published": "2026-01-28T17:14:00+00:00",
@@ -757,7 +757,7 @@
     "service": "internetconnectivity-sa-east-1",
     "service_name": "AWS Internet Connectivity",
     "region": "sa-east-1",
-    "region_name": "Sao Paulo",
+    "region_name": "South America (São Paulo)",
     "updates": [
       {
         "published": "2026-02-07T18:30:00+00:00",
@@ -867,7 +867,7 @@
     "service": "directconnect-us-east-1",
     "service_name": "AWS Direct Connect",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2026-02-21T00:38:00+00:00",
@@ -922,7 +922,7 @@
     "service": "ec2-us-east-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2026-02-25T18:14:29+00:00",
@@ -4770,7 +4770,7 @@
     "service": "s3-eu-central-2",
     "service_name": "Amazon Simple Storage Service",
     "region": "eu-central-2",
-    "region_name": "Zurich",
+    "region_name": "Europe (Zurich)",
     "updates": [
       {
         "published": "2026-03-07T19:53:12+00:00",
@@ -4811,7 +4811,7 @@
     "service": "ec2-eu-west-3",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "eu-west-3",
-    "region_name": "Paris",
+    "region_name": "Europe (Paris)",
     "updates": [
       {
         "published": "2026-04-27T11:27:17+00:00",
@@ -4838,7 +4838,7 @@
     "service": "ec2-us-east-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2026-05-08T00:25:26+00:00",
@@ -4983,7 +4983,7 @@
     "service": "internetconnectivity-sa-east-1",
     "service_name": "AWS Internet Connectivity",
     "region": "sa-east-1",
-    "region_name": "Sao Paulo",
+    "region_name": "South America (São Paulo)",
     "updates": [
       {
         "published": "2026-06-06T04:24:38+00:00",
@@ -5003,7 +5003,7 @@
     "service": "bedrock-us-east-1",
     "service_name": "Amazon Bedrock",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2026-06-13T01:26:58+00:00",
@@ -5030,7 +5030,7 @@
     "service": "ec2-eu-north-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "eu-north-1",
-    "region_name": "Stockholm",
+    "region_name": "Europe (Stockholm)",
     "updates": [
       {
         "published": "2026-06-30T21:02:20+00:00",
@@ -5071,7 +5071,7 @@
     "service": "ec2-us-east-1",
     "service_name": "Amazon Elastic Compute Cloud",
     "region": "us-east-1",
-    "region_name": "N. Virginia",
+    "region_name": "US East (N. Virginia)",
     "updates": [
       {
         "published": "2026-07-06T12:45:29+00:00",
@@ -5112,7 +5112,7 @@
     "service": "multipleservices-eu-central-1",
     "service_name": "Multiple services",
     "region": "eu-central-1",
-    "region_name": "Frankfurt",
+    "region_name": "Europe (Frankfurt)",
     "updates": [
       {
         "published": "2026-07-15T23:11:07+00:00",
@@ -5305,7 +5305,7 @@
     "service": "multipleservices-us-west-2",
     "service_name": "Multiple services",
     "region": "us-west-2",
-    "region_name": "Oregon",
+    "region_name": "US West (Oregon)",
     "updates": [
       {
         "published": "2026-07-24T11:40:00+00:00",
@@ -5346,7 +5346,7 @@
     "service": "directconnect-ap-south-1",
     "service_name": "AWS Direct Connect",
     "region": "ap-south-1",
-    "region_name": "Mumbai",
+    "region_name": "Asia Pacific (Mumbai)",
     "updates": [
       {
         "published": "2026-07-31T17:33:18+00:00",

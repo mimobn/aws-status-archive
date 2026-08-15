@@ -6,8 +6,10 @@ Run with:  uv run uvicorn api.main:app
 
 import os
 import sqlite3
+from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "out", "status.db")
 
@@ -15,6 +17,15 @@ app = FastAPI(
     title="status-archive",
     description="AWS incident history reconstructed from the official Service Health JSON archives.",
     version="0.2.0",
+)
+
+# Enable CORS for local development and web frontends
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 INCIDENT_COLUMNS = (
@@ -51,6 +62,7 @@ def index():
             "/healthz",
             "/incidents",
             "/incidents/{incident_key}",
+            "/regions",
             "/updates",
             "/metrics",
         ],
@@ -71,34 +83,47 @@ def healthz():
 
 
 @app.get("/incidents")
-def incidents():
+def incidents(region: str | None = None, service: str | None = None):
     conn = connect()
-    rows = conn.execute(
-        f"SELECT {INCIDENT_COLUMNS} FROM incidents ORDER BY started_at"
-    ).fetchall()
+    query = f"SELECT {INCIDENT_COLUMNS} FROM incidents"
+    params = []
+    conditions = []
+    if region:
+        conditions.append("(region = ? OR region_name = ?)")
+        params.extend([region, region])
+    if service:
+        conditions.append("service = ?")
+        params.append(service)
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+    query += " ORDER BY started_at DESC"
+
+    rows = conn.execute(query, params).fetchall()
     conn.close()
     return [row_to_incident(row) for row in rows]
 
 
-@app.get("/incidents/{incident_key}")
+@app.get("/incidents/{incident_key:path}")
 def incident(incident_key: str):
+    decoded_key = unquote(incident_key)
     conn = connect()
     row = conn.execute(
-        f"SELECT {INCIDENT_COLUMNS} FROM incidents WHERE incident_key = ?",
-        (incident_key,),
+        f"SELECT {INCIDENT_COLUMNS} FROM incidents WHERE incident_key = ? OR incident_key = ?",
+        (incident_key, decoded_key),
     ).fetchone()
     if row is None:
         conn.close()
         raise HTTPException(status_code=404, detail="incident not found")
+    actual_key = row[0]
     updates = conn.execute(
         "SELECT guid, published, severity, title, description "
         "FROM updates WHERE incident_key = ? ORDER BY published",
-        (incident_key,),
+        (actual_key,),
     ).fetchall()
     services = conn.execute(
         "SELECT service_slug, service_name, severity, max_severity "
         "FROM services WHERE incident_key = ? ORDER BY service_name",
-        (incident_key,),
+        (actual_key,),
     ).fetchall()
     conn.close()
     incident_data = row_to_incident(row)
@@ -122,6 +147,21 @@ def incident(incident_key: str):
         for s in services
     ]
     return incident_data
+
+
+@app.get("/regions")
+def regions():
+    conn = connect()
+    rows = conn.execute(
+        "SELECT region, region_name, count(*) as count "
+        "FROM incidents WHERE region IS NOT NULL "
+        "GROUP BY region ORDER BY region_name, region"
+    ).fetchall()
+    conn.close()
+    return [
+        {"region": r[0], "region_name": r[1] or r[0], "incidents_count": r[2]}
+        for r in rows
+    ]
 
 
 @app.get("/updates")

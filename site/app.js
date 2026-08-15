@@ -1,6 +1,6 @@
 /**
  * status-archive — Main Application Engine
- * Renders AWS incident history, regions breakdown, timeline heatmap, and interactive filters.
+ * Renders AWS incident history, regions breakdown, timeline heatmap, modal inspector, and interactive filters.
  */
 
 const DATA_URLS = ["parsed/incidents.json", "../out/incidents.json"];
@@ -30,18 +30,36 @@ const MONTHS_SHORT = [
 const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const REGION_NAMES = {
-  "me-central-1": "Middle East (UAE)",
-  "me-south-1": "Middle East (Bahrain)",
   "us-east-1": "US East (N. Virginia)",
   "us-east-2": "US East (Ohio)",
   "us-west-1": "US West (N. California)",
   "us-west-2": "US West (Oregon)",
+  "ca-central-1": "Canada (Central)",
+  "ca-west-1": "Canada West (Calgary)",
   "eu-west-1": "Europe (Ireland)",
   "eu-central-1": "Europe (Frankfurt)",
   "eu-west-2": "Europe (London)",
+  "eu-west-3": "Europe (Paris)",
+  "eu-north-1": "Europe (Stockholm)",
+  "eu-south-1": "Europe (Milan)",
+  "eu-south-2": "Europe (Spain)",
+  "eu-central-2": "Europe (Zurich)",
   "ap-southeast-1": "Asia Pacific (Singapore)",
   "ap-southeast-2": "Asia Pacific (Sydney)",
   "ap-northeast-1": "Asia Pacific (Tokyo)",
+  "ap-northeast-2": "Asia Pacific (Seoul)",
+  "ap-northeast-3": "Asia Pacific (Osaka)",
+  "ap-south-1": "Asia Pacific (Mumbai)",
+  "ap-south-2": "Asia Pacific (Hyderabad)",
+  "ap-southeast-3": "Asia Pacific (Jakarta)",
+  "ap-southeast-4": "Asia Pacific (Melbourne)",
+  "sa-east-1": "South America (São Paulo)",
+  "me-central-1": "Middle East (UAE)",
+  "me-south-1": "Middle East (Bahrain)",
+  "af-south-1": "Africa (Cape Town)",
+  "us-gov-east-1": "AWS GovCloud (US-East)",
+  "us-gov-west-1": "AWS GovCloud (US-West)",
+  "global": "Global Services",
 };
 
 const REGION_CODE_RE = /\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b/i;
@@ -57,6 +75,8 @@ const state = {
   impactedServicesOnly: false,
   sortOrder: "newest",
   theme: localStorage.getItem("theme") || "dark",
+  // Modal state
+  activeModalIncident: null,
   // Strip window state
   windowDays: 90,
   stripWindowEnd: null,
@@ -194,6 +214,73 @@ function initTheme() {
       localStorage.setItem("theme", state.theme);
     });
   }
+}
+
+// Modal Inspector Dialog
+function openModal(incident) {
+  state.activeModalIncident = incident;
+  const modal = document.getElementById("incidentModal");
+  const title = document.getElementById("modalTitle");
+  const sub = document.getElementById("modalSub");
+  const body = document.getElementById("modalBody");
+  if (!modal || !title || !body) return;
+
+  const regLabel = regionLabel(incident) || "Global";
+  const updates = incident.updates || [];
+  const worstSev = worstSeverityFromUpdates(incident);
+
+  title.textContent = incident.title;
+  if (sub) sub.textContent = `${regLabel} · ${updates.length} update(s) · Started ${fmtDate(updates[0]?.published)}`;
+
+  let servicesHtml = "";
+  if (incident.services) {
+    const list = Object.entries(incident.services).map(([slug, svc]) => `
+      <div class="service-chip">
+        <span class="dot dot-${svc.current || "unknown"}"></span>
+        <span class="service-chip-name">${escapeHtml(svc.service_name || slug)}: ${escapeHtml(SEVERITY_LABEL[svc.current] || svc.current)}</span>
+      </div>
+    `).join("");
+    servicesHtml = `
+      <div style="margin-bottom:16px;">
+        <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Impacted Services (${Object.keys(incident.services).length})</h5>
+        <div class="service-grid">${list}</div>
+      </div>
+    `;
+  }
+
+  const timelineHtml = `
+    <ul class="timeline">
+      ${updates.map(u => `
+        <li>
+          <div class="timeline-meta">
+            <span class="dot dot-${u.severity}"></span>
+            <span class="timeline-time">${fmtDate(u.published)}</span>
+            <span class="badge badge-${u.severity}">${SEVERITY_LABEL[u.severity] ?? u.severity}</span>
+          </div>
+          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
+        </li>
+      `).join("")}
+    </ul>
+  `;
+
+  body.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
+      <span class="badge badge-${worstSev}">${SEVERITY_LABEL[worstSev] ?? worstSev}</span>
+      <span class="incident-region">${escapeHtml(regLabel)}</span>
+      <span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);font-family:monospace;">Key: ${escapeHtml(incident.key)}</span>
+    </div>
+    ${servicesHtml}
+    <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Update History Logs</h5>
+    ${timelineHtml}
+  `;
+
+  modal.hidden = false;
+}
+
+function closeModal() {
+  const modal = document.getElementById("incidentModal");
+  if (modal) modal.hidden = true;
+  state.activeModalIncident = null;
 }
 
 // Build Day Map for Timeline Strip
@@ -389,7 +476,6 @@ function renderDayStrip(incidents) {
 
     const cell = document.createElement("span");
     const isSelected = state.activeDate === key;
-    // FIX: Uses correct class mapping bar-sev to match CSS!
     cell.className = `bar bar-${sev}${isSelected ? " bar-selected" : ""}`;
     cell.dataset.dayIndex = String(index);
     cell.dataset.day = key;
@@ -633,11 +719,12 @@ function renderIncidentCard(incident) {
   const article = document.createElement("article");
   article.className = `incident sev-${worstSev}`;
   article.id = `incident-${encodeURIComponent(incident.key)}`;
+  article.dataset.key = incident.key;
 
   article.innerHTML = `
     <div class="incident-head">
       <div class="incident-title-row">
-        <h4>${escapeHtml(incident.title)}</h4>
+        <h4 class="incident-title-btn" style="cursor:pointer;" title="Click to view details">${escapeHtml(incident.title)}</h4>
         ${regionBadge}
       </div>
       <div class="incident-badges">
@@ -812,6 +899,37 @@ function renderAll() {
   }
 }
 
+// Parse Hash State from Location Bar
+function parseUrlHash() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+
+  const params = new URLSearchParams(hash);
+  const region = params.get("region");
+  const date = params.get("date");
+  const sev = params.get("sev");
+  const incKey = params.get("incident");
+
+  if (region) state.activeRegion = region;
+  if (date) state.activeDate = date;
+  if (sev) state.activeSeverity = sev;
+
+  if (incKey) {
+    const inc = state.allIncidents.find(i => i.key === incKey || i.key === decodeURIComponent(incKey));
+    if (inc) {
+      setTimeout(() => {
+        openModal(inc);
+        const card = document.getElementById(`incident-${encodeURIComponent(inc.key)}`);
+        if (card) {
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          card.classList.add("incident-highlight");
+          setTimeout(() => card.classList.remove("incident-highlight"), 3000);
+        }
+      }, 100);
+    }
+  }
+}
+
 // Data Export Handler (CSV & JSON)
 function exportDataset() {
   const filtered = filterIncidents(state.allIncidents);
@@ -955,6 +1073,59 @@ function setupEventListeners() {
   const exportBtn = document.getElementById("exportDataBtn");
   if (exportBtn) exportBtn.addEventListener("click", exportDataset);
 
+  // Modal event listeners
+  const modalClose = document.getElementById("modalCloseBtn");
+  const modalOverlay = document.getElementById("incidentModal");
+  const modalCopy = document.getElementById("modalCopyBtn");
+  const modalRaw = document.getElementById("modalRawBtn");
+
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalOverlay) {
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+  }
+  if (modalCopy) {
+    modalCopy.addEventListener("click", () => {
+      if (state.activeModalIncident) {
+        const linkUrl = `${window.location.origin}${window.location.pathname}#incident=${encodeURIComponent(state.activeModalIncident.key)}`;
+        navigator.clipboard.writeText(linkUrl).then(() => {
+          showToast("Incident permalink copied!");
+        });
+      }
+    });
+  }
+  if (modalRaw) {
+    modalRaw.addEventListener("click", () => {
+      if (state.activeModalIncident) {
+        const jsonStr = JSON.stringify(state.activeModalIncident, null, 2);
+        const w = window.open();
+        if (w) {
+          w.document.write(`<pre style="font-family:monospace;padding:16px;background:#0f172a;color:#f8fafc;white-space:pre-wrap;">${escapeHtml(jsonStr)}</pre>`);
+        }
+      }
+    });
+  }
+
+  // Incident title click opens Modal
+  const incidentList = document.getElementById("incidentList");
+  if (incidentList) {
+    incidentList.addEventListener("click", (e) => {
+      const titleBtn = e.target.closest(".incident-title-btn");
+      if (!titleBtn) return;
+      const card = titleBtn.closest(".incident");
+      if (!card) return;
+      const key = card.dataset.key;
+      const inc = state.allIncidents.find(i => i.key === key);
+      if (inc) openModal(inc);
+    });
+  }
+
+  // Keyboard shortcut (Escape closes modal)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
   // Copy Permalink Delegation
   document.addEventListener("click", (e) => {
     const copyBtn = e.target.closest(".copy-link-btn");
@@ -1010,6 +1181,7 @@ async function init() {
     const incidents = await loadIncidentsData();
     state.allIncidents = incidents;
 
+    parseUrlHash();
     renderAll();
 
     if (updatedAtEl) {

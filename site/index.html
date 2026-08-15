@@ -249,6 +249,24 @@
       </div>
     </footer>
 
+    <!-- Incident Details Modal -->
+    <div id="incidentModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3 id="modalTitle" class="modal-title">Incident Details</h3>
+            <span id="modalSub" class="modal-sub"></span>
+          </div>
+          <button type="button" id="modalCloseBtn" class="modal-close-btn" aria-label="Close modal">✕</button>
+        </div>
+        <div id="modalBody" class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" id="modalCopyBtn" class="action-btn">🔗 Copy Permalink</button>
+          <button type="button" id="modalRawBtn" class="action-btn">View Raw JSON</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Notification Overlay -->
     <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
