@@ -301,6 +301,136 @@
       "summary": "[RESOLVED] Elevated Packet Loss"
     }
   ],
+  "directconnect-eu-central-1": [
+    {
+      "arn": "arn:aws:health:eu-central-1::event/DIRECTCONNECT/AWS_DIRECTCONNECT_OPERATIONAL_ISSUE/AWS_DIRECTCONNECT_OPERATIONAL_ISSUE_E23AA_ADAB9D3D11F",
+      "date": "1786765379",
+      "event_log": [
+        {
+          "message": "We are investigating increased packet loss, impacting AWS Direct Connect connectivity for some customers in the EU-CENTRAL-1 Region.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786765379
+        },
+        {
+          "message": "We can confirm packet loss impacting Direct Connect connections in the EU-CENTRAL-1 Region. Engineers were automatically engaged and immediately began working to both identify the root cause, and identify multiple parallel paths to mitigate the issue. At this time, we are seeing early signs of recovery. We will provide another update in 60 minutes, or sooner if we have additional information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786768970
+        },
+        {
+          "message": "Starting at 7:33 PM PDT, we began experiencing increased packet loss impacting AWS Direct Connect connectivity for some customers in the EU-CENTRAL-1 Region. While we have made progress, connections to the following Direct Connect location are still impaired: Equinix FR5, Frankfurt, DEU. Customers who have multi-site redundancy configured with their Direct Connect paths should not be observing impact at this time. Customers whom only have connections at the Equinix FR5, Frankfurt, DEU location will continue to experience connectivity issues. We are actively working to mitigate the impact and work toward full recovery, but expect full recovery is multiple hours away. We will provide an update in 90 minutes, or sooner if we have additional information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786773313
+        },
+        {
+          "message": "We are actively working to restore connectivity through the Direct Connect location: Equinix FR5, Frankfurt, DEU. Customers whom only have connections at the Equinix FR5, Frankfurt, DEU location will continue to experience connectivity issues. For a workaround impacted customers who have the option available to failover to VPN are recommended to do so to achieve recovery. For customers using Direct Connect gateway and Transit Gateway, we recommend creating a AWS Site-to-Site VPN and attach it to your Transit Gateway, refer steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers we recommend establishing a AWS Site-to-Site VPN as a temporary backup path,  refer steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. As of this time, we expect recovery is multiple hours away. We will provide another update in 90 minutes, or sooner if we have additional information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786778668
+        },
+        {
+          "message": "We continue to work towards recovery of connectivity for AWS Direct Connect connections at Equinix FR5, Frankfurt, DEU. The root cause is related to a facility infrastructure issue at the location that is impacting network infrastructure. Customers with connections solely at this location will continue to experience packet loss or connectivity degradation. Customers with multi-site or redundant configurations across other locations are not impacted. For a workaround, impacted customers who have the option available to failover to VPN are recommended to do so. For customers using Direct Connect gateway and Transit Gateway, we recommend creating a AWS Site-to-Site VPN and attaching it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. As of this time, we expect recovery is multiple hours away. We will provide another update within 2 hours or as soon as we have more information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786784894
+        },
+        {
+          "message": "AWS Direct Connect connectivity remains impaired for customers with connections at the Equinix FR5 location in Frankfurt, DEU. Customers with multi-site or redundant configurations across other locations continue to be unaffected. Engineers are actively working to restore connectivity, with efforts ongoing across multiple workstreams to resolve the underlying facility issue and bring the impacted network equipment back into service. We continue to expect recovery is multiple hours away. For a workaround, impacted customers who have the option to failover to VPN are recommended to do so. For customers using Direct Connect gateway and Transit Gateway, we recommend creating a AWS Site-to-Site VPN and attaching it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. We will provide another update within 2 hours or as soon as we have more information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786792229
+        },
+        {
+          "message": "Engineers continue work to restore connectivity at Equinix FR5 location in Frankfurt, DEU. Our co-location partner is working to resolve the underlying facility infrastructure issue and while the improvements are not yet customer visible, we are making positive progress towards resolution. For customers who require immediate recovery, we recommend failing over to VPN, as outlined in our previous updates. We will provide another update by 9:30 AM PDT, or sooner if we have additional information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786799870
+        },
+        {
+          "message": "Our co-location partner continues to work to resolve the underlying facility infrastructure issue at the Equinix FR5 location in Frankfurt, DEU. Access to the affected area is currently restricted due to safety concerns, which is impacting our ability to assess the physical condition of the network equipment and provide a more accurate recovery timeline. Based on current information, full recovery is not expected in the near term and may extend beyond today. AWS Direct Connect connections at this location remain impaired. Customers with redundant connections through other locations remain unaffected. For customers using Direct Connect gateway and Transit Gateway, we recommend creating a AWS Site-to-Site VPN and attaching it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. We will provide another update by 3:30 PM PDT, or sooner if we have additional information to share.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786811261
+        },
+        {
+          "message": "Our co-location partner is continuing work to restore safe access to the affected area at the Equinix FR5 location in Frankfurt, DEU. Once safe access has been secured, our engineers will be able to assess the affected network devices. We continue to closely track progress and will share an update by 9:30 PM PDT, or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786832802
+        },
+        {
+          "message": "We are actively engaged with our co-location partner to restore connectivity at Equinix FR5 location in Frankfurt, DEU. Since our last update, we have made incremental progress to restore safe access to the affected area at the Equinix FR5 location in Frankfurt, DEU. In parallel, we have prioritized the order in which critical and high-priority racks will be restored, as part of the mitigation efforts. Based on our current assessment, full recovery is not expected in the near term and may extend beyond today. AWS Direct Connect connections at this location remain impaired. Customers with connections exclusively at this location will continue to experience packet loss. Customers with multi-site or redundant configurations across other Direct Connect locations remain unaffected. For a workaround, impacted customers who have the option available to failover to VPN are recommended to do so. For customers using Direct Connect gateway and Transit Gateway, we recommend creating a AWS Site-to-Site VPN and attaching it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. We continue to closely track progress and will share an update by August 16 3:30 AM PDT, or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786855067
+        },
+        {
+          "message": "We continue to work with our co-location partner to restore connectivity at the Equinix FR5 location in Frankfurt, DEU. Since our last update, we have made significant progress toward restoring safe access to the affected area. The electrical isolation procedure is now underway, with our teams on site in the electrical room executing the de-energization of the affected infrastructure. Once isolation is verified and confirmed safe, engineers will begin a physical inspection of the impacted network equipment to determine the scope of replacement required. \n\nBased on our current assessment, full recovery is not expected in the near term due to the scope of potential impacted to equipment. AWS Direct Connect connections at this location remain impaired. Customers with connections exclusively at this location will continue to experience packet loss. Customers with multi-site or redundant configurations across other Direct Connect locations remain unaffected. For a workaround, impacted customers who have the option available to failover to VPN are recommended to do so. For customers using Direct Connect gateway and Transit Gateway, we recommend creating a AWS Site-to-Site VPN and attaching it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. We continue to closely track progress and will share an update by August 16 9:30 AM PDT, or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786875932
+        },
+        {
+          "message": "The electrical isolation at Equinix FR5 in Frankfurt, DEU is now complete and our engineers have begun physically inspecting the impacted network equipment. We do not yet have a timeline for full resolution while we continue to assess the extent of impact to equipment.\n\nDirect Connect connections at this location remain impaired. Customers with connections exclusively at this location will continue to experience packet loss. Customers with multi-site or redundant configurations across other Direct Connect locations are not affected.\n\nWe recommend that impacted customers failover to VPN until we have more clarity on next steps and a recovery timeline. For customers using Direct Connect gateway and Transit Gateway, you can create an AWS Site-to-Site VPN and attach it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers, we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>. \n\nWe will provide another update by August 16 5:30 PM PDT, or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786897839
+        },
+        {
+          "message": "We have completed our assessment of the impacted network equipment at the Equinix FR5 location in Frankfurt, DEU and now have a clear understanding of the scope of impact. We are making progress toward restoring connectivity and will be taking a phased approach to remediation.\n\nCustomers with connections exclusively at this location will continue to experience packet loss until remediation is complete. Customers with multi-site or redundant configurations across other Direct Connect locations are not affected.\n\nWe will provide another update by August 16 10:30 PM PDT, or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786920667
+        },
+        {
+          "message": "We continue to make progress in our phased remediation at the Equinix FR5 location in Frankfurt, DEU. Since our last update, some dependent network infrastructure has been restored. Remediation of remaining infrastructure is ongoing, with a portion of recovery dependent on the delivery of replacement hardware. Cooling has been fully restored, with environmental conditions stable within normal operating thresholds.\n\nCustomers with connections exclusively at this location will continue to experience packet loss as remediation progresses. Customers with multi-site or redundant configurations across other Direct Connect locations are not affected. Previously communicated mitigation guidance and recommendations remain unchanged at this time. We will provide another update by August 17 4:30 AM PDT, or sooner as remediation progresses.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786945084
+        },
+        {
+          "message": "We continue to make progress in our phased remediation at the Equinix FR5 location in Frankfurt, DEU. Network infrastructure and dependent systems continue to improve as we bring affected hardware back online. Some replacement hardware has been delivered and installation is proceeding as components arrive on-site. In parallel, we are shifting network traffic to allow restored devices to begin serving customers as they come online. \n\nAs we progress through recovery, customers will observe restoration occurring in two stages. In the first stage, BGP sessions will re-establish but IP prefixes will not yet be advertised, this indicates that recovery is still in progress and the underlying infrastructure is not yet ready to carry traffic. In the second stage, IP prefix advertisement will resume, at which point the infrastructure is fully remediated and connectivity is restored.\n\nWhile we do not currently have an ETA for full recovery, we continue to work as quickly and safely as possible to mitigate the impact for customers. We will provide another update by August 17 10:30 AM PDT, or sooner as remediation progresses.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786965750
+        },
+        {
+          "message": "We continue to work on phased remediation incrementally at the Equinix FR5 location in Frankfurt, DEU. We are seeing early signs of recovery while we continue to fully remediate the issue. We are actively working to bring the remaining affected hardware back online and we will provide another update by 12:30 PM PDT, or sooner as remediation progresses.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786983922
+        },
+        {
+          "message": "We are seeing broad signs of recovery at the Equinix FR5 location in Frankfurt, DEU. We have restored connectivity for the majority of affected hardware and most of the connections are fully recovered and stable. There are a small number of customers that will remain affected until the remaining devices are fully restored. We will provide another update by 2:00 PM PDT, or sooner as remediation progresses.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1786989560
+        },
+        {
+          "message": "We continue to work on bringing affected hardware back online. Since our last update we have made progress that will not be visible to customers, but is required for recovery. We are working in parallel to bring all devices online as safely as possible. This work is expected to take several hours to complete and validate.\n\nFor customers that require workarounds, we recommend that you consider failing over to VPN. For customers using Direct Connect gateway and Transit Gateway, you can create an AWS Site-to-Site VPN and attach it to your Transit Gateway, refer to steps <a href=\"https://aws.amazon.com/premiumsupport/knowledge-center/dx-configure-dx-and-vpn-failover-tgw/\">here</a>. For other customers, we recommend establishing an AWS Site-to-Site VPN as a temporary backup path, refer to steps <a href=\"https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html\">here</a>.\n\nWe will provide another update by 7:00 PM PDT or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1787000411
+        },
+        {
+          "message": "We are seeing significant recovery for most of the customer connections at this stage. While we are not yet fully recovered, restoration efforts are progressing as expected at the Equinix FR5 location in Frankfurt, DEU. Remediation of remaining infrastructure involves completion of hardware replacements and traffic validation, both of which are actively underway. We anticipate further customer-visible recovery as the remaining infrastructure is brought back into service. \n\nCustomers with connections exclusively at this location will continue to experience packet loss until remediation is complete. Previously communicated mitigation guidance and recommendations remain unchanged at this time. We will provide another update by August 17 11:00 PM PDT or sooner.",
+          "status": "1",
+          "summary": "Increased Packet loss",
+          "timestamp": 1787017812
+        },
+        {
+          "message": "Starting August 14 7:33 PM PDT, we experienced increased packet loss impacting AWS Direct Connect connectivity for customers with connections at the Equinix FR5 location in Frankfurt, DEU. Engineers were automatically engaged at 7:45 PM on August 14 and immediately began investigating mitigations. By 8:30 PM, we identified that network equipment at the FR5 location was impaired due to water ingress into the co-location facility. As a result, cooling system was impaired which resulted in devices overheating and shutting down. Water also affected power distribution systems which disabled the power for the network devices. Initial recovery efforts were delayed as environmental conditions within the facility required stabilization before engineers could safely access the affected area. Throughout August 15 and 16, our engineers worked in coordination with the facility operator to restore impaired network devices while the underlying infrastructure issue was addressed. By 7:26 PM on August 17, all impaired network equipment was successfully restored and connectivity to the location was verified as fully operational with sustained recovery. We do not expect this issue to recur. \n\nCustomers with redundant connections across other Direct Connect locations maintained connectivity through their alternate paths throughout this event and require no further action. Customers who implemented VPN failover as a workaround may now safely revert to their primary Direct Connect paths. Connectivity has been verified as stable and fully operational. Customers requiring further assistance may contact AWS Support through the AWS Management Console or the <a href=\"https://console.aws.amazon.com/support\">AWS Support Center</a>.",
+          "status": "0",
+          "summary": "[RESOLVED] Increased Packet loss",
+          "timestamp": 1787025679
+        }
+      ],
+      "status": "1",
+      "summary": "[RESOLVED] Increased Packet loss"
+    }
+  ],
   "directconnect-us-east-1": [
     {
       "arn": "arn:aws:health:us-east-1::event/DIRECTCONNECT/AWS_DIRECTCONNECT_OPERATIONAL_ISSUE/AWS_DIRECTCONNECT_OPERATIONAL_ISSUE_5A8A8_4B5C928EF8F",
@@ -572,174 +702,7 @@
   "ec2-ap-northeast-1": [],
   "ec2-ap-northeast-2": [],
   "ec2-ap-northeast-3": [],
-  "ec2-ca-central-1": [
-    {
-      "arn": "arn:aws:health:ca-central-1::event/EC2/AWS_EC2_OPERATIONAL_ISSUE/AWS_EC2_OPERATIONAL_ISSUE_CB2EA_C5CCF3CBF64",
-      "date": "1754991720",
-      "event_log": [
-        {
-          "message": "We are investigating connectivity issues affecting instances in a single Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region.",
-          "status": "1",
-          "summary": "Connectivity Issues",
-          "timestamp": 1754991720
-        },
-        {
-          "message": "We can confirm connectivity issues affecting a subset of EC2 instances and EBS volumes in a single Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region. Engineers were automatically engaged and immediately began investigating. We have identified the root cause as a power issue, and are actively working to restore power. Other AWS Services are also affected by this issue, and are experiencing connectivity issues as well as increased error rates and latencies for some control plane operations. If possible, we recommend using an alternate Availability Zone while we work to fully mitigate this issue. We will provide another update in the next 60 minutes, or sooner if we have additional information to share. ",
-          "status": "1",
-          "summary": "Connectivity Issues",
-          "timestamp": 1754994212
-        },
-        {
-          "message": "We have restored power and are seeing signs of recovery. We continue to work toward recovering all affected EC2 Instances and impaired EBS volumes and will provide another update as soon as we have additional information to share.",
-          "status": "1",
-          "summary": "Connectivity Issues",
-          "timestamp": 1754996695
-        },
-        {
-          "message": "Starting at 2:31 AM PDT, we experienced power and network connectivity issues for instances and EBS volumes in a single Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region due to a power issue. By 3:58 AM PDT, power and networking connectivity had been restored to the majority of affected instances, and degraded performance for the majority of affected EBS volumes had been resolved. A subset of remaining instances and volumes are hosted on hardware which are adversely affected by the loss of power and we continue to work to recover all affected remaining resources. For immediate recovery, we recommend replacing any remaining affected resources if possible. We will provide another update in the next 60 minutes, or sooner if we have additional information to share. ",
-          "status": "1",
-          "summary": "Connectivity Issues",
-          "timestamp": 1754999520
-        },
-        {
-          "message": "We continue to work to fully restore power to impacted resources in a single Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region. We have recovered the majority of impaired resources and are now working to confirm stability before we call full recovery. For immediate recovery, we recommend replacing any remaining affected resources if possible. We will provide another update as soon as we have additional information to share.",
-          "status": "1",
-          "summary": "Connectivity Issues",
-          "timestamp": 1755003060
-        },
-        {
-          "message": "Between 2:31 AM and 5:43 AM PDT, we experienced power and network connectivity issues for instances and resources in a single Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region. Our engineering team was engaged and immediately began working on mitigation while simultaneously investigating the root cause of this impact. Other affected AWS services took immediate mitigation actions aimed at reducing increased error rate and latencies for control plane operations. By 3:58 AM PDT, power and networking connectivity had been restored to the majority of affected instances, and the majority of affected resources were recovered. For the remaining subset of impacted resources, we worked to carefully validate stability while recovering them. By 5:43 AM PDT we had fully recovered all impacted resources. This issue has been resolved and the service is operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Connectivity Issues in Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region.",
-          "timestamp": 1755005520
-        }
-      ],
-      "impacted_services": {
-        "apigateway-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon API Gateway"
-        },
-        "clientvpn-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Client VPN"
-        },
-        "connect-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Connect"
-        },
-        "directconnect-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Direct Connect"
-        },
-        "dms-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Database Migration Service"
-        },
-        "docdb-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon DocumentDB"
-        },
-        "ec2systemsmanager-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Systems Manager"
-        },
-        "ecs-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic Container Service"
-        },
-        "elasticache-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon ElastiCache"
-        },
-        "elasticsearch-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon OpenSearch Service"
-        },
-        "elb-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic Load Balancing"
-        },
-        "emr-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic MapReduce"
-        },
-        "emrserverless-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EMR Serverless"
-        },
-        "fargate-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Fargate"
-        },
-        "globalaccelerator": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Global Accelerator"
-        },
-        "memorydb-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon MemoryDB for Redis"
-        },
-        "privatelink-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS VPCE PrivateLink"
-        },
-        "rds-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Relational Database Service"
-        },
-        "route53": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Route 53"
-        },
-        "route53resolver-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Route 53 Resolver"
-        },
-        "transitgateway-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Transit Gateway"
-        },
-        "verifiedaccess-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Verified Access"
-        },
-        "vpclattice-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon VPC Lattice"
-        },
-        "vpnvpc-ca-central-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Site-to-Site VPN"
-        }
-      },
-      "status": "1",
-      "summary": "[RESOLVED] Connectivity Issues in Availability Zone (cac1-az1) in the CA-CENTRAL-1 Region."
-    }
-  ],
+  "ec2-ca-central-1": [],
   "ec2-eu-north-1": [
     {
       "arn": "arn:aws:health:eu-north-1::event/EC2/AWS_EC2_OPERATIONAL_ISSUE/AWS_EC2_OPERATIONAL_ISSUE_77410_461A699110A",

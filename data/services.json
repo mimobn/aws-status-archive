@@ -51351,6 +51351,21 @@
     "service_name": "Amazon Route 53 Domain Registration"
   },
   {
+    "event_type_code": "AWS_ROUTE53GLOBALRESOLVER_OPERATIONAL_ISSUE",
+    "launch_date": 1772064000,
+    "locale": [
+      "AF",
+      "AP",
+      "EU",
+      "ME",
+      "NA",
+      "SA"
+    ],
+    "region_name": null,
+    "service": "route53globalresolver",
+    "service_name": "Amazon Route 53 Global Resolver"
+  },
+  {
     "event_type_code": "AWS_ROUTE53PRIVATEDNS_OPERATIONAL_ISSUE",
     "launch_date": 1756339200,
     "locale": [
