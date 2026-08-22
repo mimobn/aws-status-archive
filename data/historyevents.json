@@ -272,6 +272,28 @@
     }
   ],
   "cognito-us-east-1": [],
+  "connect-ap-northeast-1": [
+    {
+      "arn": "arn:aws:health:ap-northeast-1::event/CONNECT/AWS_CONNECT_OPERATIONAL_ISSUE/AWS_CONNECT_OPERATIONAL_ISSUE_BFE2B_2DD530F8C5B",
+      "date": "1787277742",
+      "event_log": [
+        {
+          "message": "AP-NORTHEAST-1リージョンにおいて、エラー率が上昇しており、リアルタイムメトリクスに影響が出ています。お客様はリアルタイムメトリクスデータの欠落または遅延を経験する可能性があります。| We are experiencing increased error rates affecting real-time metrics in the AP-NORTHEAST-1 Region. Customers may experience missing or delayed real-time metric data.\n",
+          "status": "1",
+          "summary": "Increased Error Rates",
+          "timestamp": 1787277742
+        },
+        {
+          "message": "日本時間 8:58 AM から 10:34 AM の間、AP-NORTHEAST-1 リージョンにおける Amazon Connect のリアルタイムメトリクスに影響する遅延が増加し、データが欠落する、またはデータが最新の状態に更新されない事象が発生しました。この間、お客様は分析レポート内で一部のデータが反映されない状況を経験した可能性があり、また、コンタクトフロー内でリアルタイムメトリクス (例: 人員の確認ブロック) にアクセスする際に問題が発生した可能性があります。根本原因は、メトリクスイベント配信を担うサブシステムの問題であると特定しました。日本時間 10:13 AM に緩和策の適用を開始し、 10:34 AM までに影響を解消しました。本事象は解決済みであり、サービスは正常に稼働しています。| Between 4:58 PM and 6:34 PM PDT, we experienced increased delays affecting real-time metrics for Amazon Connect in the AP-NORTHEAST-1 Region, resulting in missing or stale data. During this time, customers may have experienced missing data within analytics reports, and may have observed issues if accessing realtime metrics within contact Flows, such as checking agent staffing. We identified the root cause to be an issue with the subsystem responsible for metric event delivery. We started applying the mitigations at 6:13 PM and mitigated the issue by 6:34 PM. The issue has been resolved and the service is operating normally.\n",
+          "status": "0",
+          "summary": "[RESOLVED] Increased Error Rates",
+          "timestamp": 1787280002
+        }
+      ],
+      "status": "1",
+      "summary": "[RESOLVED] Increased Error Rates"
+    }
+  ],
   "connect-us-east-1": [],
   "directconnect-ap-south-1": [
     {
@@ -477,228 +499,8 @@
       "summary": "[RESOLVED] AWS Direct Connect Connectivity Issues"
     }
   ],
-  "dynamodb-us-gov-east-1": [
-    {
-      "arn": "arn:aws:health:us-gov-east-1::event/DYNAMODB/AWS_DYNAMODB_OPERATIONAL_ISSUE/AWS_DYNAMODB_OPERATIONAL_ISSUE_17E2E_6744B0582C8",
-      "date": "1755107766",
-      "event_log": [
-        {
-          "message": "We are investigating increased error rates and increased latencies in the US-GOV-EAST-1 Region.",
-          "status": "1",
-          "summary": "Increased error rates and increased latencies",
-          "timestamp": 1755107766
-        },
-        {
-          "message": "At 9:20 AM PDT we began experiencing increased latency and error rates impacting DynamoDB Streams. Engineers were engaged shortly after and began investigating the issue. We have identified the root cause to be related to a planned configuration change to the supporting network. Work has started on mitigating this impact and we expect to know more within the next 30 minutes. At this time there are no workarounds available.",
-          "status": "1",
-          "summary": "Increased error rates and increased latencies",
-          "timestamp": 1755109574
-        },
-        {
-          "message": "We are beginning to see signs of recovery and seeing Streams processing traffic catch up. Services that depend on DynamoDB streams will recover as they catch up. We continue to monitor the situation and will update this post within the next 30 minutes.",
-          "status": "1",
-          "summary": "Increased error rates and increased latencies",
-          "timestamp": 1755110611
-        },
-        {
-          "message": "Between 9:24 AM and 11:31 AM PDT we experienced increased latency and error rates affecting DynamoDB Streams in the US-GOV-EAST-1 Region. Our engineers were engaged by 9:40 AM and began investigating. By 10:43 AM root cause was understood to have been caused by a planned configuration change to the network that supports DynamoDB Streams and work to correct this configuration began. During this time, attempts to read data from DynamoDB Streams would have failed. Services which depend on DynamoDB Streams have caught up on processing data that was published to streams during this time. At this time the issue is resolved and the service is operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Increased error rates and increased latencies",
-          "timestamp": 1755112525
-        }
-      ],
-      "impacted_services": {
-        "awsiot-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS IoT Core"
-        },
-        "awsiotdevicemanagement-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS IoT Device Management"
-        },
-        "batch-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Batch"
-        },
-        "clientvpn-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Client VPN"
-        },
-        "controltower-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Control Tower"
-        },
-        "ecr-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic Container Registry"
-        },
-        "emr-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic MapReduce"
-        },
-        "emrserverless-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EMR Serverless"
-        },
-        "events-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EventBridge"
-        },
-        "lambda-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Lambda"
-        },
-        "pcs-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Parallel Computing Service"
-        },
-        "quicksight-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Quick Suite"
-        },
-        "scheduler-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EventBridge Scheduler"
-        },
-        "xray-us-gov-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS X-Ray"
-        }
-      },
-      "status": "2",
-      "summary": "[RESOLVED] Increased error rates and increased latencies"
-    }
-  ],
-  "dynamodb-us-gov-west-1": [
-    {
-      "arn": "arn:aws:health:us-gov-west-1::event/DYNAMODB/AWS_DYNAMODB_OPERATIONAL_ISSUE/AWS_DYNAMODB_OPERATIONAL_ISSUE_00450_8B26F765398",
-      "date": "1755107817",
-      "event_log": [
-        {
-          "message": "We are investigating increased error rates and increased latencies in the US-GOV-WEST-1 Region.",
-          "status": "1",
-          "summary": "Increased error rates and increased latencies",
-          "timestamp": 1755107817
-        },
-        {
-          "message": "At 9:20 AM PDT we began experiencing increased latency and error rates impacting DynamoDB Streams. Engineers were engaged shortly after and began investigating the issue. We have identified the root cause to be related to a planned configuration change to the supporting network. Work has started on mitigating this impact and we expect to know more within the next 30 minutes. At this time there are no workarounds available.",
-          "status": "1",
-          "summary": "Increased error rates and increased latencies",
-          "timestamp": 1755109643
-        },
-        {
-          "message": "We are beginning to see signs of recovery and seeing Streams processing traffic catch up. Services that depend on DynamoDB streams will recover as they catch up. We continue to monitor the situation and will update this post within the next 30 minutes.",
-          "status": "1",
-          "summary": "Increased error rates and increased latencies",
-          "timestamp": 1755110645
-        },
-        {
-          "message": "Between 9:36 AM and 11:23 AM PDT we experienced increased latency and error rates affecting DynamoDB Streams in the US-GOV-WEST-1 Region. Our engineers were engaged by 9:40 AM and began investigating. By 10:43 AM root cause was understood to have been caused by a planned configuration change to the network that supports DynamoDB Streams and work to correct this configuration began. During this time, attempts to read data from DynamoDB Streams would have failed. Services which depend on DynamoDB Streams have caught up on processing data that was published to streams during this time. At this time the issue is resolved and the service is operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Increased error rates and increased latencies",
-          "timestamp": 1755112573
-        }
-      ],
-      "impacted_services": {
-        "awsiot-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS IoT Core"
-        },
-        "awsiotdevicemanagement-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS IoT Device Management"
-        },
-        "batch-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Batch"
-        },
-        "bedrock-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Bedrock"
-        },
-        "clientvpn-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Client VPN"
-        },
-        "connect-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Connect"
-        },
-        "controltower-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Control Tower"
-        },
-        "ecr-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic Container Registry"
-        },
-        "emr-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Elastic MapReduce"
-        },
-        "emrserverless-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EMR Serverless"
-        },
-        "events-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EventBridge"
-        },
-        "lambda-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Lambda"
-        },
-        "pcs-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS Parallel Computing Service"
-        },
-        "quicksight-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon Quick Suite"
-        },
-        "scheduler-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EventBridge Scheduler"
-        },
-        "xray-us-gov-west-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "AWS X-Ray"
-        }
-      },
-      "status": "2",
-      "summary": "[RESOLVED] Increased error rates and increased latencies"
-    }
-  ],
+  "dynamodb-us-gov-east-1": [],
+  "dynamodb-us-gov-west-1": [],
   "ec2-ap-northeast-1": [],
   "ec2-ap-northeast-2": [],
   "ec2-ap-northeast-3": [],
@@ -1068,6 +870,34 @@
       },
       "status": "1",
       "summary": "[RESOLVED] Elevated latencies for network change propagation"
+    }
+  ],
+  "ec2-eu-west-2": [
+    {
+      "arn": "arn:aws:health:eu-west-2::event/EC2/AWS_EC2_OPERATIONAL_ISSUE/AWS_EC2_OPERATIONAL_ISSUE_25280_73B0FC79387",
+      "date": "1787152514",
+      "event_log": [
+        {
+          "message": "We are investigating an issue that is impacting launching new EC2 instances and resources in a newly launched Availability Zone (euw2-az4) in the EU-WEST-2 Region. During this time, affected customers may experience issues when creating or modifying resources in the Region. Other AWS services may also be impacted. For immediate recovery, we recommend that customers use alternative Availability Zones (euw2-az1, euw2-az2, and euw2-az3) where applicable. Existing running instances and resources are not affected. We will provide another update by 10:00 AM PDT, or sooner if we have additional information to share.",
+          "status": "1",
+          "summary": "Increased Error Rates",
+          "timestamp": 1787152514
+        },
+        {
+          "message": "On August 18 we launched a new Availability Zone (euw2-az4) in the EU-WEST-2 Region. After the launch, we began experiencing errors launching EC2 instances in the new Availability Zone when a default subnet is not present. We can confirm that existing running instances and resources are not affected. Workflows that automatically get a list of Availability Zones in the Region via the DescribeAvailabilityZones API and then attempt to launch new instances or create resources in the new Availability Zone may encounter errors. For EC2 instance launch failures, we are taking mitigating steps to automatically create default subnets, where one is not already present, when an EC2 instance launch is targeting the new Availability Zone. For customers and workflows that require immediate remediation <a href=\"https://docs.aws.amazon.com/vpc/latest/userguide/work-with-default-vpc.html#create-default-subnet\">you may create a default subnet</a> in the new Availability Zone. This will enable EC2 instance launches to successfully complete. \n\nFor other resources, such as Lambda functions, where the new Availability Zone is currently not supported, we recommend customers update their workflows to exclude the newly launched Availability Zone and continue resource creation using the other Availability Zones in the Region. While we don't have an exact estimate for how long our mitigation efforts will take, we will keep you up to date on our progress and provide you with another update by 1:00 PM PDT or sooner as new information becomes available.",
+          "status": "1",
+          "summary": "Increased Error Rates",
+          "timestamp": 1787159039
+        },
+        {
+          "message": "Between August 18 5:00 PM and August 19 11:00 AM PDT, we experienced elevated errors launching EC2 instances in a newly launched Availability Zone (euw2-az4) in the EU-WEST-2 Region. After the new Availability Zone launch, we began experiencing errors when using a default VPC. We discovered the root cause of the issue on August 19 at 9:00 AM and began deploying a change to resolve the issue at 9:30 AM. While the change was underway, we began to see incremental improvements in new instance launches, with full recovery at 11:00 AM. Existing running instances and resources were not affected. \n\nSome regional services, such as Lambda functions or Aurora databases, were not available at the launch of the new Availability Zone and service availability will be added over time. Customers attempting to create resources before the services become available will see a message reporting that it is not supported in the Availability Zone. \n\nThe issue has been resolved and the service is operating normally.",
+          "status": "0",
+          "summary": "[RESOLVED] Increased Error Rates",
+          "timestamp": 1787165240
+        }
+      ],
+      "status": "1",
+      "summary": "[RESOLVED] Increased Error Rates"
     }
   ],
   "ec2-eu-west-3": [
