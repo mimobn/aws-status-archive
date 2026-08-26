@@ -59480,6 +59480,17 @@
   },
   {
     "event_type_code": "AWS_TIMESTREAM_OPERATIONAL_ISSUE",
+    "launch_date": 1787529600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-north-1",
+    "region_name": "Stockholm",
+    "service": "timestream-eu-north-1",
+    "service_name": "Amazon Timestream"
+  },
+  {
+    "event_type_code": "AWS_TIMESTREAM_OPERATIONAL_ISSUE",
     "launch_date": 1732147200,
     "locale": [
       "AP"
@@ -59553,6 +59564,17 @@
     "region_id": "us-west-2",
     "region_name": "Oregon",
     "service": "timestream-us-west-2",
+    "service_name": "Amazon Timestream"
+  },
+  {
+    "event_type_code": "AWS_TIMESTREAM_OPERATIONAL_ISSUE",
+    "launch_date": 1787529600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-1",
+    "region_name": "Singapore",
+    "service": "timestream-ap-southeast-1",
     "service_name": "Amazon Timestream"
   },
   {
