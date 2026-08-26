@@ -65,6 +65,7 @@ def index():
             "/regions",
             "/updates",
             "/metrics",
+            "/metadata",
         ],
     }
 
@@ -76,10 +77,21 @@ def healthz():
         incidents = conn.execute("SELECT count(*) FROM incidents").fetchone()[0]
         updates = conn.execute("SELECT count(*) FROM updates").fetchone()[0]
         services = conn.execute("SELECT count(*) FROM services").fetchone()[0]
+        meta = dict(
+            conn.execute("SELECT key, value FROM metadata").fetchall()
+        )
         conn.close()
     except sqlite3.Error as exc:
         raise HTTPException(status_code=503, detail=str(exc))
-    return {"ok": True, "incidents": incidents, "updates": updates, "services": services}
+    return {
+        "ok": True,
+        "incidents": incidents,
+        "updates": updates,
+        "services": services,
+        "archive_earliest_date": meta.get("archive_earliest_date"),
+        "archive_latest_date": meta.get("archive_latest_date"),
+        "rebuilt_at": meta.get("rebuilt_at"),
+    }
 
 
 @app.get("/incidents")
@@ -201,10 +213,32 @@ def metrics():
     by_severity = conn.execute(
         "SELECT severity, count(*) FROM updates GROUP BY severity"
     ).fetchall()
+    meta = dict(
+        conn.execute("SELECT key, value FROM metadata").fetchall()
+    )
     conn.close()
     return {
         "incidents": incidents,
         "updates": updates,
         "services": services,
         "updates_by_severity": dict(by_severity),
+        "archive_earliest_date": meta.get("archive_earliest_date"),
+        "archive_latest_date": meta.get("archive_latest_date"),
+        "rebuilt_at": meta.get("rebuilt_at"),
     }
+
+
+@app.get("/metadata")
+def metadata():
+    conn = connect()
+    try:
+        meta = dict(
+            conn.execute("SELECT key, value FROM metadata").fetchall()
+        )
+    except sqlite3.Error as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    finally:
+        conn.close()
+    if not meta:
+        raise HTTPException(status_code=404, detail="no metadata available")
+    return meta
