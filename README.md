@@ -105,24 +105,41 @@ on a given day = no data, not confirmed healthy.
 
 **"No data" vs "operational":** The dashboard distinguishes between
 these states. Days without archived incident data are shown as
-"no data" (gray), not "operational" (green). The incident-free rate is
-calculated only across days where observations exist.
+"no data" (gray), not "operational" (green).
 
 ### Metrics
 
-- **Incident-Free Rate:** `clean_days / observed_days` — the fraction of
-  observed days with no active incidents. Only counts days that have at
-  least one status update in the archive.
-- **Archive Coverage:** The number of days with observations, plus the
-  count of unknown days in the calendar range.
-- **Impacted Days:** Days where at least one incident had a severity
-  worse than operational.
+- **Activity Days:** Days where at least one incident update exists in
+  the archive. These are days with incident activity, NOT confirmed
+  healthy operation.
+- **Total Incidents:** Number of distinct service+region incidents in
+  the archive.
+- **Impact Days:** Activity days where at least one incident had a
+  severity worse than operational (degraded, impacted, or disrupted).
+- **Resolution Days:** Activity days containing only resolution
+  updates (status=operational). These days indicate when incidents
+  ended, NOT that the service was independently observed healthy.
+
+### Day Classification
+
+The heatmap and metrics classify each day as:
+
+1. **Impact day** (red/orange/yellow): Day has at least one
+   non-operational status update.
+2. **Resolution day** (green): Day has only operational status updates
+   — typically the final update resolving an incident.
+3. **No data** (gray): Day has no archived incident activity.
+
+**Important:** The archive does NOT contain independent health
+observations. "Operational" updates always appear as the resolution
+post for an incident. Absence of incidents does NOT confirm normal
+operation.
 
 ### Severity levels
 
 | Level | Meaning |
 |---|---|
-| `operational` | Service confirmed working (explicit status=0 in archive) |
+| `operational` | Incident resolved (explicit status=0 in archive) |
 | `degraded` | Service degraded (status=2) |
 | `impacted` | Service impacted (status=1) |
 | `disrupted` | Service disrupted (status=3) |

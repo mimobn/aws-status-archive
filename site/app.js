@@ -320,27 +320,34 @@ function buildDayMap(incidents) {
   return { byDay, firstDay, lastDay };
 }
 
-// Compute Overall Health Stats & Incident-Free Rate
-function computeIncidentFreeStats(incidents, byDay, firstDay, lastDay) {
+// Compute activity-based stats from the incident day map.
+// "Activity days" are days where at least one incident update occurred.
+// "Impact days" are activity days with non-operational status.
+// "Resolution days" are activity days where every update is operational
+// (i.e. the only activity was an incident being resolved — NOT evidence
+// that the service was independently observed healthy).
+function computeActivityStats(byDay, firstDay, lastDay) {
   if (!firstDay || !lastDay) {
-    return { incidentFreeRate: 1.0, observedDays: 0, cleanDays: 0, calendarDays: 0, impactedDays: 0, noDataDays: 0 };
+    return { activityDays: 0, impactDays: 0, resolutionDays: 0, calendarDays: 0, noDataDays: 0 };
   }
   const startMs = dayToMs(firstDay);
   const endMs = dayToMs(lastDay);
   const calendarDays = Math.max(1, Math.round((endMs - startMs) / 86400000) + 1);
-  const observedDays = Object.keys(byDay).length;
+  const activityDays = Object.keys(byDay).length;
 
-  let impactedDays = 0;
+  let impactDays = 0;
+  let resolutionDays = 0;
   for (const key in byDay) {
-    const worst = worstSeverity(byDay[key].map((u) => u.severity));
+    const updates = byDay[key];
+    const worst = worstSeverity(updates.map((u) => u.severity));
     if (worst !== "operational" && worst !== "unknown" && worst !== "no_data") {
-      impactedDays += 1;
+      impactDays += 1;
+    } else if (updates.every((u) => u.severity === "operational")) {
+      resolutionDays += 1;
     }
   }
-  const cleanDays = observedDays - impactedDays;
-  const noDataDays = calendarDays - observedDays;
-  const incidentFreeRate = observedDays > 0 ? Math.max(0, cleanDays / observedDays) : 1.0;
-  return { incidentFreeRate, observedDays, cleanDays, calendarDays, impactedDays, noDataDays };
+  const noDataDays = calendarDays - activityDays;
+  return { activityDays, impactDays, resolutionDays, calendarDays, noDataDays };
 }
 
 // Render KPI Summary Stats Cards
@@ -349,23 +356,13 @@ function renderStatsCards(incidents) {
   if (!container) return;
 
   const dayMap = buildDayMap(incidents);
-  const { incidentFreeRate, cleanDays, calendarDays, impactedDays, noDataDays, observedDays } = computeIncidentFreeStats(
-    incidents,
+  const { activityDays, impactDays, resolutionDays, calendarDays, noDataDays } = computeActivityStats(
     dayMap.byDay,
     dayMap.firstDay,
     dayMap.lastDay
   );
 
   const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
-
-  // Region count
-  const regionsSet = new Set();
-  incidents.forEach((i) => {
-    const r = regionLabel(i);
-    if (r) regionsSet.add(r);
-  });
-
-  const rateFormatted = (incidentFreeRate * 100).toFixed(1) + "%";
 
   // Scope label for filtered vs global
   let scopeLabel = "Global archive";
@@ -375,24 +372,11 @@ function renderStatsCards(incidents) {
     scopeLabel = `Filtered to ${SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity}`;
   }
 
-  // Archive date range from metadata
-  const meta = state.archiveMetadata;
-  let archiveRange = "";
-  if (meta && meta.archive_earliest_date && meta.archive_latest_date) {
-    archiveRange = `${meta.archive_earliest_date} to ${meta.archive_latest_date}`;
-  }
-
-  // Low coverage warning
-  const lowCoverage = observedDays > 0 && observedDays <= 3;
-  const coverageWarning = lowCoverage
-    ? `<span class="stat-warning">Low observation coverage</span>`
-    : "";
-
   container.innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">Incident-Free Rate</div>
-      <div class="stat-value stat-val-operational">${rateFormatted}</div>
-      <div class="stat-sub">${cleanDays} / ${observedDays} observed days${coverageWarning}</div>
+      <div class="stat-label">Activity Days</div>
+      <div class="stat-value">${activityDays}<span class="stat-unit"> / ${calendarDays}</span></div>
+      <div class="stat-sub">Days with archived incident activity</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Total Incidents</div>
@@ -400,14 +384,14 @@ function renderStatsCards(incidents) {
       <div class="stat-sub">${totalUpdates} status updates</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Impacted Days</div>
-      <div class="stat-value ${impactedDays > 0 ? "stat-val-degraded" : "stat-val-operational"}">${impactedDays}</div>
-      <div class="stat-sub">Days with recorded impact</div>
+      <div class="stat-label">Impact Days</div>
+      <div class="stat-value ${impactDays > 0 ? "stat-val-degraded" : "stat-val-operational"}">${impactDays}</div>
+      <div class="stat-sub">Days with non-operational status</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Observed Days</div>
-      <div class="stat-value">${observedDays}<span class="stat-unit"> / ${calendarDays}</span></div>
-      <div class="stat-sub">${noDataDays > 0 ? noDataDays + " days unknown · " : ""}${scopeLabel}</div>
+      <div class="stat-label">Resolution Days</div>
+      <div class="stat-value">${resolutionDays}</div>
+      <div class="stat-sub">Days containing only resolution updates</div>
     </div>
   `;
 }
@@ -574,6 +558,7 @@ function attachStripTooltip(stripState) {
 
     const updates = stripState.byDay[day] || [];
     const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
+    const isResolutionOnly = updates.length > 0 && updates.every((u) => u.severity === "operational");
 
     const uniqueTitles = [...new Set(updates.map((u) => u.incidentTitle || u.title))].slice(0, 3);
 
@@ -584,6 +569,10 @@ function attachStripTooltip(stripState) {
          </ul>`
       : "";
 
+    const resolutionNote = isResolutionOnly
+      ? `<div style="margin-top:4px;font-size:0.7rem;color:var(--text-subtle);">Incident resolved on this day</div>`
+      : "";
+
     tooltip.innerHTML = `
       <div class="tooltip-date">${fmtShortDay(day)}</div>
       <div class="tooltip-summary">
@@ -592,6 +581,7 @@ function attachStripTooltip(stripState) {
         ${updates.length ? `<span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);">${updates.length} event(s)</span>` : ""}
       </div>
       ${titleListHtml}
+      ${resolutionNote}
       <div style="margin-top:6px;font-size:0.7rem;color:var(--accent-primary);">Click bar to filter date</div>
     `;
 
