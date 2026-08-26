@@ -9,6 +9,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from check_integrity import run_checks  # noqa: E402
+from rebuild import build_metadata  # noqa: E402
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS updates (
@@ -33,6 +34,10 @@ CREATE TABLE IF NOT EXISTS services (
     severity TEXT,
     max_severity TEXT,
     PRIMARY KEY (incident_key, service_slug)
+);
+CREATE TABLE IF NOT EXISTS metadata (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
 );
 """
 
@@ -67,6 +72,9 @@ def build_db(path, incidents, updates):
             "INSERT INTO updates VALUES (?, ?, ?, ?, ?, ?)",
             (guid, key, published, severity, title, desc),
         )
+    meta = build_metadata(one_incident_rebuild() if len(incidents) == 1 else [])
+    for k, v in meta.items():
+        conn.execute("INSERT INTO metadata VALUES (?, ?)", (k, str(v)))
     conn.commit()
     conn.close()
 

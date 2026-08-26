@@ -4,7 +4,7 @@
 The rebuild is supposed to be a lossless mirror of the archived AWS
 Service Health JSON files. This verifies that:
 
-  * all three tables exist,
+  * all four tables exist (incidents, updates, services, metadata),
   * every incident has at least one update,
   * every update belongs to a known incident (no orphans),
   * every update guid is unique,
@@ -20,7 +20,7 @@ import os
 import sqlite3
 import sys
 
-from rebuild import DB_PATH, rebuild
+from rebuild import DB_PATH, build_metadata, rebuild
 
 
 def run_checks(conn, incidents):
@@ -43,6 +43,7 @@ def run_checks(conn, incidents):
     check("incidents table exists", "incidents" in tables)
     check("updates table exists", "updates" in tables)
     check("services table exists", "services" in tables)
+    check("metadata table exists", "metadata" in tables)
     if "incidents" not in tables or "updates" not in tables:
         return results
 
@@ -100,6 +101,23 @@ def run_checks(conn, incidents):
             expected["update_count"] == update_count,
             f"updates db {update_count} vs rebuild {expected['update_count']}",
         )
+
+    if "metadata" in tables:
+        meta_rows = dict(
+            conn.execute("SELECT key, value FROM metadata").fetchall()
+        )
+        expected_meta = build_metadata(incidents)
+        for mk, mv in expected_meta.items():
+            if mk == "rebuilt_at":
+                check(f"metadata.{mk} exists", mk in meta_rows)
+                continue
+            db_val = meta_rows.get(mk)
+            check(
+                f"metadata.{mk} matches",
+                db_val == str(mv),
+                f"db {db_val!r} vs rebuild {str(mv)!r}",
+            )
+
     return results
 
 

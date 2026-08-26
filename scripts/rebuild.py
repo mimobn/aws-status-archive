@@ -25,7 +25,7 @@ import json
 import os
 import sqlite3
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from parse_status import (
     clean_title,
@@ -80,6 +80,7 @@ SCHEMA = """
 DROP TABLE IF EXISTS services;
 DROP TABLE IF EXISTS updates;
 DROP TABLE IF EXISTS incidents;
+DROP TABLE IF EXISTS metadata;
 
 CREATE TABLE updates (
     guid TEXT PRIMARY KEY,
@@ -109,6 +110,11 @@ CREATE TABLE services (
     severity TEXT,
     max_severity TEXT,
     PRIMARY KEY (incident_key, service_slug)
+);
+
+CREATE TABLE metadata (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
 );
 """
 
@@ -215,6 +221,33 @@ def rebuild():
     return build_incidents(catalog, history, current)
 
 
+def build_metadata(incidents):
+    """Compute archive metadata from the rebuilt incident list.
+
+    Returns a dict with:
+      - total_incidents, total_updates: counts
+      - archive_earliest_date, archive_latest_date: ISO date strings of the
+        earliest and latest update timestamps across all incidents
+      - rebuilt_at: ISO timestamp of when this rebuild ran
+    """
+    total_updates = sum(inc["update_count"] for inc in incidents)
+    dates = []
+    for inc in incidents:
+        if inc.get("started_at"):
+            dates.append(inc["started_at"][:10])
+        if inc.get("last_update"):
+            dates.append(inc["last_update"][:10])
+    earliest = min(dates) if dates else None
+    latest = max(dates) if dates else None
+    return {
+        "total_incidents": len(incidents),
+        "total_updates": total_updates,
+        "archive_earliest_date": earliest,
+        "archive_latest_date": latest,
+        "rebuilt_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 def with_guids(incident):
     """Give each update the archive's stable guid (slug + unix timestamp)."""
     for update in incident["updates"]:
@@ -223,7 +256,7 @@ def with_guids(incident):
             update["guid"] = f"https://status.aws.amazon.com/#{incident['service']}_{ts}"
 
 
-def write_db(incidents):
+def write_db(incidents, metadata):
     """Mirror the rebuild into SQLite (wipe and rewrite)."""
     conn = sqlite3.connect(DB_PATH)
     try:
@@ -273,6 +306,11 @@ def write_db(incidents):
                         service.get("max"),
                     ),
                 )
+        for key, value in metadata.items():
+            conn.execute(
+                "INSERT INTO metadata (key, value) VALUES (?, ?)",
+                (key, str(value)),
+            )
         conn.commit()
     finally:
         conn.close()
@@ -287,17 +325,28 @@ def main():
             f"{incident['title'][:70]}"
         )
 
+    metadata = build_metadata(incidents)
+
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as handle:
         json.dump(incidents, handle, indent=2, ensure_ascii=False)
 
-    site_parsed_path = os.path.join(os.path.dirname(__file__), "..", "site", "parsed", "incidents.json")
-    os.makedirs(os.path.dirname(site_parsed_path), exist_ok=True)
+    site_parsed_dir = os.path.join(os.path.dirname(__file__), "..", "site", "parsed")
+    os.makedirs(site_parsed_dir, exist_ok=True)
+    site_parsed_path = os.path.join(site_parsed_dir, "incidents.json")
     with open(site_parsed_path, "w", encoding="utf-8") as handle:
         json.dump(incidents, handle, indent=2, ensure_ascii=False)
 
-    write_db(incidents)
+    metadata_path = os.path.join(os.path.dirname(OUT_PATH), "metadata.json")
+    with open(metadata_path, "w", encoding="utf-8") as handle:
+        json.dump(metadata, handle, indent=2, ensure_ascii=False)
+    site_metadata_path = os.path.join(site_parsed_dir, "metadata.json")
+    with open(site_metadata_path, "w", encoding="utf-8") as handle:
+        json.dump(metadata, handle, indent=2, ensure_ascii=False)
+
+    write_db(incidents, metadata)
     print(f"wrote {DB_PATH}")
+    print(f"wrote {metadata_path}")
     print(f"wrote {site_parsed_path}")
 
 
