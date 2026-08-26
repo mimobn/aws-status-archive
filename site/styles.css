@@ -630,7 +630,7 @@ button, input, select {
 .bar.bar-impacted { background: var(--bar-impacted); }
 .bar.bar-disrupted { background: var(--bar-disrupted); }
 .bar.bar-informational { background: var(--bar-informational); }
-.bar.bar-none { background: var(--bar-none); }
+.bar.bar-none, .bar.bar-no_data { background: var(--bar-none); }
 
 .bar.bar-selected {
   box-shadow: 0 0 0 2px var(--accent-primary), 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -675,7 +675,8 @@ button, input, select {
 .dot-disrupted { background: var(--disrupted); }
 .dot-impacted { background: var(--impacted); }
 .dot-degraded { background: var(--degraded); }
-.dot-operational, .dot-none { background: var(--operational); }
+.dot-operational { background: var(--operational); }
+.dot-none, .dot-no_data { background: var(--text-subtle); }
 .dot-informational { background: var(--informational); }
 
 /* Tooltip Popover */
@@ -1100,6 +1101,12 @@ button, input, select {
   background: var(--operational-bg);
   color: var(--operational);
   border-color: var(--operational-border);
+}
+
+.badge-no_data, .badge-none {
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--text-subtle);
+  border-color: rgba(100, 116, 139, 0.3);
 }
 
 .badge-info {

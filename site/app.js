@@ -4,6 +4,7 @@
  */
 
 const DATA_URLS = ["parsed/incidents.json", "../out/incidents.json"];
+const METADATA_URLS = ["parsed/metadata.json", "../out/metadata.json"];
 
 const SEVERITY_RANK = {
   disrupted: 4,
@@ -12,6 +13,7 @@ const SEVERITY_RANK = {
   informational: 1,
   operational: 0,
   unknown: -1,
+  no_data: -2,
 };
 
 const SEVERITY_LABEL = {
@@ -20,6 +22,7 @@ const SEVERITY_LABEL = {
   degraded: "Degraded",
   informational: "Informational",
   operational: "Operating Normally",
+  no_data: "No Data Available",
 };
 
 const MONTHS_SHORT = [
@@ -67,6 +70,7 @@ const REGION_CODE_RE = /\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b/i;
 // State Store
 const state = {
   allIncidents: [],
+  archiveMetadata: null,
   activeRegion: null,
   activeSeverity: "all",
   activeDate: null,
@@ -180,6 +184,18 @@ async function loadIncidentsData() {
     }
   }
   throw new Error(lastErr ? lastErr.message : "Failed to load incidents dataset");
+}
+
+async function loadMetadata() {
+  for (const url of METADATA_URLS) {
+    try {
+      const resp = await fetch(url);
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (_) { /* ignore */ }
+  }
+  return null;
 }
 
 // Toast Notifications
@@ -304,25 +320,27 @@ function buildDayMap(incidents) {
   return { byDay, firstDay, lastDay };
 }
 
-// Compute Overall Health Stats & Uptime
-function computeUptime(incidents, byDay, firstDay, lastDay) {
+// Compute Overall Health Stats & Incident-Free Rate
+function computeIncidentFreeStats(incidents, byDay, firstDay, lastDay) {
   if (!firstDay || !lastDay) {
-    return { uptime: 1.0, activeDays: 0, cleanDays: 0, totalDays: 0, impactedDays: 0 };
+    return { incidentFreeRate: 1.0, observedDays: 0, cleanDays: 0, calendarDays: 0, impactedDays: 0, noDataDays: 0 };
   }
   const startMs = dayToMs(firstDay);
   const endMs = dayToMs(lastDay);
-  const totalDays = Math.max(1, Math.round((endMs - startMs) / 86400000) + 1);
+  const calendarDays = Math.max(1, Math.round((endMs - startMs) / 86400000) + 1);
+  const observedDays = Object.keys(byDay).length;
 
   let impactedDays = 0;
   for (const key in byDay) {
     const worst = worstSeverity(byDay[key].map((u) => u.severity));
-    if (worst !== "operational" && worst !== "unknown") {
+    if (worst !== "operational" && worst !== "unknown" && worst !== "no_data") {
       impactedDays += 1;
     }
   }
-  const cleanDays = totalDays - impactedDays;
-  const uptime = Math.max(0, 1 - impactedDays / totalDays);
-  return { uptime, activeDays: Object.keys(byDay).length, cleanDays, totalDays, impactedDays };
+  const cleanDays = observedDays - impactedDays;
+  const noDataDays = calendarDays - observedDays;
+  const incidentFreeRate = observedDays > 0 ? Math.max(0, cleanDays / observedDays) : 1.0;
+  return { incidentFreeRate, observedDays, cleanDays, calendarDays, impactedDays, noDataDays };
 }
 
 // Render KPI Summary Stats Cards
@@ -331,7 +349,7 @@ function renderStatsCards(incidents) {
   if (!container) return;
 
   const dayMap = buildDayMap(incidents);
-  const { uptime, cleanDays, totalDays, impactedDays } = computeUptime(
+  const { incidentFreeRate, cleanDays, calendarDays, impactedDays, noDataDays, observedDays } = computeIncidentFreeStats(
     incidents,
     dayMap.byDay,
     dayMap.firstDay,
@@ -347,13 +365,21 @@ function renderStatsCards(incidents) {
     if (r) regionsSet.add(r);
   });
 
-  const uptimeFormatted = (uptime * 100).toFixed(1) + "%";
+  const rateFormatted = (incidentFreeRate * 100).toFixed(1) + "%";
+
+  // Scope label for filtered vs global
+  let scopeLabel = "Global archive";
+  if (state.activeRegion) {
+    scopeLabel = `Filtered to ${state.activeRegion}`;
+  } else if (state.activeSeverity !== "all") {
+    scopeLabel = `Filtered to ${SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity}`;
+  }
 
   container.innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">Uptime</div>
-      <div class="stat-value stat-val-operational">${uptimeFormatted}</div>
-      <div class="stat-sub">${cleanDays} quiet / ${totalDays} days</div>
+      <div class="stat-label">Incident-Free Rate</div>
+      <div class="stat-value stat-val-operational">${rateFormatted}</div>
+      <div class="stat-sub">${cleanDays} of ${observedDays} observed days</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Total Incidents</div>
@@ -363,12 +389,12 @@ function renderStatsCards(incidents) {
     <div class="stat-card">
       <div class="stat-label">Impacted Days</div>
       <div class="stat-value ${impactedDays > 0 ? "stat-val-degraded" : "stat-val-operational"}">${impactedDays}</div>
-      <div class="stat-sub">Days with incidents</div>
+      <div class="stat-sub">Days with active incidents</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Regions Recorded</div>
-      <div class="stat-value">${regionsSet.size}</div>
-      <div class="stat-sub">AWS global locations</div>
+      <div class="stat-label">Archive Coverage</div>
+      <div class="stat-value">${observedDays}d</div>
+      <div class="stat-sub">${noDataDays > 0 ? noDataDays + " days unknown · " : ""}${scopeLabel}</div>
     </div>
   `;
 }
@@ -472,7 +498,7 @@ function renderDayStrip(incidents) {
     const key = keyFromMs(ms);
     days.push(key);
     const updates = byDay[key];
-    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "none";
+    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
 
     const cell = document.createElement("span");
     const isSelected = state.activeDate === key;
@@ -485,7 +511,7 @@ function renderDayStrip(incidents) {
 
   if (labels && labels.length >= 3) {
     labels[0].textContent = fmtShortDate(startDay);
-    labels[2].textContent = endDay === maxDay ? "Today (" + fmtShortDate(endDay) + ")" : fmtShortDate(endDay);
+    labels[2].textContent = endDay === maxDay ? "Latest (" + fmtShortDate(endDay) + ")" : fmtShortDate(endDay);
   }
 
   // Update strip controls UI
@@ -503,8 +529,8 @@ function renderDayStrip(incidents) {
 
     if (windowLabel) {
       windowLabel.textContent = state.stripShowAll
-        ? "All time view (" + totalDays + " days)"
-        : `Showing last ${state.windowDays} days`;
+        ? `All available data (${totalDays} calendar days)`
+        : `Showing last ${state.windowDays} calendar days`;
     }
   }
 
@@ -534,7 +560,7 @@ function attachStripTooltip(stripState) {
     if (!day) return;
 
     const updates = stripState.byDay[day] || [];
-    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "none";
+    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
 
     const uniqueTitles = [...new Set(updates.map((u) => u.incidentTitle || u.title))].slice(0, 3);
 
@@ -549,7 +575,7 @@ function attachStripTooltip(stripState) {
       <div class="tooltip-date">${fmtShortDay(day)}</div>
       <div class="tooltip-summary">
         <span class="dot dot-${severity}"></span>
-        <span>${SEVERITY_LABEL[severity] ?? (severity === "none" ? "Operating Normally" : severity)}</span>
+        <span>${SEVERITY_LABEL[severity] ?? (severity === "no_data" ? "No Data Available" : severity)}</span>
         ${updates.length ? `<span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);">${updates.length} event(s)</span>` : ""}
       </div>
       ${titleListHtml}
@@ -712,7 +738,7 @@ function renderIncidentCard(incident) {
     if (diffMins > 0) {
       const hrs = Math.floor(diffMins / 60);
       const mins = diffMins % 60;
-      durationStr = ` · Duration: ${hrs > 0 ? `${hrs}h ` : ""}${mins}m`;
+        durationStr = ` · Updates span: ${hrs > 0 ? `${hrs}h ` : ""}${mins}m`;
     }
   }
 
@@ -1178,15 +1204,22 @@ async function init() {
 
   const updatedAtEl = document.getElementById("updatedAt");
   try {
-    const incidents = await loadIncidentsData();
+    const [incidents, metadata] = await Promise.all([
+      loadIncidentsData(),
+      loadMetadata(),
+    ]);
     state.allIncidents = incidents;
+    state.archiveMetadata = metadata;
 
     parseUrlHash();
     renderAll();
 
     if (updatedAtEl) {
       const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
-      updatedAtEl.textContent = `${incidents.length} incidents · ${totalUpdates} updates · Data snapshot up-to-date`;
+      const freshness = metadata && metadata.archive_latest_date
+        ? ` · Archive covers ${metadata.archive_earliest_date} to ${metadata.archive_latest_date}`
+        : "";
+      updatedAtEl.textContent = `${incidents.length} incidents · ${totalUpdates} updates${freshness}`;
     }
   } catch (err) {
     console.error("Initialization error:", err);
