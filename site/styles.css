@@ -537,6 +537,18 @@ button, input, select {
   margin-top: 4px;
 }
 
+.stat-unit {
+  font-size: 0.7em;
+  color: var(--text-subtle);
+}
+
+.stat-warning {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--degraded);
+  margin-top: 2px;
+}
+
 /* --- Heatmap Strip --- */
 .strip-container {
   background: var(--bg-primary);

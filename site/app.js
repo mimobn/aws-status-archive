@@ -375,11 +375,24 @@ function renderStatsCards(incidents) {
     scopeLabel = `Filtered to ${SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity}`;
   }
 
+  // Archive date range from metadata
+  const meta = state.archiveMetadata;
+  let archiveRange = "";
+  if (meta && meta.archive_earliest_date && meta.archive_latest_date) {
+    archiveRange = `${meta.archive_earliest_date} to ${meta.archive_latest_date}`;
+  }
+
+  // Low coverage warning
+  const lowCoverage = observedDays > 0 && observedDays <= 3;
+  const coverageWarning = lowCoverage
+    ? `<span class="stat-warning">Low observation coverage</span>`
+    : "";
+
   container.innerHTML = `
     <div class="stat-card">
       <div class="stat-label">Incident-Free Rate</div>
       <div class="stat-value stat-val-operational">${rateFormatted}</div>
-      <div class="stat-sub">${cleanDays} of ${observedDays} observed days</div>
+      <div class="stat-sub">${cleanDays} / ${observedDays} observed days${coverageWarning}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Total Incidents</div>
@@ -389,11 +402,11 @@ function renderStatsCards(incidents) {
     <div class="stat-card">
       <div class="stat-label">Impacted Days</div>
       <div class="stat-value ${impactedDays > 0 ? "stat-val-degraded" : "stat-val-operational"}">${impactedDays}</div>
-      <div class="stat-sub">Days with active incidents</div>
+      <div class="stat-sub">Days with recorded impact</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Archive Coverage</div>
-      <div class="stat-value">${observedDays}d</div>
+      <div class="stat-label">Observed Days</div>
+      <div class="stat-value">${observedDays}<span class="stat-unit"> / ${calendarDays}</span></div>
       <div class="stat-sub">${noDataDays > 0 ? noDataDays + " days unknown · " : ""}${scopeLabel}</div>
     </div>
   `;
@@ -1217,7 +1230,7 @@ async function init() {
     if (updatedAtEl) {
       const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
       const freshness = metadata && metadata.archive_latest_date
-        ? ` · Archive covers ${metadata.archive_earliest_date} to ${metadata.archive_latest_date}`
+        ? ` · Incident data: ${metadata.archive_earliest_date} to ${metadata.archive_latest_date}`
         : "";
       updatedAtEl.textContent = `${incidents.length} incidents · ${totalUpdates} updates${freshness}`;
     }
