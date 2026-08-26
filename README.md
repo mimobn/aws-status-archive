@@ -61,11 +61,13 @@ is the static GitHub Pages version, not this service.
 
 | Endpoint | What it does |
 |---|---|
-| `GET /healthz` | Health check + counts |
+| `GET /healthz` | Health check + counts + archive freshness |
 | `GET /incidents` | List all incidents |
 | `GET /incidents/{key}` | Incident detail with timeline + services |
+| `GET /regions` | Regions with incident counts |
 | `GET /updates` | Recent updates (filterable by severity) |
-| `GET /metrics` | Aggregate stats |
+| `GET /metrics` | Aggregate stats + archive metadata |
+| `GET /metadata` | Archive metadata (date range, counts, rebuild time) |
 
 ## Tests
 
@@ -81,5 +83,50 @@ archive-shape validation — all with real samples in `fixtures/`.
 The archives are snapshots of what AWS publishes, fetched on a schedule and
 stored in git. The history reaches back about 12 months (as far as AWS
 keeps it); the daily archive keeps that window rolling forward.
+
+### Data semantics
+
+**What an archived snapshot represents:** A point-in-time dump of the AWS
+Service Health Dashboard's internal state. It contains three JSON files:
+the service catalog, historical incidents with full update logs, and
+currently open incidents with per-service status.
+
+**What an incident represents:** A single service+region event (e.g.,
+`ec2-us-east-1` during a specific time window). Incidents are keyed by
+service slug and event start timestamp.
+
+**What a status update represents:** A timestamped status change entry
+within an incident's event log. Timestamps are publication times (unix
+seconds), not necessarily the exact moment a state transition occurred.
+
+**What absence of an incident means:** The archive does NOT confirm
+normal operation. AWS only populates the feed with incidents. No incident
+on a given day = no data, not confirmed healthy.
+
+**"No data" vs "operational":** The dashboard distinguishes between
+these states. Days without archived incident data are shown as
+"no data" (gray), not "operational" (green). The incident-free rate is
+calculated only across days where observations exist.
+
+### Metrics
+
+- **Incident-Free Rate:** `clean_days / observed_days` — the fraction of
+  observed days with no active incidents. Only counts days that have at
+  least one status update in the archive.
+- **Archive Coverage:** The number of days with observations, plus the
+  count of unknown days in the calendar range.
+- **Impacted Days:** Days where at least one incident had a severity
+  worse than operational.
+
+### Severity levels
+
+| Level | Meaning |
+|---|---|
+| `operational` | Service confirmed working (explicit status=0 in archive) |
+| `degraded` | Service degraded (status=2) |
+| `impacted` | Service impacted (status=1) |
+| `disrupted` | Service disrupted (status=3) |
+| `no_data` | No archived observation for this period |
+| `unknown` | Status could not be determined |
 
 Built with Python, FastAPI, and SQLite.
