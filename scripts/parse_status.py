@@ -19,6 +19,11 @@ colors the same way as the site does:
     1 -> impacted         (Impacted)
     2 -> degraded         (Degraded)
     3 -> disrupted        (Disrupted)
+
+An additional "no_data" state indicates that no archived observation exists
+for a given period.  Absence of incidents does NOT confirm normal
+operation — it means the archive has no evidence either way.  "no_data"
+must never be confused with "operational".
 """
 
 import json
@@ -130,9 +135,15 @@ def service_days(transitions, first_day, last_day):
     """Per-day severity for a service across an incident window.
 
     `transitions` is a list of {"timestamp"/"date" (unix), "status"/"previous_status"
-    ...} entries sorted by time. Each day takes the severity of the most
-    recent transition at or before that day; days before the first
-    transition are operational.
+    ...} entries sorted by time.  Each day takes the severity of the most
+    recent transition at or before that day.
+
+    Days before the first transition are "no_data" — the archive contains
+    no observation for those periods and they must not be treated as
+    "operational".  Similarly, days after the last transition retain that
+    transition's severity only if the source explicitly establishes
+    continuity (e.g. a "resolved" status); otherwise the state persists
+    as the last known observation.
     """
     events = []
     for trans in transitions:
@@ -147,7 +158,7 @@ def service_days(transitions, first_day, last_day):
     events.sort()
 
     days = {}
-    current = "operational"
+    current = "no_data"
     year, month, day = (int(part) for part in first_day.split("-"))
     cursor = int(datetime(year, month, day, tzinfo=UTC).timestamp()) * 1000
     end = day_start_ms(last_day)
@@ -165,7 +176,7 @@ def service_days(transitions, first_day, last_day):
 
 def worst_transition_severity(transitions):
     """Worst severity reached across an incident's per-service transitions."""
-    rank = {"disrupted": 4, "impacted": 3, "degraded": 2, "informational": 1, "operational": 0, "unknown": -1}
+    rank = {"disrupted": 4, "impacted": 3, "degraded": 2, "informational": 1, "operational": 0, "unknown": -1, "no_data": -2}
     worst = "unknown"
     for trans in transitions:
         status = trans.get("current_status")

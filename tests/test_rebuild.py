@@ -70,10 +70,40 @@ class TestParseStatus(unittest.TestCase):
         self.assertEqual(incident["updates"][0]["title"], "Increased Error Rates")
         self.assertEqual(incident["updates"][1]["severity"], "disrupted")
 
-    def test_service_days_starts_operational(self):
+    def test_service_days_no_data_before_first_transition(self):
         transitions = [{"timestamp": 1772369485000, "current_status": "3"}]
         days = service_days(transitions, "2026-02-28", "2026-03-02")
-        self.assertEqual(days["2026-02-28"], "operational")
+        self.assertEqual(days["2026-02-28"], "no_data")
+        self.assertEqual(days["2026-03-01"], "disrupted")
+        self.assertEqual(days["2026-03-02"], "disrupted")
+
+    def test_service_days_no_data_with_empty_transitions(self):
+        days = service_days([], "2026-03-01", "2026-03-03")
+        self.assertEqual(days["2026-03-01"], "no_data")
+        self.assertEqual(days["2026-03-02"], "no_data")
+        self.assertEqual(days["2026-03-03"], "no_data")
+
+    def test_service_days_gap_between_transitions(self):
+        transitions = [
+            {"timestamp": 1772369485000, "current_status": "3"},
+            {"timestamp": 1772542285000, "current_status": "0"},
+        ]
+        days = service_days(transitions, "2026-02-28", "2026-03-04")
+        self.assertEqual(days["2026-02-28"], "no_data")
+        self.assertEqual(days["2026-03-01"], "disrupted")
+        self.assertEqual(days["2026-03-02"], "disrupted")
+        # After resolution, the state persists as "operational" (last known observation)
+        self.assertEqual(days["2026-03-03"], "operational")
+        self.assertEqual(days["2026-03-04"], "operational")
+
+    def test_service_days_multiple_transitions_same_day(self):
+        transitions = [
+            {"timestamp": 1772369485000, "current_status": "1"},
+            {"timestamp": 1772373085000, "current_status": "3"},
+        ]
+        days = service_days(transitions, "2026-02-28", "2026-03-02")
+        self.assertEqual(days["2026-02-28"], "no_data")
+        # Both transitions are on Mar 1; the worst (disrupted) should apply
         self.assertEqual(days["2026-03-01"], "disrupted")
         self.assertEqual(days["2026-03-02"], "disrupted")
 
@@ -84,6 +114,16 @@ class TestParseStatus(unittest.TestCase):
             {"current_status": "0"},
         ]
         self.assertEqual(worst_transition_severity(transitions), "disrupted")
+
+    def test_worst_transition_severity_ignores_no_data(self):
+        transitions = [
+            {"current_status": None},
+            {"current_status": "2"},
+        ]
+        self.assertEqual(worst_transition_severity(transitions), "degraded")
+
+    def test_worst_transition_severity_empty(self):
+        self.assertEqual(worst_transition_severity([]), "unknown")
 
 
 class TestRebuild(unittest.TestCase):
