@@ -11371,6 +11371,18 @@
   },
   {
     "event_type_code": "AWS_BEDROCK_AGENTCORE_OPERATIONAL_ISSUE",
+    "launch_date": 1787702400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-south-2",
+    "region_name": "Hyderabad",
+    "service": "bedrock-agentcore-ap-south-2",
+    "service_name": "Bedrock AgentCore",
+    "short_name": "Bedrock AgentCore"
+  },
+  {
+    "event_type_code": "AWS_BEDROCK_AGENTCORE_OPERATIONAL_ISSUE",
     "launch_date": 1760918400,
     "locale": [
       "NA"
@@ -11450,6 +11462,18 @@
     "region_id": "us-west-2",
     "region_name": "Oregon",
     "service": "bedrock-agentcore-us-west-2",
+    "service_name": "Bedrock AgentCore",
+    "short_name": "Bedrock AgentCore"
+  },
+  {
+    "event_type_code": "AWS_BEDROCK_AGENTCORE_OPERATIONAL_ISSUE",
+    "launch_date": 1787702400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-1",
+    "region_name": "N. California",
+    "service": "bedrock-agentcore-us-west-1",
     "service_name": "Bedrock AgentCore",
     "short_name": "Bedrock AgentCore"
   },
