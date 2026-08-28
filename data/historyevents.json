@@ -2535,28 +2535,7 @@
       "summary": "[RESOLVED] Internet Connectivity Issues"
     }
   ],
-  "internetconnectivity-us-east-1": [
-    {
-      "arn": "arn:aws:health:us-east-1::event/INTERNETCONNECTIVITY/AWS_INTERNETCONNECTIVITY_OPERATIONAL_ISSUE/AWS_INTERNETCONNECTIVITY_OPERATIONAL_ISSUE_49824_16DD211EFC1",
-      "date": "1755805096",
-      "event_log": [
-        {
-          "message": "We are investigating network connectivity issues external to the AWS network in the US-EAST-1 Region. We are working with the external provider to help mitigate the connectivity issues in their network. Connectivity within the AWS region and to all other internet providers continues to operate normally.",
-          "status": "1",
-          "summary": "External Network Connectivity Issues",
-          "timestamp": 1755805096
-        },
-        {
-          "message": "Between 10:10 AM and 12:30 PM PDT we observed a network connectivity issue affecting inbound Internet traffic to AWS from a provider outside of our network. During this time, traffic bound for AWS resources may have experienced connection errors or higher latency. Connectivity within the AWS Region continued to operate normally throughout the event. The issue is resolved and all AWS services continue to operate normally.",
-          "status": "0",
-          "summary": "[RESOLVED] External Network Connectivity Issues",
-          "timestamp": 1755806820
-        }
-      ],
-      "status": "1",
-      "summary": "[RESOLVED] External Network Connectivity Issues"
-    }
-  ],
+  "internetconnectivity-us-east-1": [],
   "internetconnectivity-us-east-2": [],
   "kinesis-us-east-1": [],
   "lambda-eu-central-2": [],
