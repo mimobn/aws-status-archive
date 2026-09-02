@@ -5809,6 +5809,61 @@
     "service_name": "AWS Activate Console"
   },
   {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-1",
+    "region_name": "Ireland",
+    "service": "agent-registry-eu-west-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-1",
+    "region_name": "N. Virginia",
+    "service": "agent-registry-us-east-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-1",
+    "region_name": "Tokyo",
+    "service": "agent-registry-ap-northeast-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-2",
+    "region_name": "Oregon",
+    "service": "agent-registry-us-west-2",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-2",
+    "region_name": "Sydney",
+    "service": "agent-registry-ap-southeast-2",
+    "service_name": "AWS Agent Registry"
+  },
+  {
     "event_type_code": "AWS_DSQL_OPERATIONAL_ISSUE",
     "launch_date": 1778457600,
     "locale": [
