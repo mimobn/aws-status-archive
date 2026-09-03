@@ -8448,6 +8448,17 @@
   },
   {
     "event_type_code": "AWS_APPSTREAM2_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-3",
+    "region_name": "Osaka",
+    "service": "appstream2-ap-northeast-3",
+    "service_name": "Amazon WorkSpaces Applications"
+  },
+  {
+    "event_type_code": "AWS_APPSTREAM2_OPERATIONAL_ISSUE",
     "launch_date": 1763424000,
     "locale": [
       "AP"
@@ -8547,6 +8558,17 @@
   },
   {
     "event_type_code": "AWS_APPSTREAM2_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "ca-west-1",
+    "region_name": "Calgary",
+    "service": "appstream2-ca-west-1",
+    "service_name": "Amazon WorkSpaces Applications"
+  },
+  {
+    "event_type_code": "AWS_APPSTREAM2_OPERATIONAL_ISSUE",
     "launch_date": 1763424000,
     "locale": [
       "EU"
@@ -8554,6 +8576,17 @@
     "region_id": "eu-south-2",
     "region_name": "Spain",
     "service": "appstream2-eu-south-2",
+    "service_name": "Amazon WorkSpaces Applications"
+  },
+  {
+    "event_type_code": "AWS_APPSTREAM2_OPERATIONAL_ISSUE",
+    "launch_date": 1788134400,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-central-2",
+    "region_name": "Zurich",
+    "service": "appstream2-eu-central-2",
     "service_name": "Amazon WorkSpaces Applications"
   },
   {

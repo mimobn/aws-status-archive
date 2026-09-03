@@ -2424,32 +2424,6 @@
   ],
   "iam": [
     {
-      "arn": "arn:aws:health:global::event/IAM/AWS_IAM_OPERATIONAL_ISSUE/AWS_IAM_OPERATIONAL_ISSUE_A5508_C0E97449FDD",
-      "date": "1756321319",
-      "event_log": [
-        {
-          "message": "We are investigating increased error rates and latency issues in the EU-SOUTH-2 Region.",
-          "status": "1",
-          "summary": "Increased error rates and latency",
-          "timestamp": 1756321319
-        },
-        {
-          "message": "We are seeing initial signs of recovery. We will provide an additional update by 12:20 PM PDT.",
-          "status": "1",
-          "summary": "Increased error rates and latency",
-          "timestamp": 1756321496
-        },
-        {
-          "message": "Between 11:35 AM and 11:58 AM PDT, we experienced increased API error rates for the IAM service in the EU-SOUTH-2 Region. Engineers were automatically alerted at 11:37 AM and began working on investigating root cause and mitigating impact. By 11:43 AM we understood the issue to be related to a planned networking configuration change. The change was reverted and we began seeing significant signs of recovery at 11:58 AM. During this time, other AWS services' APIs and workflows may also have experienced increased error rates and latencies. The issue is resolved and all AWS services are operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Increased error rates and latency",
-          "timestamp": 1756322160
-        }
-      ],
-      "status": "1",
-      "summary": "[RESOLVED] Increased error rates and latency"
-    },
-    {
       "arn": "arn:aws:health:global::event/IAM/AWS_IAM_OPERATIONAL_ISSUE/AWS_IAM_OPERATIONAL_ISSUE_38AEE_C340609D4FD",
       "date": "1758943527",
       "event_log": [
