@@ -32478,6 +32478,17 @@
   },
   {
     "event_type_code": "AWS_GLACIER_OPERATIONAL_ISSUE",
+    "launch_date": 1756339200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-6",
+    "region_name": "New Zealand",
+    "service": "glacier-ap-southeast-6",
+    "service_name": "Amazon Glacier"
+  },
+  {
+    "event_type_code": "AWS_GLACIER_OPERATIONAL_ISSUE",
     "launch_date": 1544486400,
     "locale": [
       "EU"
@@ -32753,6 +32764,17 @@
   },
   {
     "event_type_code": "AWS_GLACIER_OPERATIONAL_ISSUE",
+    "launch_date": 1749081600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-east-2",
+    "region_name": "Taipei",
+    "service": "glacier-ap-east-2",
+    "service_name": "Amazon Glacier"
+  },
+  {
+    "event_type_code": "AWS_GLACIER_OPERATIONAL_ISSUE",
     "launch_date": 1481155200,
     "locale": [
       "NA"
@@ -32793,28 +32815,6 @@
     "region_id": "eu-central-2",
     "region_name": "Zurich",
     "service": "glacier-eu-central-2",
-    "service_name": "Amazon Glacier"
-  },
-  {
-    "event_type_code": "AWS_GLACIER_OPERATIONAL_ISSUE",
-    "launch_date": 1749081600,
-    "locale": [
-      "AP"
-    ],
-    "region_id": "ap-east-2",
-    "region_name": "Taipei",
-    "service": "glacier-ap-east-2",
-    "service_name": "Amazon Glacier"
-  },
-  {
-    "event_type_code": "AWS_GLACIER_OPERATIONAL_ISSUE",
-    "launch_date": 1756339200,
-    "locale": [
-      "AP"
-    ],
-    "region_id": "ap-southeast-6",
-    "region_name": "New Zealand",
-    "service": "glacier-ap-southeast-6",
     "service_name": "Amazon Glacier"
   },
   {
