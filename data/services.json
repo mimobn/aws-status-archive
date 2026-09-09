@@ -47198,6 +47198,18 @@
   },
   {
     "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
+    "launch_date": 1788739200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-6",
+    "region_name": "New Zealand",
+    "service": "pcs-ap-southeast-6",
+    "service_name": "AWS Parallel Computing Service",
+    "short_name": "PCS"
+  },
+  {
+    "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
     "launch_date": 1727308800,
     "locale": [
       "EU"
