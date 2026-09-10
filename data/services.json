@@ -1765,6 +1765,17 @@
   },
   {
     "event_type_code": "AWS_EVS_OPERATIONAL_ISSUE",
+    "launch_date": 1788912000,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-3",
+    "region_name": "Osaka",
+    "service": "evs-ap-northeast-3",
+    "service_name": "AWS Elastic VMWare Service"
+  },
+  {
+    "event_type_code": "AWS_EVS_OPERATIONAL_ISSUE",
     "launch_date": 1765497600,
     "locale": [
       "AP"
@@ -1864,6 +1875,28 @@
   },
   {
     "event_type_code": "AWS_EVS_OPERATIONAL_ISSUE",
+    "launch_date": 1788912000,
+    "locale": [
+      "ME"
+    ],
+    "region_id": "il-central-1",
+    "region_name": "Tel Aviv",
+    "service": "evs-il-central-1",
+    "service_name": "AWS Elastic VMWare Service"
+  },
+  {
+    "event_type_code": "AWS_EVS_OPERATIONAL_ISSUE",
+    "launch_date": 1788912000,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-east-2",
+    "region_name": "Taipei",
+    "service": "evs-ap-east-2",
+    "service_name": "AWS Elastic VMWare Service"
+  },
+  {
+    "event_type_code": "AWS_EVS_OPERATIONAL_ISSUE",
     "launch_date": 1761782400,
     "locale": [
       "NA"
@@ -1882,6 +1915,17 @@
     "region_id": "ca-west-1",
     "region_name": "Calgary",
     "service": "evs-ca-west-1",
+    "service_name": "AWS Elastic VMWare Service"
+  },
+  {
+    "event_type_code": "AWS_EVS_OPERATIONAL_ISSUE",
+    "launch_date": 1788912000,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-south-2",
+    "region_name": "Spain",
+    "service": "evs-eu-south-2",
     "service_name": "AWS Elastic VMWare Service"
   },
   {
@@ -5780,6 +5824,17 @@
     "region_id": "ca-central-1",
     "region_name": "Canada-Central",
     "service": "transform-ca-central-1",
+    "service_name": "AWS Transform"
+  },
+  {
+    "event_type_code": "AWS_TRANSFORM_OPERATIONAL_ISSUE",
+    "launch_date": 1788825600,
+    "locale": [
+      "GC"
+    ],
+    "region_id": "us-gov-west-1",
+    "region_name": "US-West",
+    "service": "transform-us-gov-west-1",
     "service_name": "AWS Transform"
   },
   {
