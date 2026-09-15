@@ -2480,34 +2480,7 @@
   "internetconnectivity-us-east-2": [],
   "kinesis-us-east-1": [],
   "lambda-eu-central-2": [],
-  "management-console": [
-    {
-      "arn": "arn:aws:health:global::event/MANAGEMENTCONSOLE/AWS_MANAGEMENTCONSOLE_OPERATIONAL_ISSUE/AWS_MANAGEMENTCONSOLE_OPERATIONAL_ISSUE_4EEBD_2A76BAF307B",
-      "date": "1757317084",
-      "event_log": [
-        {
-          "message": "We are investigating increased error rates for the AWS Management Console in the EU-CENTRAL-1 Region. We will provide another update in the next 30-45 minutes.",
-          "status": "1",
-          "summary": "Management Console Error Rates",
-          "timestamp": 1757317084
-        },
-        {
-          "message": "We are seeing significant signs of recovery and continue to monitor for full recovery.",
-          "status": "1",
-          "summary": "Management Console Error Rates",
-          "timestamp": 1757318734
-        },
-        {
-          "message": "Between September 7 11:32 PM and September 8 12:33 AM PDT, we experienced increased error rates when attempting to access the AWS Management Console in the EU-CENTRAL-1 Region. During this time, customers may have experienced connectivity issues, including accessing the Management Console and AWS Service Endpoints (such as sts.eu-central-1.amazonaws.com). Engineers were automatically engaged at 11:35 PM and immediately began investigating the root cause. At 12:28 AM, we identified the root cause as a networking issue. By 12:33 AM, we had mitigated the underlying root cause and continued to monitor for full recovery. We recommend customers retry any failed requests during this period. We do not expect this issue to reoccur. The issue has been resolved and all AWS Services are operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Management Console Error Rates",
-          "timestamp": 1757320980
-        }
-      ],
-      "status": "1",
-      "summary": "[RESOLVED] Management Console Error Rates"
-    }
-  ],
+  "management-console": [],
   "multipleservices-ap-south-2": [],
   "multipleservices-eu-central-1": [
     {
