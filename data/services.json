@@ -6193,6 +6193,17 @@
   },
   {
     "event_type_code": "AWS_CONNECTHEALTH_OPERATIONAL_ISSUE",
+    "launch_date": 1783555200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "health-agent-eu-west-2",
+    "service_name": "Amazon Connect Health"
+  },
+  {
+    "event_type_code": "AWS_CONNECTHEALTH_OPERATIONAL_ISSUE",
     "launch_date": 1781049600,
     "locale": [
       "NA"

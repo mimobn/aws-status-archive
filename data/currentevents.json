@@ -140,6 +140,12 @@
         "status": 3,
         "summary": "Increased Error Rates",
         "timestamp": 1777533954
+      },
+      {
+        "message": "We are providing an update on the disruption affecting the Middle East (UAE) (me-central-1) Region. After a thorough assessment, we have determined that we are unable to restore access to the resources and data hosted exclusively in the mec1-az2 Availability Zone. We continue to work on recovering regional resources, as well as zonal resources hosted in the other affected Availability Zones (mec1-az1 and mec1-az3).\n\nSince the disruption began in March, most customers have been able to re-establish their operations in other Regions by restoring backups or copying data that remained accessible. AWS Support remains available to help customers who need assistance moving their applications to alternate Regions.\n\nWe remain committed to supporting our customers in the UAE. We are working on replacing the affected infrastructure and will provide an update on the restoration of our services in the coming months. We have notified the relevant authorities and continue to work with them toward that goal.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1789468030
       }
     ],
     "impacted_service_status_changes": [
@@ -1128,35 +1134,35 @@
         "previous_status": "1",
         "service": "cloudfront",
         "service_name": "Amazon CloudFront",
-        "timestamp": 1778054773000
+        "timestamp": 1789468743000
       },
       {
         "current_status": "0",
         "previous_status": "1",
         "service": "cloudwan",
         "service_name": "AWS Cloud WAN",
-        "timestamp": 1778054773000
+        "timestamp": 1789468743000
       },
       {
         "current_status": "0",
         "previous_status": "1",
         "service": "globalaccelerator",
         "service_name": "AWS Global Accelerator",
-        "timestamp": 1778054773000
+        "timestamp": 1789468743000
       },
       {
         "current_status": "0",
         "previous_status": "3",
         "service": "management-console",
         "service_name": "AWS Management Console",
-        "timestamp": 1778054773000
+        "timestamp": 1789468743000
       },
       {
         "current_status": "0",
         "previous_status": "2",
         "service": "route53",
         "service_name": "Amazon Route 53",
-        "timestamp": 1778054773000
+        "timestamp": 1789468743000
       }
     ],
     "impacted_services": {
@@ -1865,7 +1871,7 @@
     "service": "multipleservices-me-central-1",
     "service_name": "Multiple services",
     "status": "3",
-    "summary": "Increased Error Rates"
+    "summary": "Region Availability"
   },
   {
     "arn": "arn:aws:health:me-south-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_E6426_01AD72B4E1E",
@@ -1948,6 +1954,12 @@
         "status": 3,
         "summary": "Increased Connectivity Issues and API Error Rates",
         "timestamp": 1777532831
+      },
+      {
+        "message": "We are providing an update on the disruption affecting the Middle East (Bahrain) (me-south-1) Region. The damage to our infrastructure spanned multiple Availability Zones and exceeded what our regional and multi-AZ services are designed to withstand. After a thorough assessment, we have determined that we are unable to restore access to the resources and data hosted exclusively in this Region.\n\nWhen the first Availability Zone was damaged in March, we began recommending that customers migrate their workloads to other Regions, and most did so before the Region became unavailable following the disruption of a second Availability Zone in April. Since then, we have supported the remaining customers in re-establishing their operations in alternate Regions, using backups where available or implementing alternative solutions to mitigate the impact of inaccessible data. In parallel, we assessed all affected infrastructure and exhausted every option for restoring data and resources that had not been migrated before the Region became unavailable.\n\nWe remain committed to supporting our customers in Bahrain in the long term and will share a further update in early 2027. We have notified the relevant authorities and continue to work with them toward that goal.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1789467748
       }
     ],
     "impacted_service_status_changes": [
@@ -2999,35 +3011,35 @@
         "previous_status": "1",
         "service": "cloudfront",
         "service_name": "Amazon CloudFront",
-        "timestamp": 1778053812000
+        "timestamp": 1789484347000
       },
       {
         "current_status": "0",
         "previous_status": "1",
         "service": "cloudwan",
         "service_name": "AWS Cloud WAN",
-        "timestamp": 1778053812000
+        "timestamp": 1789484347000
       },
       {
         "current_status": "0",
         "previous_status": "1",
         "service": "globalaccelerator",
         "service_name": "AWS Global Accelerator",
-        "timestamp": 1778053812000
+        "timestamp": 1789484347000
       },
       {
         "current_status": "0",
         "previous_status": "2",
         "service": "management-console",
         "service_name": "AWS Management Console",
-        "timestamp": 1778053812000
+        "timestamp": 1789484347000
       },
       {
         "current_status": "0",
         "previous_status": "1",
         "service": "route53",
         "service_name": "Amazon Route 53",
-        "timestamp": 1778053812000
+        "timestamp": 1789484347000
       }
     ],
     "impacted_services": {
@@ -3781,6 +3793,6 @@
     "service": "multipleservices-me-south-1",
     "service_name": "Multiple services",
     "status": "3",
-    "summary": "Increased Error Rates"
+    "summary": "Region Availability"
   }
 ]
