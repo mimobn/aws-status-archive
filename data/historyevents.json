@@ -2716,41 +2716,7 @@
   "ec2-us-gov-west-1": [],
   "emr-us-east-1": [],
   "glue-ap-northeast-1": [],
-  "glue-us-east-1": [
-    {
-      "arn": "arn:aws:health:us-east-1::event/GLUE/AWS_GLUE_OPERATIONAL_ISSUE/AWS_GLUE_OPERATIONAL_ISSUE_3A92B_7824AB2D84B",
-      "date": "1758057619",
-      "event_log": [
-        {
-          "message": "We are investigating increased failure rates for Glue Job runs in the US-EAST-1 Region.",
-          "status": "1",
-          "summary": "Increased error rates",
-          "timestamp": 1758057619
-        },
-        {
-          "message": "We are seeing initial signs of recovery and continue to work toward full recovery.",
-          "status": "1",
-          "summary": "Increased error rates",
-          "timestamp": 1758058622
-        },
-        {
-          "message": "Between 1:37 PM and 2:28 PM PDT, we experienced increased failure rates for Glue Job runs in the US-EAST-1 Region. We were automatically engaged to investigate this at 2:00 PM. We identified the root cause as a recent configuration change that was rolled back at 2:28 PM which brought full recovery. We recommend customers to retry any failed Glue Jobs that were experienced during this issue. We do not expect this issue to reoccur. The issue has been resolved and the service is operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Increased error rates",
-          "timestamp": 1758060059
-        }
-      ],
-      "impacted_services": {
-        "events-us-east-1": {
-          "current": "0",
-          "max": "1",
-          "service_name": "Amazon EventBridge"
-        }
-      },
-      "status": "1",
-      "summary": "[RESOLVED] Increased error rates"
-    }
-  ],
+  "glue-us-east-1": [],
   "iam": [
     {
       "arn": "arn:aws:health:global::event/IAM/AWS_IAM_OPERATIONAL_ISSUE/AWS_IAM_OPERATIONAL_ISSUE_38AEE_C340609D4FD",
