@@ -32346,6 +32346,17 @@
   },
   {
     "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
+    "launch_date": 1790035200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-3",
+    "region_name": "Jakarta",
+    "service": "gamelift-ap-southeast-3",
+    "service_name": "Amazon GameLift Servers"
+  },
+  {
+    "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
     "launch_date": 1504742400,
     "locale": [
       "NA"
@@ -32408,6 +32419,17 @@
     "region_id": "ap-east-1",
     "region_name": "Hong Kong",
     "service": "gamelift-ap-east-1",
+    "service_name": "Amazon GameLift Servers"
+  },
+  {
+    "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
+    "launch_date": 1790035200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-south-2",
+    "region_name": "Hyderabad",
+    "service": "gamelift-ap-south-2",
     "service_name": "Amazon GameLift Servers"
   },
   {
@@ -32500,6 +32522,17 @@
   },
   {
     "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
+    "launch_date": 1790035200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "mx-central-1",
+    "region_name": "Mexico-Central",
+    "service": "gamelift-mx-central-1",
+    "service_name": "Amazon GameLift Servers"
+  },
+  {
+    "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
     "launch_date": 1504742400,
     "locale": [
       "NA"
@@ -32533,6 +32566,17 @@
   },
   {
     "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
+    "launch_date": 1790035200,
+    "locale": [
+      "ME"
+    ],
+    "region_id": "il-central-1",
+    "region_name": "Tel Aviv",
+    "service": "gamelift-il-central-1",
+    "service_name": "Amazon GameLift Servers"
+  },
+  {
+    "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
     "launch_date": 1504742400,
     "locale": [
       "NA"
@@ -32540,6 +32584,17 @@
     "region_id": "ca-central-1",
     "region_name": "Canada-Central",
     "service": "gamelift-ca-central-1",
+    "service_name": "Amazon GameLift Servers"
+  },
+  {
+    "event_type_code": "AWS_GAMELIFT_OPERATIONAL_ISSUE",
+    "launch_date": 1790035200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-south-2",
+    "region_name": "Spain",
+    "service": "gamelift-eu-south-2",
     "service_name": "Amazon GameLift Servers"
   },
   {
@@ -59381,116 +59436,6 @@
     "region_name": "US-West",
     "service": "supportapi-us-gov-west-1",
     "service_name": "AWS Support API"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1695859200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-north-1",
-    "region_name": "Stockholm",
-    "service": "tnb-eu-north-1",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1679529600,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-west-3",
-    "region_name": "Paris",
-    "service": "tnb-eu-west-3",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1679529600,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-central-1",
-    "region_name": "Frankfurt",
-    "service": "tnb-eu-central-1",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1695859200,
-    "locale": [
-      "SA"
-    ],
-    "region_id": "sa-east-1",
-    "region_name": "Sao Paulo",
-    "service": "tnb-sa-east-1",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1679529600,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-east-1",
-    "region_name": "N. Virginia",
-    "service": "tnb-us-east-1",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1695859200,
-    "locale": [
-      "AP"
-    ],
-    "region_id": "ap-northeast-2",
-    "region_name": "Seoul",
-    "service": "tnb-ap-northeast-2",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1679529600,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-west-2",
-    "region_name": "Oregon",
-    "service": "tnb-us-west-2",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1679529600,
-    "locale": [
-      "AP"
-    ],
-    "region_id": "ap-southeast-2",
-    "region_name": "Sydney",
-    "service": "tnb-ap-southeast-2",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1695859200,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "ca-central-1",
-    "region_name": "Canada-Central",
-    "service": "tnb-ca-central-1",
-    "service_name": "AWS Telco Network Builder"
-  },
-  {
-    "event_type_code": "AWS_TNB_OPERATIONAL_ISSUE",
-    "launch_date": 1695859200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-south-2",
-    "region_name": "Spain",
-    "service": "tnb-eu-south-2",
-    "service_name": "AWS Telco Network Builder"
   },
   {
     "event_type_code": "AWS_TEXTRACT_OPERATIONAL_ISSUE",
