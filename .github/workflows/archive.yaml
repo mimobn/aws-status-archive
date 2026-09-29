@@ -36,16 +36,13 @@ jobs:
         continue-on-error: true
         run: |
           if git status --porcelain | grep -q .; then
-            prev=$(mktemp)
-            if git show HEAD:data/historyevents.json > "$prev" 2>/dev/null; then
-              python scripts/diff_snapshots.py \
-                --previous "$(dirname $prev)" \
-                --current data \
-                --json || true
+            prev=$(mktemp -d)
+            if git show HEAD:data/historyevents.json > "$prev/historyevents.json" 2>/dev/null; then
+              python scripts/diff_snapshots.py --previous "$prev" --current data --json || true
             else
               echo "no previous archive to compare"
             fi
-            rm -f "$prev"
+            rm -rf "$prev"
           else
             echo "archives unchanged"
           fi
