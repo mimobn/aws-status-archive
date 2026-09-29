@@ -46,16 +46,21 @@ REGION_CODE_RE = re.compile(r"\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b", re.IGNORECASE
 
 
 def severity(status):
-    """Map an AWS numeric status to a site severity label."""
+    """Map an AWS numeric status to a site severity label.
+
+    Accepts both string and int status codes.
+    """
     return STATUS_TO_SEVERITY.get(str(status), "unknown")
 
 
 def clean_title(value):
-    """Drop noisy brackets AWS prefixes summaries with."""
+    """Drop noisy brackets AWS prefixes summaries with (case-insensitive)."""
     value = value or ""
+    # Check all prefix variations case-insensitively
     for prefix in RESOLVED_PREFIXES:
-        if value.startswith(prefix):
+        if value.lower().startswith(prefix.lower()):
             value = value[len(prefix):]
+            break
     return value
 
 
@@ -85,7 +90,11 @@ def parse_current_text(content):
 
 
 def event_log_updates(event):
-    """Flatten an event's update log into the site's update records."""
+    """Flatten an event's update log into the site's update records.
+
+    Deduplicates on (timestamp, status, message) so entries with the same
+    second but different status/message are kept.
+    """
     seen = set()
     updates = []
     for entry in event.get("event_log", []):
@@ -93,15 +102,19 @@ def event_log_updates(event):
             stamp = int(entry["timestamp"])
         except (KeyError, TypeError, ValueError):
             continue
-        if stamp in seen:
+        status = entry.get("status")
+        message = entry.get("message") or ""
+        # Dedupe on (timestamp, status, message) tuple
+        key = (stamp, status, message)
+        if key in seen:
             continue
-        seen.add(stamp)
+        seen.add(key)
         updates.append(
             {
                 "published": iso(stamp),
-                "severity": severity(entry.get("status")),
+                "severity": severity(status),
                 "title": clean_title(entry.get("summary") or event.get("summary")),
-                "description": entry.get("message") or "",
+                "description": message,
             }
         )
     updates.sort(key=lambda u: u["published"])
@@ -154,6 +167,9 @@ def service_days(transitions, first_day, last_day):
         if stamp < 100000000000:
             stamp *= 1000
         status = trans.get("status") or trans.get("current_status")
+        # Treat int 0 as a valid status (operational), not missing
+        if status is None:
+            continue
         events.append((stamp, severity(status)))
     events.sort()
 
@@ -175,8 +191,21 @@ def service_days(transitions, first_day, last_day):
 
 
 def worst_transition_severity(transitions):
-    """Worst severity reached across an incident's per-service transitions."""
-    rank = {"disrupted": 4, "impacted": 3, "degraded": 2, "informational": 1, "operational": 0, "unknown": -1, "no_data": -2}
+    """Worst severity reached across an incident's per-service transitions.
+
+    Follows AWS numeric order: disrupted(3) > degraded(2) > impacted(1) >
+    informational > operational(0) > unknown > no_data
+    """
+    # Rank higher = worse
+    rank = {
+        "disrupted": 4,
+        "degraded": 3,
+        "impacted": 2,
+        "informational": 1,
+        "operational": 0,
+        "unknown": -1,
+        "no_data": -2,
+    }
     worst = "unknown"
     for trans in transitions:
         status = trans.get("current_status")
