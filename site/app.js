@@ -141,6 +141,15 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Escape an AWS description, then re-enable plain http(s) links only.
+function renderDescription(text) {
+  const escaped = escapeHtml(text);
+  return escaped.replace(
+    /&lt;a\s+href=(?:&quot;|&#39;)(https?:\/\/[^"'\s<>]+?)(?:&quot;|&#39;)[^&]*?&gt;(.*?)&lt;\/a&gt;/gi,
+    (_, href, label) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`
+  );
+}
+
 function escapeHtml(text) {
   return String(text || "")
     .replace(/&/g, "&amp;")
@@ -317,7 +326,7 @@ function openModal(incident) {
             <span class="timeline-time">${fmtDate(u.published)}</span>
             <span class="badge badge-${u.severity}">${SEVERITY_LABEL[u.severity] ?? u.severity}</span>
           </div>
-          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
+          <div class="timeline-desc">${renderDescription(u.description) || "—"}</div>
         </li>
       `).join("")}
     </ul>
@@ -335,6 +344,7 @@ function openModal(incident) {
   `;
 
   modal.hidden = false;
+  writeUrlHash();
 
   // Move focus into modal
   const closeBtn = document.getElementById("modalCloseBtn");
@@ -347,6 +357,7 @@ function closeModal() {
   const modal = document.getElementById("incidentModal");
   if (modal) modal.hidden = true;
   state.activeModalIncident = null;
+  writeUrlHash();
 }
 
 // Build Day Map for Timeline Strip
@@ -827,7 +838,7 @@ function renderIncidentCard(incident) {
             <span class="timeline-time">${fmtDate(u.published)}</span>
             <span class="badge badge-${u.severity}">${SEVERITY_LABEL[u.severity] ?? u.severity}</span>
           </div>
-          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
+          <div class="timeline-desc">${renderDescription(u.description) || "—"}</div>
         </li>`
         )
         .join("")}
@@ -981,6 +992,7 @@ function renderAll() {
       list.appendChild(renderIncidentCard(incident));
     }
   }
+  writeUrlHash();
 }
 
 // Filter incidents excluding date filter (for strip building)
@@ -1020,35 +1032,79 @@ function filterIncidentsExcludeDate(incidents) {
   });
 }
 
-// Parse Hash State from Location Bar
-function parseUrlHash() {
-  const hash = window.location.hash.slice(1);
-  if (!hash) return;
+// URL hash <-> filter state
+const HASH_SEVERITIES = ["all", "disrupted", "degraded", "impacted"];
 
-  const params = new URLSearchParams(hash);
-  const region = params.get("region");
+function syncFilterControls() {
+  document.querySelectorAll(".sev-filter-btn").forEach((b) => {
+    b.classList.toggle("active", b.dataset.severity === state.activeSeverity);
+  });
+  const gs = document.getElementById("globalSearchInput");
+  if (gs && gs.value !== state.searchQuery) gs.value = state.searchQuery;
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (clearBtn) clearBtn.hidden = !state.searchQuery;
+}
+
+function writeUrlHash() {
+  const params = new URLSearchParams();
+  if (state.activeRegion) params.set("region", state.activeRegion);
+  if (state.activeSeverity !== "all") params.set("sev", state.activeSeverity);
+  if (state.activeDate) params.set("date", state.activeDate);
+  if (state.searchQuery) params.set("q", state.searchQuery);
+  if (state.activeModalIncident) params.set("incident", state.activeModalIncident.key);
+  const hash = params.toString();
+  const url = `${window.location.pathname}${window.location.search}${hash ? "#" + hash : ""}`;
+  if (url !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+    history.replaceState(null, "", url);
+  }
+}
+
+function parseUrlHash() {
+  // URLSearchParams already decodes; never decode again (a lone "%" would throw).
+  const params = new URLSearchParams(window.location.hash.slice(1));
   const date = params.get("date");
   const sev = params.get("sev");
+
+  state.activeRegion = params.get("region") || null;
+  state.activeDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(dayToMs(date)) ? date : null;
+  state.activeSeverity = sev && HASH_SEVERITIES.includes(sev) ? sev : "all";
+  state.searchQuery = params.get("q") || "";
+  syncFilterControls();
+
   const incKey = params.get("incident");
-
-  if (region) state.activeRegion = region;
-  if (date) state.activeDate = date;
-  if (sev) state.activeSeverity = sev;
-
-  if (incKey) {
-    const inc = state.allIncidents.find(i => i.key === incKey || i.key === decodeURIComponent(incKey));
-    if (inc) {
-      setTimeout(() => {
-        openModal(inc);
-        const card = document.getElementById(`incident-${encodeURIComponent(inc.key)}`);
-        if (card) {
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-          card.classList.add("incident-highlight");
-          setTimeout(() => card.classList.remove("incident-highlight"), 3000);
-        }
-      }, 100);
-    }
+  const inc = incKey ? state.allIncidents.find((i) => i.key === incKey) : null;
+  if (inc) {
+    setTimeout(() => {
+      openModal(inc);
+      const card = document.getElementById(`incident-${encodeURIComponent(inc.key)}`);
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.classList.add("incident-highlight");
+        setTimeout(() => card.classList.remove("incident-highlight"), 3000);
+      }
+    }, 100);
   }
+}
+
+// Archive freshness pill in the header
+function renderFreshnessPill(metadata, failed) {
+  const pill = document.getElementById("liveStatusBadge");
+  if (!pill) return;
+  const label = pill.querySelector("span:last-child");
+  const stamp = metadata && (metadata.snapshot_fetched_at || metadata.rebuilt_at);
+  const ageMs = stamp ? Date.now() - new Date(stamp).getTime() : NaN;
+  let cls = "status-pill-active";
+  let text = "Archive fresh";
+  if (failed) {
+    cls = "status-pill-error";
+    text = "Archive unavailable";
+  } else if (!(ageMs < 48 * 3600 * 1000)) {
+    cls = "status-pill-stale";
+    text = stamp ? `Archive stale (last snapshot ${stamp.slice(0, 10)})` : "Archive age unknown";
+  }
+  pill.classList.remove("status-pill-active", "status-pill-stale", "status-pill-error");
+  pill.classList.add(cls);
+  if (label) label.textContent = text;
 }
 
 // Data Export Handler (CSV & JSON)
@@ -1400,6 +1456,11 @@ async function init() {
 
     parseUrlHash();
     renderAll();
+    renderFreshnessPill(metadata, false);
+    window.addEventListener("hashchange", () => {
+      parseUrlHash();
+      renderAll();
+    });
 
     if (updatedAtEl) {
       const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
@@ -1410,6 +1471,7 @@ async function init() {
     }
   } catch (err) {
     console.error("Initialization error:", err);
+    renderFreshnessPill(null, true);
     if (updatedAtEl) {
       updatedAtEl.textContent = "Error loading archived data";
     }
