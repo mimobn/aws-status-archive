@@ -649,17 +649,23 @@ button, input, select {
 
 .strip {
   display: flex;
-  gap: 3px;
+  gap: 2px;
   margin-bottom: 8px;
+  padding: 6px 0;
   overflow-x: auto;
-  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
 }
 
+.strip::-webkit-scrollbar { height: 6px; }
+.strip::-webkit-scrollbar-track { background: transparent; }
+.strip::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
 .bar {
-  flex: 1 0 8px;
-  min-width: 8px;
+  flex: 1 1 0;
+  min-width: 2px;
   height: 32px;
-  border-radius: 4px;
+  border-radius: 2px;
   background: var(--bar-none);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
