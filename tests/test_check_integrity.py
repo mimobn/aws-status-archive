@@ -4,6 +4,7 @@
 import os
 import sqlite3
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
@@ -80,6 +81,11 @@ def build_db(path, incidents, updates):
 
 
 class TestIntegrityChecks(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.tmpdir = tmp.name
+
     def test_empty_db_fails_on_missing_tables(self):
         conn = sqlite3.connect(":memory:")
         results = run_checks(conn, empty_rebuild())
@@ -89,21 +95,21 @@ class TestIntegrityChecks(unittest.TestCase):
         self.assertIn("services table exists", failures)
 
     def test_clean_db_passes(self):
-        path = "/tmp/opencode/test-clean.db"
+        path = os.path.join(self.tmpdir, "test-clean.db")
         build_db(
             path,
             [("k1", "2026-03-01T00:00:00Z", 1, "t")],
             [("g1", "k1", "2026-03-01T00:00:00Z", "impacted", "t", "d")],
         )
         conn = sqlite3.connect(path)
+        self.addCleanup(conn.close)
         results = run_checks(conn, one_incident_rebuild())
         conn.close()
-        os.unlink(path)
         failures = [name for name, ok, _ in results if not ok]
         self.assertEqual(failures, [])
 
     def test_orphan_update_fails(self):
-        path = "/tmp/opencode/test-orphan.db"
+        path = os.path.join(self.tmpdir, "test-orphan.db")
         build_db(
             path,
             [("k1", "2026-03-01T00:00:00Z", 1, "t")],
@@ -113,24 +119,24 @@ class TestIntegrityChecks(unittest.TestCase):
             ],
         )
         conn = sqlite3.connect(path)
+        self.addCleanup(conn.close)
         results = run_checks(conn, one_incident_rebuild())
         conn.close()
-        os.unlink(path)
         failures = [name for name, ok, _ in results if not ok]
         self.assertIn("no orphan updates", failures)
 
     def test_count_mismatch_fails(self):
-        path = "/tmp/opencode/test-mismatch.db"
+        path = os.path.join(self.tmpdir, "test-mismatch.db")
         build_db(
             path,
             [("k1", "2026-03-01T00:00:00Z", 1, "t")],
             [("g1", "k1", "2026-03-01T00:00:00Z", "impacted", "t", "d")],
         )
         conn = sqlite3.connect(path)
+        self.addCleanup(conn.close)
         # reference rebuild claims 2 incidents, db has 1
         results = run_checks(conn, one_incident_rebuild() * 2)
         conn.close()
-        os.unlink(path)
         failures = [name for name, ok, _ in results if not ok]
         self.assertIn("incident count matches rebuild", failures)
 
