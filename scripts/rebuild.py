@@ -174,7 +174,7 @@ def load_archives():
 
 
 def build_services(current_event):
-    """Per-service availability for a still-open event.
+    """Per-service availability for an event (history or current).
 
     Returns a {service_slug: {...}} map with the display name, the current
     severity, the worst severity reached, and the status transitions the
@@ -250,8 +250,13 @@ def build_incident(slug, event, catalog, current_event, raw_current_arns=None):
         "region_name": region_name,
         "updates": updates,
     }
+    # History events carry their own per-service breakdown; a matching open
+    # current event (same arn) has the fresher per-service status.
+    services = build_services(event)
     if current_event and current_event.get("impacted_services"):
-        incident["services"] = build_services(current_event)
+        services.update(build_services(current_event))
+    if services:
+        incident["services"] = services
     return incident
 
 
