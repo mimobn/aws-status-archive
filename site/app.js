@@ -8,8 +8,8 @@ const METADATA_URLS = ["parsed/metadata.json", "../out/metadata.json"];
 
 const SEVERITY_RANK = {
   disrupted: 4,
-  impacted: 3,
-  degraded: 2,
+  degraded: 3,
+  impacted: 2,
   informational: 1,
   operational: 0,
   unknown: -1,
@@ -78,7 +78,7 @@ const state = {
   regionSearchQuery: "",
   impactedServicesOnly: false,
   sortOrder: "newest",
-  theme: localStorage.getItem("theme") || "dark",
+  theme: "auto",
   // Modal state
   activeModalIncident: null,
   // Strip window state
@@ -86,7 +86,16 @@ const state = {
   stripWindowEnd: null,
   stripShowAll: false,
   stripFirstDay: null,
+  // Strip byDay state for tooltip attachment
+  stripByDay: {},
 };
+
+// Initialize theme from localStorage (try/catch guarded)
+try {
+  state.theme = localStorage.getItem("theme") || "auto";
+} catch (e) {
+  // localStorage may be unavailable
+}
 
 // Date utilities
 function fmtDate(iso) {
@@ -109,7 +118,10 @@ function fmtShortDay(dayStr) {
 }
 
 function dayKey(iso) {
-  return new Date(iso).toISOString().slice(0, 10);
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
 }
 
 function dayToMs(key) {
@@ -133,7 +145,9 @@ function escapeHtml(text) {
   return String(text || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function worstSeverity(candidates) {
@@ -151,13 +165,17 @@ function worstSeverity(candidates) {
 
 function regionLabel(incident) {
   if (incident.region_name) return incident.region_name;
-  if (incident.region) return REGION_NAMES[incident.region] || incident.region;
+  if (incident.region) {
+    if (incident.region === "global" || !incident.region) return "Global Services";
+    return REGION_NAMES[incident.region] || incident.region;
+  }
+  if (!incident.region) return "Global Services";
   const match = incident.key ? incident.key.match(REGION_CODE_RE) : null;
   if (match) {
     const code = match[1].toLowerCase();
     return REGION_NAMES[code] || code.toUpperCase();
   }
-  return null;
+  return "Global Services";
 }
 
 function worstSeverityFromUpdates(incident) {
@@ -221,14 +239,37 @@ function showToast(message) {
 
 // Theme Management
 function initTheme() {
-  document.documentElement.setAttribute("data-theme", state.theme);
+  // Set theme before render to avoid flash
+  const savedTheme = localStorage.getItem("theme") || "auto";
+  state.theme = savedTheme;
+  applyTheme(state.theme);
+
   const btn = document.getElementById("themeToggleBtn");
   if (btn) {
     btn.addEventListener("click", () => {
-      state.theme = state.theme === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", state.theme);
-      localStorage.setItem("theme", state.theme);
+      // Cycle: light → dark → auto → light
+      if (state.theme === "light") {
+        state.theme = "dark";
+      } else if (state.theme === "dark") {
+        state.theme = "auto";
+      } else {
+        state.theme = "light";
+      }
+      applyTheme(state.theme);
+      try {
+        localStorage.setItem("theme", state.theme);
+      } catch (e) {
+        // localStorage may be unavailable
+      }
     });
+  }
+}
+
+function applyTheme(theme) {
+  if (theme === "auto") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", theme);
   }
 }
 
@@ -241,8 +282,8 @@ function openModal(incident) {
   const body = document.getElementById("modalBody");
   if (!modal || !title || !body) return;
 
-  const regLabel = regionLabel(incident) || "Global";
-  const updates = incident.updates || [];
+  const regLabel = regionLabel(incident) || "Global Services";
+  const updates = (incident.updates || []).sort((a, b) => new Date(a.published) - new Date(b.published));
   const worstSev = worstSeverityFromUpdates(incident);
 
   title.textContent = incident.title;
@@ -250,6 +291,9 @@ function openModal(incident) {
 
   let servicesHtml = "";
   if (incident.services) {
+    const impactedCount = Object.values(incident.services).filter(
+      svc => svc.current && svc.current !== "operational" && svc.current !== "unknown" && svc.current !== "no_data" && svc.current !== "informational"
+    ).length;
     const list = Object.entries(incident.services).map(([slug, svc]) => `
       <div class="service-chip">
         <span class="dot dot-${svc.current || "unknown"}"></span>
@@ -258,7 +302,7 @@ function openModal(incident) {
     `).join("");
     servicesHtml = `
       <div style="margin-bottom:16px;">
-        <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Impacted Services (${Object.keys(incident.services).length})</h5>
+        <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Impacted Services (${impactedCount})</h5>
         <div class="service-grid">${list}</div>
       </div>
     `;
@@ -291,6 +335,12 @@ function openModal(incident) {
   `;
 
   modal.hidden = false;
+
+  // Move focus into modal
+  const closeBtn = document.getElementById("modalCloseBtn");
+  if (closeBtn) {
+    closeBtn.focus();
+  }
 }
 
 function closeModal() {
@@ -363,14 +413,6 @@ function renderStatsCards(incidents) {
   );
 
   const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
-
-  // Scope label for filtered vs global
-  let scopeLabel = "Global archive";
-  if (state.activeRegion) {
-    scopeLabel = `Filtered to ${state.activeRegion}`;
-  } else if (state.activeSeverity !== "all") {
-    scopeLabel = `Filtered to ${SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity}`;
-  }
 
   container.innerHTML = `
     <div class="stat-card">
@@ -460,12 +502,14 @@ function renderDayStrip(incidents) {
   if (!strip || !firstDay) {
     if (strip) strip.hidden = true;
     if (controls) controls.hidden = true;
+    state.stripByDay = {};
     return { days: [], byDay: {} };
   }
 
   strip.hidden = false;
   strip.innerHTML = "";
   state.stripFirstDay = firstDay;
+  state.stripByDay = byDay;
 
   const today = todayKey();
   const maxDay = lastDay > today ? lastDay : today;
@@ -495,7 +539,11 @@ function renderDayStrip(incidents) {
     const key = keyFromMs(ms);
     days.push(key);
     const updates = byDay[key];
-    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
+    let sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
+
+    // Resolution: day with only operational updates
+    const isResolution = updates && updates.length > 0 && updates.every((u) => u.severity === "operational");
+    if (isResolution) sev = "resolution";
 
     const cell = document.createElement("span");
     const isSelected = state.activeDate === key;
@@ -503,11 +551,17 @@ function renderDayStrip(incidents) {
     cell.dataset.dayIndex = String(index);
     cell.dataset.day = key;
     cell.tabIndex = 0;
+    cell.setAttribute("role", "button");
+
+    const sevLabel = sev === "resolution" ? "Resolution (incident resolved)" : (SEVERITY_LABEL[sev] ?? sev);
+    cell.setAttribute("aria-label", `${fmtShortDay(key)}: ${sevLabel}`);
     strip.appendChild(cell);
   }
 
   if (labels && labels.length >= 3) {
+    labels[0].id = "stripStart";
     labels[0].textContent = fmtShortDate(startDay);
+    labels[2].id = "stripEnd";
     labels[2].textContent = endDay === maxDay ? "Latest (" + fmtShortDate(endDay) + ")" : fmtShortDate(endDay);
   }
 
@@ -525,100 +579,71 @@ function renderDayStrip(incidents) {
     if (allBtn) allBtn.classList.toggle("strip-btn-active", state.stripShowAll);
 
     if (windowLabel) {
+      const endLabel = startDay === endDay ? fmtShortDate(endDay) : endDay;
       windowLabel.textContent = state.stripShowAll
         ? `All available data (${totalDays} calendar days)`
-        : `Showing last ${state.windowDays} calendar days`;
+        : `Showing ${days.length} days ending ${fmtShortDate(endDay)}`;
     }
   }
 
   return { days, byDay };
 }
 
-// Tooltip Popover & Interactivity for Heatmap Strip
-function attachStripTooltip(stripState) {
-  const strip = document.getElementById("daysStrip");
+// Tooltip Popover & Interactivity for Heatmap Strip (attached once in setupEventListeners)
+function showStripTooltip(target) {
   const tooltip = document.getElementById("stripTooltip");
   const stage = document.getElementById("stripStage");
-  if (!strip || !tooltip || !stage) return;
+  if (!tooltip || !stage) return;
 
-  function positionTooltip(target) {
-    const stageRect = stage.getBoundingClientRect();
-    const barRect = target.getBoundingClientRect();
+  const day = target.dataset.day;
+  if (!day) return;
 
-    let left = barRect.left - stageRect.left + barRect.width / 2;
-    left = Math.max(110, Math.min(left, stageRect.width - 110));
+  const updates = state.stripByDay[day] || [];
+  const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
+  const isResolutionOnly = updates.length > 0 && updates.every((u) => u.severity === "operational");
 
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `-10px`;
-  }
+  const uniqueTitles = [...new Set(updates.map((u) => u.incidentTitle || u.title))].slice(0, 3);
 
-  function show(target) {
-    const day = target.dataset.day;
-    if (!day) return;
+  const titleListHtml = uniqueTitles.length
+    ? `<ul class="tooltip-incidents-list">
+        ${uniqueTitles.map((t) => `<li>• ${escapeHtml(t)}</li>`).join("")}
+        ${updates.length > 3 ? `<li>+ ${updates.length - 3} more update(s)</li>` : ""}
+       </ul>`
+    : "";
 
-    const updates = stripState.byDay[day] || [];
-    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
-    const isResolutionOnly = updates.length > 0 && updates.every((u) => u.severity === "operational");
+  const resolutionNote = isResolutionOnly
+    ? `<div style="margin-top:4px;font-size:0.7rem;color:var(--text-subtle);">Incident resolved on this day</div>`
+    : "";
 
-    const uniqueTitles = [...new Set(updates.map((u) => u.incidentTitle || u.title))].slice(0, 3);
+  tooltip.innerHTML = `
+    <div class="tooltip-date">${fmtShortDay(day)}</div>
+    <div class="tooltip-summary">
+      <span class="dot dot-${severity}"></span>
+      <span>${SEVERITY_LABEL[severity] ?? (severity === "no_data" ? "No Data Available" : severity)}</span>
+      ${updates.length ? `<span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);">${updates.length} event(s)</span>` : ""}
+    </div>
+    ${titleListHtml}
+    ${resolutionNote}
+    <div style="margin-top:6px;font-size:0.7rem;color:var(--accent-primary);">Click bar to filter date</div>
+  `;
 
-    const titleListHtml = uniqueTitles.length
-      ? `<ul class="tooltip-incidents-list">
-          ${uniqueTitles.map((t) => `<li>• ${escapeHtml(t)}</li>`).join("")}
-          ${updates.length > 3 ? `<li>+ ${updates.length - 3} more update(s)</li>` : ""}
-         </ul>`
-      : "";
+  tooltip.classList.add("active");
+  tooltip.setAttribute("aria-hidden", "false");
 
-    const resolutionNote = isResolutionOnly
-      ? `<div style="margin-top:4px;font-size:0.7rem;color:var(--text-subtle);">Incident resolved on this day</div>`
-      : "";
+  const stageRect = stage.getBoundingClientRect();
+  const barRect = target.getBoundingClientRect();
+  let left = barRect.left - stageRect.left + barRect.width / 2;
+  left = Math.max(110, Math.min(left, stageRect.width - 110));
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `-10px`;
+}
 
-    tooltip.innerHTML = `
-      <div class="tooltip-date">${fmtShortDay(day)}</div>
-      <div class="tooltip-summary">
-        <span class="dot dot-${severity}"></span>
-        <span>${SEVERITY_LABEL[severity] ?? (severity === "no_data" ? "No Data Available" : severity)}</span>
-        ${updates.length ? `<span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);">${updates.length} event(s)</span>` : ""}
-      </div>
-      ${titleListHtml}
-      ${resolutionNote}
-      <div style="margin-top:6px;font-size:0.7rem;color:var(--accent-primary);">Click bar to filter date</div>
-    `;
-
-    tooltip.classList.add("active");
-    tooltip.setAttribute("aria-hidden", "false");
-    positionTooltip(target);
-  }
-
-  function hide() {
+function hideStripTooltip() {
+  const tooltip = document.getElementById("stripTooltip");
+  if (tooltip) {
     tooltip.classList.remove("active");
     tooltip.setAttribute("aria-hidden", "true");
   }
-
-  // Mouse / Pointer listeners
-  strip.addEventListener("pointerover", (e) => {
-    const bar = e.target.closest(".bar");
-    if (bar) show(bar);
-  });
-  strip.addEventListener("pointerleave", hide);
-
-  strip.addEventListener("focusin", (e) => {
-    if (e.target.classList.contains("bar")) show(e.target);
-  });
-  strip.addEventListener("focusout", hide);
-
-  // Click on bar filters date!
-  strip.addEventListener("click", (e) => {
-    const bar = e.target.closest(".bar");
-    if (!bar) return;
-    const clickedDay = bar.dataset.day;
-    if (state.activeDate === clickedDay) {
-      state.activeDate = null; // toggle off
-    } else {
-      state.activeDate = clickedDay;
-    }
-    renderAll();
-  });
 }
 
 // Render Service Status breakdown block per region
@@ -628,13 +653,15 @@ function renderRegionServiceStates(incidents) {
 
   const byRegion = {};
   for (const inc of incidents) {
-    if (!inc.region) continue;
-    (byRegion[inc.region] = byRegion[inc.region] || []).push(inc);
+    const region = inc.region || "global";
+    (byRegion[region] = byRegion[region] || []).push(inc);
   }
 
-  const codes = Object.keys(byRegion).sort((a, b) =>
-    (regionLabel(byRegion[a][0]) || a).localeCompare(regionLabel(byRegion[b][0]) || b)
-  );
+  const codes = Object.keys(byRegion).sort((a, b) => {
+    const labelA = regionLabel(byRegion[a][0]) || a;
+    const labelB = regionLabel(byRegion[b][0]) || b;
+    return labelA.localeCompare(labelB);
+  });
 
   const blocks = [];
 
@@ -645,24 +672,40 @@ function renderRegionServiceStates(incidents) {
     if (state.activeRegion && label !== state.activeRegion) continue;
 
     const services = {};
-    let fullMap = false;
 
     for (const inc of regionIncidents) {
       if (inc.services) {
-        fullMap = true;
-        Object.assign(services, inc.services);
-      }
-    }
-
-    if (!fullMap) {
-      for (const inc of regionIncidents) {
+        for (const [slug, svc] of Object.entries(inc.services)) {
+          if (!services[slug]) {
+            services[slug] = {
+              service_name: svc.service_name || slug,
+              current: svc.current || "unknown",
+            };
+          }
+        }
+      } else {
+        // No detailed services: use worst update severity for closed, or latest update for status
         const slug = inc.service;
-        const worst = worstSeverityFromUpdates(inc);
-        if (!services[slug] || (SEVERITY_RANK[worst] ?? -1) > SEVERITY_RANK[services[slug].current]) {
-          services[slug] = {
-            service_name: inc.service_name || slug,
-            current: worst,
-          };
+        if (slug) {
+          if (inc.open) {
+            // Open incident: unknown status
+            if (!services[slug]) {
+              services[slug] = {
+                service_name: inc.service_name || slug,
+                current: "unknown",
+              };
+            }
+          } else {
+            // Closed incident: use last update's severity
+            const updates = inc.updates || [];
+            const lastSev = updates.length > 0 ? updates[updates.length - 1].severity : "unknown";
+            if (!services[slug]) {
+              services[slug] = {
+                service_name: inc.service_name || slug,
+                current: lastSev,
+              };
+            }
+          }
         }
       }
     }
@@ -673,18 +716,21 @@ function renderRegionServiceStates(incidents) {
 
     if (state.impactedServicesOnly) {
       serviceEntries = serviceEntries.filter(
-        ([, svc]) => svc.current && svc.current !== "operational" && svc.current !== "none"
+        ([, svc]) => {
+          const cur = svc.current || "unknown";
+          return cur !== "operational" && cur !== "unknown" && cur !== "no_data" && cur !== "informational";
+        }
       );
     }
 
     if (serviceEntries.length === 0) continue;
 
-    let worst = "unknown";
+    let worst = "operational";
     let impactedCount = 0;
     for (const [, svc] of serviceEntries) {
       const cur = svc.current || "unknown";
-      if (SEVERITY_RANK[cur] > SEVERITY_RANK[worst]) worst = cur;
-      if (cur !== "operational" && cur !== "none" && cur !== "unknown") impactedCount++;
+      if ((SEVERITY_RANK[cur] ?? -1) > (SEVERITY_RANK[worst] ?? -1)) worst = cur;
+      if (cur !== "operational" && cur !== "unknown" && cur !== "no_data" && cur !== "informational") impactedCount++;
     }
 
     const chips = serviceEntries
@@ -753,7 +799,7 @@ function renderIncidentCard(incident) {
   article.innerHTML = `
     <div class="incident-head">
       <div class="incident-title-row">
-        <h4 class="incident-title-btn" style="cursor:pointer;" title="Click to view details">${escapeHtml(incident.title)}</h4>
+        <button type="button" class="incident-title-btn" title="Click to view details">${escapeHtml(incident.title)}</button>
         ${regionBadge}
       </div>
       <div class="incident-badges">
@@ -871,10 +917,18 @@ function filterIncidents(incidents) {
       const q = state.searchQuery.toLowerCase();
       const matchTitle = inc.title && inc.title.toLowerCase().includes(q);
       const matchService = inc.service && inc.service.toLowerCase().includes(q);
+      const matchServiceName = inc.service_name && inc.service_name.toLowerCase().includes(q);
+      const matchRegion = regionLabel(inc) && regionLabel(inc).toLowerCase().includes(q);
+      const matchUpdateTitle = (inc.updates || []).some(
+        (u) => u.title && u.title.toLowerCase().includes(q)
+      );
       const matchDesc = (inc.updates || []).some(
         (u) => u.description && u.description.toLowerCase().includes(q)
       );
-      if (!matchTitle && !matchService && !matchDesc) return false;
+      const matchServices = inc.services && Object.values(inc.services).some(
+        (svc) => (svc.service_name && svc.service_name.toLowerCase().includes(q))
+      );
+      if (!matchTitle && !matchService && !matchServiceName && !matchRegion && !matchUpdateTitle && !matchDesc && !matchServices) return false;
     }
 
     return true;
@@ -904,8 +958,9 @@ function renderAll() {
   renderRegionServiceStates(filtered);
   renderActiveFiltersBar();
 
-  const stripState = renderDayStrip(filtered);
-  attachStripTooltip(stripState);
+  // Build strip from incidents filtered by everything EXCEPT date
+  const stripFiltered = filterIncidentsExcludeDate(state.allIncidents);
+  renderDayStrip(stripFiltered);
 
   const list = document.getElementById("incidentList");
   const empty = document.getElementById("emptyState");
@@ -926,6 +981,43 @@ function renderAll() {
       list.appendChild(renderIncidentCard(incident));
     }
   }
+}
+
+// Filter incidents excluding date filter (for strip building)
+function filterIncidentsExcludeDate(incidents) {
+  return incidents.filter((inc) => {
+    // 1. Region Filter
+    if (state.activeRegion && regionLabel(inc) !== state.activeRegion) {
+      return false;
+    }
+
+    // 2. Severity Filter
+    if (state.activeSeverity !== "all") {
+      const worst = worstSeverityFromUpdates(inc);
+      if (worst !== state.activeSeverity) return false;
+    }
+
+    // 3. Global Search Query
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      const matchTitle = inc.title && inc.title.toLowerCase().includes(q);
+      const matchService = inc.service && inc.service.toLowerCase().includes(q);
+      const matchServiceName = inc.service_name && inc.service_name.toLowerCase().includes(q);
+      const matchRegion = regionLabel(inc) && regionLabel(inc).toLowerCase().includes(q);
+      const matchUpdateTitle = (inc.updates || []).some(
+        (u) => u.title && u.title.toLowerCase().includes(q)
+      );
+      const matchDesc = (inc.updates || []).some(
+        (u) => u.description && u.description.toLowerCase().includes(q)
+      );
+      const matchServices = inc.services && Object.values(inc.services).some(
+        (svc) => (svc.service_name && svc.service_name.toLowerCase().includes(q))
+      );
+      if (!matchTitle && !matchService && !matchServiceName && !matchRegion && !matchUpdateTitle && !matchDesc && !matchServices) return false;
+    }
+
+    return true;
+  });
 }
 
 // Parse Hash State from Location Bar
@@ -962,18 +1054,62 @@ function parseUrlHash() {
 // Data Export Handler (CSV & JSON)
 function exportDataset() {
   const filtered = filterIncidents(state.allIncidents);
-  const jsonBlob = new Blob([JSON.stringify(filtered, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(jsonBlob);
+  const now = new Date().toISOString().slice(0, 10);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `aws-status-archive-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Show export options
+  const exportMenu = document.createElement("div");
+  exportMenu.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-lg);z-index:9999;min-width:300px;";
+  exportMenu.innerHTML = `
+    <div style="margin-bottom:16px;font-weight:600;">Export incidents as:</div>
+    <button id="exportJson" style="display:block;width:100%;padding:10px;margin-bottom:8px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);cursor:pointer;color:var(--text-main);">📄 JSON</button>
+    <button id="exportCsv" style="display:block;width:100%;padding:10px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);cursor:pointer;color:var(--text-main);">📊 CSV</button>
+  `;
+  document.body.appendChild(exportMenu);
 
-  showToast(`Exported ${filtered.length} incidents to JSON`);
+  document.getElementById("exportJson").addEventListener("click", () => {
+    const jsonBlob = new Blob([JSON.stringify(filtered, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(jsonBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aws-status-archive-${now}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    showToast(`Exported ${filtered.length} incidents to JSON`);
+    exportMenu.remove();
+  });
+
+  document.getElementById("exportCsv").addEventListener("click", () => {
+    const headers = ["key", "title", "region", "service", "started_at", "last_update", "update_count", "worst_severity", "open"];
+    const rows = filtered.map(inc => {
+      const updates = inc.updates || [];
+      const worst = worstSeverityFromUpdates(inc);
+      return [
+        `"${(inc.key || "").replace(/"/g, '""')}"`,
+        `"${(inc.title || "").replace(/"/g, '""')}"`,
+        `"${(regionLabel(inc) || "").replace(/"/g, '""')}"`,
+        `"${(inc.service || "").replace(/"/g, '""')}"`,
+        `"${inc.started_at || ""}"`,
+        `"${inc.last_update || ""}"`,
+        updates.length,
+        worst,
+        inc.open ? "true" : "false"
+      ].join(",");
+    });
+    const csv = [headers.join(","), ...rows].join("\n");
+    const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(csvBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aws-status-archive-${now}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    showToast(`Exported ${filtered.length} incidents to CSV`);
+    exportMenu.remove();
+  });
 }
 
 // Attach Event Listeners
@@ -1131,6 +1267,9 @@ function setupEventListeners() {
         const w = window.open();
         if (w) {
           w.document.write(`<pre style="font-family:monospace;padding:16px;background:#0f172a;color:#f8fafc;white-space:pre-wrap;">${escapeHtml(jsonStr)}</pre>`);
+          w.document.close();
+        } else {
+          showToast("Popup blocked. Please allow popups for this site.");
         }
       }
     });
@@ -1165,6 +1304,51 @@ function setupEventListeners() {
       showToast("Incident permalink copied to clipboard!");
     });
   });
+
+  // Strip Tooltip & Bar Click Listeners (attached once)
+  const strip = document.getElementById("daysStrip");
+  if (strip) {
+    strip.addEventListener("pointerover", (e) => {
+      const bar = e.target.closest(".bar");
+      if (bar && bar.dataset.day) showStripTooltip(bar);
+    });
+    strip.addEventListener("pointerleave", hideStripTooltip);
+    strip.addEventListener("focusin", (e) => {
+      if (e.target.classList.contains("bar") && e.target.dataset.day) showStripTooltip(e.target);
+    });
+    strip.addEventListener("focusout", hideStripTooltip);
+
+    // Bar click to toggle date filter (skip no_data bars)
+    strip.addEventListener("click", (e) => {
+      const bar = e.target.closest(".bar");
+      if (!bar) return;
+      const clickedDay = bar.dataset.day;
+      if (!clickedDay || bar.classList.contains("bar-no_data")) return;
+      if (state.activeDate === clickedDay) {
+        state.activeDate = null; // toggle off
+      } else {
+        state.activeDate = clickedDay;
+      }
+      renderAll();
+    });
+
+    // Bar keyboard interaction (Enter/Space, skip no_data bars)
+    strip.addEventListener("keydown", (e) => {
+      if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("bar")) {
+        if (e.target.classList.contains("bar-no_data")) return;
+        e.preventDefault();
+        const clickedDay = e.target.dataset.day;
+        if (clickedDay) {
+          if (state.activeDate === clickedDay) {
+            state.activeDate = null;
+          } else {
+            state.activeDate = clickedDay;
+          }
+          renderAll();
+        }
+      }
+    });
+  }
 
   // Strip Navigation Controls
   const prevBtn = document.getElementById("stripPrev");
