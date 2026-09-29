@@ -22,7 +22,9 @@ workflow looks at git status to decide if there is anything to commit.
 
 import gzip
 import json
+import os
 import sys
+import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -68,19 +70,29 @@ def canonical_json(value):
 
 
 def main():
+    any_failed = False
     for name, url in SOURCES.items():
         out_path = DATA_DIR / name
         try:
             raw = fetch(url)
         except Exception as exc:  # noqa: BLE001 - report and keep going
             print(f"[FAIL] {name}: fetch failed: {exc}", file=sys.stderr)
-            return 1
+            any_failed = True
+            continue
 
         try:
             parsed = decode_json_bytes(raw)
         except Exception as exc:  # noqa: BLE001
             print(f"[FAIL] {name}: could not decode JSON: {exc}", file=sys.stderr)
-            return 1
+            any_failed = True
+            continue
+
+        # Refuse empty payloads: services should be a non-empty list, history should be a non-empty dict
+        if isinstance(parsed, (dict, list)) and not parsed:
+            expected_type = "list" if name == "services.json" else "dict"
+            print(f"[FAIL] {name}: empty {expected_type} payload", file=sys.stderr)
+            any_failed = True
+            continue
 
         text = canonical_json(parsed)
         previous = out_path.read_text(encoding="utf-8") if out_path.exists() else None
@@ -88,10 +100,21 @@ def main():
         if text == previous:
             print(f"no change: {name}")
         else:
-            out_path.write_text(text, encoding="utf-8")
-            print(f"changed: wrote {len(text.encode('utf-8'))} bytes to {out_path.relative_to(BASE_DIR)}")
+            # Write atomically: write to temp file in same dir, then replace
+            fd, temp_path = tempfile.mkstemp(suffix=".json", dir=str(out_path.parent), text=False)
+            try:
+                with open(fd, "w", encoding="utf-8") as f:
+                    f.write(text)
+                os.replace(temp_path, str(out_path))
+                print(f"changed: wrote {len(text.encode('utf-8'))} bytes to {out_path.relative_to(BASE_DIR)}")
+            except Exception:
+                try:
+                    os.unlink(temp_path)
+                except Exception:
+                    pass
+                raise
 
-    return 0
+    return 1 if any_failed else 0
 
 
 if __name__ == "__main__":
