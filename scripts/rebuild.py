@@ -252,9 +252,20 @@ def build_incident(slug, event, catalog, current_event, raw_current_arns=None):
     }
     # History events carry their own per-service breakdown; a matching open
     # current event (same arn) has the fresher per-service status.
+    # An archived current event of a now-closed incident is a stale
+    # mid-incident snapshot, so it only fills gaps rather than overriding.
     services = build_services(event)
     if current_event and current_event.get("impacted_services"):
-        services.update(build_services(current_event))
+        live = build_services(current_event)
+        if is_open:
+            services.update(live)
+        else:
+            for slug, snapshot in live.items():
+                known = services.get(slug, {})
+                services[slug] = {
+                    **snapshot,
+                    **{k: v for k, v in known.items() if v not in (None, [], "unknown")},
+                }
     if services:
         incident["services"] = services
     return incident
@@ -347,7 +358,8 @@ def with_guids(incidents):
     seen_guids = {}
 
     for incident in incidents:
-        event_date = str(int(incident["started_at"].split("T")[0].replace("-", ""))) if incident["started_at"] else "0"
+        # Same event suffix as the incident key (…#{slug}_{event_date}).
+        event_date = incident["key"].rsplit("_", 1)[-1]
 
         for update in incident["updates"]:
             if "guid" not in update:
