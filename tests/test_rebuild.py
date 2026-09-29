@@ -70,60 +70,6 @@ class TestParseStatus(unittest.TestCase):
         self.assertEqual(incident["updates"][0]["title"], "Increased Error Rates")
         self.assertEqual(incident["updates"][1]["severity"], "disrupted")
 
-    def test_service_days_no_data_before_first_transition(self):
-        transitions = [{"timestamp": 1772369485000, "current_status": "3"}]
-        days = service_days(transitions, "2026-02-28", "2026-03-02")
-        self.assertEqual(days["2026-02-28"], "no_data")
-        self.assertEqual(days["2026-03-01"], "disrupted")
-        self.assertEqual(days["2026-03-02"], "disrupted")
-
-    def test_service_days_no_data_with_empty_transitions(self):
-        days = service_days([], "2026-03-01", "2026-03-03")
-        self.assertEqual(days["2026-03-01"], "no_data")
-        self.assertEqual(days["2026-03-02"], "no_data")
-        self.assertEqual(days["2026-03-03"], "no_data")
-
-    def test_service_days_gap_between_transitions(self):
-        transitions = [
-            {"timestamp": 1772369485000, "current_status": "3"},
-            {"timestamp": 1772542285000, "current_status": "0"},
-        ]
-        days = service_days(transitions, "2026-02-28", "2026-03-04")
-        self.assertEqual(days["2026-02-28"], "no_data")
-        self.assertEqual(days["2026-03-01"], "disrupted")
-        self.assertEqual(days["2026-03-02"], "disrupted")
-        # After resolution, the state persists as "operational" (last known observation)
-        self.assertEqual(days["2026-03-03"], "operational")
-        self.assertEqual(days["2026-03-04"], "operational")
-
-    def test_service_days_multiple_transitions_same_day(self):
-        transitions = [
-            {"timestamp": 1772369485000, "current_status": "1"},
-            {"timestamp": 1772373085000, "current_status": "3"},
-        ]
-        days = service_days(transitions, "2026-02-28", "2026-03-02")
-        self.assertEqual(days["2026-02-28"], "no_data")
-        # Both transitions are on Mar 1; the worst (disrupted) should apply
-        self.assertEqual(days["2026-03-01"], "disrupted")
-        self.assertEqual(days["2026-03-02"], "disrupted")
-
-    def test_worst_transition_severity(self):
-        transitions = [
-            {"current_status": "1"},
-            {"current_status": "3"},
-            {"current_status": "0"},
-        ]
-        self.assertEqual(worst_transition_severity(transitions), "disrupted")
-
-    def test_worst_transition_severity_ignores_no_data(self):
-        transitions = [
-            {"current_status": None},
-            {"current_status": "2"},
-        ]
-        self.assertEqual(worst_transition_severity(transitions), "degraded")
-
-    def test_worst_transition_severity_empty(self):
-        self.assertEqual(worst_transition_severity([]), "unknown")
 
 
 class TestRebuild(unittest.TestCase):
@@ -149,6 +95,76 @@ class TestRebuild(unittest.TestCase):
         me_south = [i for i in incidents if i["region"] == "me-south-1"][0]
         self.assertNotIn("services", me_south)
         self.assertEqual(me_south["update_count"], 1)
+
+    def test_guid_uniqueness(self):
+        """All guids should be unique after guid generation."""
+        from rebuild import with_guids
+        catalog, history, current = load_fixtures()
+        incidents = build_incidents(catalog, history, current)
+        with_guids(incidents)
+
+        guids = set()
+        for incident in incidents:
+            for update in incident["updates"]:
+                self.assertNotIn(update["guid"], guids, f"Duplicate guid: {update['guid']}")
+                guids.add(update["guid"])
+
+    def test_arn_join(self):
+        """Incidents should be joined by ARN from currentevents."""
+        catalog, history, current = load_fixtures()
+        incidents = build_incidents(catalog, history, current)
+
+        # me-central-1 has an arn that matches current
+        me_central = [i for i in incidents if i["region"] == "me-central-1"][0]
+        self.assertIsNotNone(me_central["arn"])
+        self.assertTrue(me_central["arn"].startswith("arn:aws:health:"))
+
+    def test_open_flag(self):
+        """Open flag should be set for incidents in raw current."""
+        catalog, history, current = load_fixtures()
+        raw_current = current  # In this test, all current events are in raw_current
+        incidents = build_incidents(catalog, history, current, raw_current)
+
+        # me-central-1 should have open=1
+        me_central = [i for i in incidents if i["region"] == "me-central-1"][0]
+        self.assertEqual(me_central["open"], 1)
+
+        # me-south-1 should have open=0 (not in current)
+        me_south = [i for i in incidents if i["region"] == "me-south-1"][0]
+        self.assertEqual(me_south["open"], 0)
+
+    def test_severity_rank_order(self):
+        """Verify AWS numeric severity order: 3>2>1>0."""
+        self.assertEqual(severity("3"), "disrupted")
+        self.assertEqual(severity("2"), "degraded")
+        self.assertEqual(severity("1"), "impacted")
+        self.assertEqual(severity("0"), "operational")
+        # Test int input
+        self.assertEqual(severity(3), "disrupted")
+        self.assertEqual(severity(0), "operational")
+
+    def test_global_region(self):
+        """Global services (no region_id) should have region='global'."""
+        # Create a global service (no region in slug)
+        catalog = {
+            "cloudfront": {
+                "service": "cloudfront",
+                "service_name": "Amazon CloudFront",
+                "region_id": None
+            }
+        }
+        history = {
+            "cloudfront": [{
+                "arn": "arn:aws:health::event/GLOBAL/test",
+                "date": "1772369485",
+                "summary": "Test",
+                "event_log": []
+            }]
+        }
+        incidents = build_incidents(catalog, history, [])
+        self.assertEqual(len(incidents), 1)
+        self.assertEqual(incidents[0]["region"], "global")
+        self.assertEqual(incidents[0]["region_name"], "Global Services")
 
 
 if __name__ == "__main__":

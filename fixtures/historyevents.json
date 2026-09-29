@@ -5,6 +5,18 @@
       "date": "1772369485",
       "summary": "Increased Error Rates",
       "status": "3",
+      "impacted_services": {
+        "ec2-me-central-1": {
+          "current": "3",
+          "max": "3",
+          "service_name": "Amazon Elastic Compute Cloud"
+        },
+        "cloudfront": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon CloudFront"
+        }
+      },
       "event_log": [
         {
           "message": "We are investigating issues with AWS services in the ME-CENTRAL-1 Region.",

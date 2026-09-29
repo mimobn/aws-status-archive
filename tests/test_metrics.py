@@ -93,7 +93,7 @@ class TestServiceDaysEdgeCases(unittest.TestCase):
             {"timestamp": 1772373085000, "current_status": "3"},
         ]
         days = service_days(transitions, "2026-03-01", "2026-03-02")
-        # Both on same day; last transition should apply
+        # Both on same day; last transition of the day applies (disrupted, status 3)
         self.assertEqual(days["2026-03-01"], "disrupted")
 
     def test_day_count_matches_window(self):
