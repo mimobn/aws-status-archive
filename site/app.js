@@ -336,7 +336,7 @@ function openModal(incident) {
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
       <span class="badge badge-${worstSev}">${SEVERITY_LABEL[worstSev] ?? worstSev}</span>
       <span class="incident-region">${escapeHtml(regLabel)}</span>
-      <span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);font-family:monospace;">Key: ${escapeHtml(incident.key)}</span>
+      <span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);font-family:var(--font-mono);">Key: ${escapeHtml(incident.key)}</span>
     </div>
     ${servicesHtml}
     <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Update History Logs</h5>

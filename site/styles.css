@@ -1,7 +1,8 @@
 /* --- Core Color System & Variables --- */
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Space Grotesk', var(--font-sans);
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
@@ -253,26 +254,6 @@ button, input, select {
   background: var(--operational-bg);
   color: var(--operational);
   border: 1px solid var(--operational-border);
-}
-
-.status-pill-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--operational);
-  box-shadow: 0 0 8px var(--operational);
-  animation: pulse-dot 2s infinite ease-in-out;
-}
-
-.status-pill-stale { background: var(--degraded-bg, rgba(245,158,11,.12)); color: var(--degraded); border-color: var(--degraded); }
-.status-pill-stale .status-pill-dot { background: var(--degraded); box-shadow: none; animation: none; }
-.status-pill-error { background: var(--disrupted-bg, rgba(239,68,68,.12)); color: var(--disrupted); border-color: var(--disrupted); }
-.status-pill-error .status-pill-dot { background: var(--disrupted); box-shadow: none; animation: none; }
-.timeline-desc a { color: var(--accent-primary); text-decoration: underline; }
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
 }
 
 .subtitle {
