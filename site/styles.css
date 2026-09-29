@@ -1559,3 +1559,27 @@ button, input, select {
   .severity-filter-group { flex-wrap: wrap; }
   .incident-head, .incident-badges { flex-wrap: wrap; }
 }
+
+/* Themed scrollbars everywhere (region bar, strip, modal, sidebar) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
+*::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+*::-webkit-scrollbar-corner { background: transparent; }
+
+.mobile-region-bar { scrollbar-width: none; }
+.mobile-region-bar::-webkit-scrollbar { display: none; }
+
+@media (max-width: 600px) {
+  .strip { gap: 1px; }
+  .bar { min-width: 1px; }
+  .mobile-region-bar {
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+}
