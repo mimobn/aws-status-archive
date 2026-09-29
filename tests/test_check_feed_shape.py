@@ -3,6 +3,7 @@
 
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -24,6 +25,12 @@ def write_dir(files):
     return directory
 
 
+def cleanup_dir(directory):
+    """Clean up a temp directory."""
+    if os.path.exists(directory):
+        shutil.rmtree(directory)
+
+
 SERVICE = {
     "event_type_code": "AWS_EC2_OPERATIONAL_ISSUE",
     "launch_date": 1661731200,
@@ -32,6 +39,15 @@ SERVICE = {
     "region_name": "N. Virginia",
     "service": "ec2-us-east-1",
     "service_name": "Amazon Elastic Compute Cloud",
+}
+
+# Global service row without region_id/region_name
+GLOBAL_SERVICE = {
+    "event_type_code": "AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE",
+    "launch_date": 1661731200,
+    "locale": ["GLOBAL"],
+    "service": "multipleservices",
+    "service_name": "Multiple services",
 }
 
 EVENT = {
@@ -70,23 +86,38 @@ def good_dir():
 
 
 class TestCheckShape(unittest.TestCase):
+    def setUp(self):
+        self.directories_to_cleanup = []
+
+    def tearDown(self):
+        for directory in self.directories_to_cleanup:
+            cleanup_dir(directory)
+
+    def _track_dir(self, directory):
+        """Track a directory for cleanup in tearDown."""
+        self.directories_to_cleanup.append(directory)
+        return directory
+
     def test_valid_archive_passes(self):
-        self.assertEqual(check_shape(good_dir()), [])
+        directory = self._track_dir(good_dir())
+        self.assertEqual(check_shape(directory), [])
 
     def test_missing_file_fails(self):
-        directory = write_dir({})
+        directory = self._track_dir(write_dir({}))
         errors = check_shape(directory)
         self.assertEqual(len(errors), 3)
 
     def test_history_entry_missing_field_fails(self):
         bad = dict(EVENT)
         del bad["summary"]
-        directory = write_dir(
-            {
-                "services.json": [SERVICE],
-                "historyevents.json": {"ec2-us-east-1": [bad]},
-                "currentevents.json": [CURRENT],
-            }
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [SERVICE],
+                    "historyevents.json": {"ec2-us-east-1": [bad]},
+                    "currentevents.json": [CURRENT],
+                }
+            )
         )
         errors = check_shape(directory)
         self.assertTrue(any("'summary'" in e for e in errors))
@@ -94,36 +125,119 @@ class TestCheckShape(unittest.TestCase):
     def test_current_event_missing_field_fails(self):
         bad = dict(CURRENT)
         del bad["impacted_services"]
-        directory = write_dir(
-            {
-                "services.json": [SERVICE],
-                "historyevents.json": {"ec2-us-east-1": [EVENT]},
-                "currentevents.json": [bad],
-            }
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [SERVICE],
+                    "historyevents.json": {"ec2-us-east-1": [EVENT]},
+                    "currentevents.json": [bad],
+                }
+            )
         )
         errors = check_shape(directory)
         self.assertTrue(any("missing 'impacted_services'" in e for e in errors))
 
     def test_not_json_fails(self):
-        directory = write_dir(
-            {
-                "services.json": "totally not json",
-                "historyevents.json": "nope",
-                "currentevents.json": "nope",
-            }
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": "totally not json",
+                    "historyevents.json": "nope",
+                    "currentevents.json": "nope",
+                }
+            )
         )
         errors = check_shape(directory)
         self.assertTrue(any("not valid JSON" in e for e in errors))
 
     def test_empty_history_is_fine(self):
-        directory = write_dir(
-            {
-                "services.json": [SERVICE],
-                "historyevents.json": {},
-                "currentevents.json": [CURRENT],
-            }
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [SERVICE],
+                    "historyevents.json": {},
+                    "currentevents.json": [CURRENT],
+                }
+            )
         )
         self.assertEqual(check_shape(directory), [])
+
+    def test_global_service_without_region_id_passes(self):
+        """Global services without region_id/region_name should be valid."""
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [GLOBAL_SERVICE],
+                    "historyevents.json": {},
+                    "currentevents.json": [CURRENT],
+                }
+            )
+        )
+        self.assertEqual(check_shape(directory), [])
+
+    def test_empty_services_list_fails(self):
+        """Empty services list should fail."""
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [],
+                    "historyevents.json": {},
+                    "currentevents.json": [CURRENT],
+                }
+            )
+        )
+        errors = check_shape(directory)
+        self.assertTrue(any("empty list" in e for e in errors))
+
+    def test_service_with_non_string_field_fails(self):
+        """Service with non-string service_name should fail."""
+        bad_service = dict(SERVICE)
+        bad_service["service_name"] = 123  # Should be a string
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [bad_service],
+                    "historyevents.json": {},
+                    "currentevents.json": [CURRENT],
+                }
+            )
+        )
+        errors = check_shape(directory)
+        self.assertTrue(any("not a string" in e for e in errors))
+
+    def test_event_with_non_int_like_date_fails(self):
+        """Event with non-int-like date should fail."""
+        bad_event = dict(EVENT)
+        bad_event["date"] = "not-a-number"  # Should be int-like
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [SERVICE],
+                    "historyevents.json": {"ec2-us-east-1": [bad_event]},
+                    "currentevents.json": [CURRENT],
+                }
+            )
+        )
+        errors = check_shape(directory)
+        self.assertTrue(any("not int-like" in e for e in errors))
+
+    def test_impacted_service_status_change_missing_field_fails(self):
+        """impacted_service_status_changes entry missing required field should fail."""
+        bad_current = dict(CURRENT)
+        bad_current["impacted_service_status_changes"] = [
+            {"timestamp": 1772369485, "service": "ec2"}  # Missing current_status
+        ]
+        directory = self._track_dir(
+            write_dir(
+                {
+                    "services.json": [SERVICE],
+                    "historyevents.json": {},
+                    "currentevents.json": [bad_current],
+                }
+            )
+        )
+        errors = check_shape(directory)
+        self.assertTrue(any("'current_status'" in e for e in errors))
 
 
 if __name__ == "__main__":

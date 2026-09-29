@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Tests for the snapshot diff logic."""
 
+import os
 import sys
 import unittest
 
-sys.path.insert(0, "scripts")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
-from diff_snapshots import diff_incidents  # noqa: E402
+from diff_snapshots import diff_incidents, _strip_title_prefix  # noqa: E402
 
 
 def state(*pairs):
@@ -53,6 +54,31 @@ class TestDiffIncidents(unittest.TestCase):
         entry = report["incidents_with_new_updates"][0]
         self.assertEqual(entry["incident_key"], BASE + "ec2_1")
         self.assertEqual(entry["new_updates"], 3)
+
+
+class TestStripTitlePrefix(unittest.TestCase):
+    def test_no_prefix(self):
+        """Title without prefix should remain unchanged."""
+        self.assertEqual(_strip_title_prefix("Increased Error Rates"), "Increased Error Rates")
+
+    def test_strip_resolved_prefix(self):
+        """[RESOLVED] prefix should be stripped."""
+        self.assertEqual(_strip_title_prefix("[RESOLVED] Increased Error Rates"), "Increased Error Rates")
+
+    def test_strip_case_insensitive(self):
+        """[resolved] or [RESOLVED] should both be stripped."""
+        self.assertEqual(_strip_title_prefix("[resolved] Issue"), "Issue")
+        self.assertEqual(_strip_title_prefix("[RESOLVED] Issue"), "Issue")
+        self.assertEqual(_strip_title_prefix("[Resolved] Issue"), "Issue")
+
+    def test_strip_custom_prefix(self):
+        """Custom prefixes like [INVESTIGATING] should also be stripped."""
+        self.assertEqual(_strip_title_prefix("[INVESTIGATING] Problem"), "Problem")
+        self.assertEqual(_strip_title_prefix("[STATUS_UPDATE] News"), "News")
+
+    def test_strip_with_spaces(self):
+        """Spaces after prefix should be handled correctly."""
+        self.assertEqual(_strip_title_prefix("[RESOLVED]  Title"), "Title")
 
 
 if __name__ == "__main__":
