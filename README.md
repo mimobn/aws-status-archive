@@ -94,14 +94,13 @@ Run the integrity checks:
 uv run python scripts/check_integrity.py
 ```
 
-To preview the site locally, copy the generated data files and serve the site:
+Run the site locally:
 
 ```bash
-cp out/incidents.json out/metadata.json site/parsed/
-python -m http.server -d site 8080
+uv run python scripts/serve.py
 ```
 
-Then open **http://localhost:8080** in your browser.
+Then open **http://127.0.0.1:8000/** in your browser.
 
 Start the local API:
 
