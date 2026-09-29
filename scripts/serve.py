@@ -12,7 +12,7 @@ import argparse
 import glob
 import http.server
 import os
-import signal
+import urllib.parse
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -127,6 +127,8 @@ class SiteHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         """Translate a /-initial abstract path to a file path."""
+        # Drop the query/fragment and percent-decode, like the base class does.
+        path = urllib.parse.unquote(path.split("?", 1)[0].split("#", 1)[0])
         fs_path = resolve_path(path, self.site_dir, self.out_dir)
         return fs_path if fs_path else ""
 
@@ -184,18 +186,15 @@ def main():
 
     print(f"Serving status-archive at http://{args.host}:{args.port}/")
 
-    # Handle Ctrl+C cleanly
-    def signal_handler(sig, frame):
-        print("\nShutting down...", file=sys.stderr)
-        server.shutdown()
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, signal_handler)
-
+    # Ctrl+C raises KeyboardInterrupt out of serve_forever(); calling
+    # server.shutdown() from this same thread would deadlock.
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        sys.exit(0)
+        print("\nShutting down.", file=sys.stderr)
+    finally:
+        server.server_close()
+    return 0
 
 
 if __name__ == "__main__":

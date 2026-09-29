@@ -459,6 +459,7 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
   font-size: 0.78rem;
 }
 .muted { color: var(--text-subtle); }
+.service-grid.is-collapsed > .service-chip:nth-child(n + 31) { display: none; }
 .note { font-size: 0.85rem; color: var(--text-muted); }
 
 /* ---------- Incident log ---------- */

@@ -647,7 +647,7 @@ function openModal(incident) {
   const servicesHtml = services.length
     ? `<section class="modal-section">
         <h3>Affected services (${services.length}), by worst status reached</h3>
-        <div class="service-grid">${services
+        <div class="service-grid${services.length > 30 ? " is-collapsed" : ""}">${services
           .map(([slug, s]) => {
             const now =
               incident.open && s.current && s.current !== s.max
@@ -655,7 +655,11 @@ function openModal(incident) {
                 : "";
             return `<span class="service-chip" title="Worst: ${escapeHtml(SEVERITY_LABEL[s.max] || s.max)}">${severityDot(s.max)}${escapeHtml(s.service_name || slug)}${now}</span>`;
           })
-          .join("")}</div>
+          .join("")}${
+          services.length > 30
+            ? `<button type="button" class="link-btn" data-expand-services>Show all ${services.length}</button>`
+            : ""
+        }</div>
       </section>`
     : "";
 
@@ -716,6 +720,12 @@ function setupModal() {
       e.preventDefault();
       first.focus();
     }
+  });
+  $("modalBody").addEventListener("click", (e) => {
+    const expand = e.target.closest("[data-expand-services]");
+    if (!expand) return;
+    expand.parentElement.classList.remove("is-collapsed");
+    expand.remove();
   });
   $("modalCopyBtn").addEventListener("click", () => {
     if (state.modalIncident) copyLink(state.modalIncident.key);
