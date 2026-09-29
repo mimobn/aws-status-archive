@@ -1,0 +1,4309 @@
+[
+  {
+    "arn": "arn:aws:health:me-central-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_5E6B8_EF2498889B5",
+    "date": "1772369485",
+    "event_log": [
+      {
+        "message": "We are investigating issues with AWS services in the ME-CENTRAL-1 Region.",
+        "status": 1,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772369485
+      },
+      {
+        "message": "We are investigating connectivity and power issues affecting APIs and instances in a single Availability Zone (mec1-az2) in the ME-CENTRAL-1 Region due to a localized power issue. Existing instances in this zone will also be affected. Other AWS Services may also be experiencing increased errors and latencies for their workflows, and we are working to route requests away from this affected Availability Zone. We recommend customers make use of other Availability Zones at this time. Targeting new launches using RunInstances in the remaining AZs should succeed. Existing instances in the other AZs are not affected.",
+        "status": 1,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772371152
+      },
+      {
+        "message": "We can confirm that a localized power issue has affected a single Availability Zone in the ME-CENTRAL-1 Region (mec1-az2). EC2 Instances, DB Instances, EBS Volumes, and others resources are currently unavailable and will experience connectivity issues at this time. Other AWS Services are also experiencing error rates and latencies for some workflows. We have weighed away traffic for most services at this time. We recommend customers utilize one of the other Availability Zones in the ME-CENTRAL-1 Region at this time, as existing instances in other AZ's remain unaffected by this issue. We are actively working to restore power and connectivity, at which time we will begin to work to recover affected resources. As of this time, we expect recovery is multiple hours away. We will provide an update by 7:15 AM PST, or sooner if we have additional information to share.",
+        "status": 1,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772374140
+      },
+      {
+        "message": "We wanted to provide some additional information on the isolated power issue. At this time, most AWS Services have weighted away from the affected Availability Zone (mec1-az2) and are seeing recovery for their affected operations and workflows. For EC2 Instances, EBS Volumes, and other resources that are impacted in the affected Zone, we will have a longer tail of recovery. At this time, power has not yet been restored to the affected AZ. For now, we recommend continuing to retry any failed API requests. If immediate recovery is required, we recommend customers restore from EBS Snapshots and/or replace affected resources by launching replacement resources in one of the unaffected zones, or an alternate region. As of this time, recovery is still several hours away. We will provide an update by 8:30 AM PST, or sooner if we have additional information to share.",
+        "status": 2,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772377753
+      },
+      {
+        "message": "We continue to work toward restoring power in the affected Availability Zone in the ME-CENTRAL-1 Region (mec1-az2). In parallel, we are actively working on improving error rates and latencies that some customers are observing for EC2 Networking and EC2 Describe APIs. Due to increased demand in the unaffected Availability Zones, customers may experience longer than usual provisioning times or may need to retry requests for certain instance types, or pick an alternative instance type. We will provide an update by 10:30 AM PST, or sooner if we have additional information to share. ",
+        "status": 2,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772384340
+      },
+      {
+        "message": "We want to provide some additional information on the power issue in a single Availability Zone in the ME-CENTRAL-1 Region. At around 4:30 AM PST, one of our Availability Zones (mec1-az2) was impacted by objects that struck the data center, creating sparks and fire. The fire department shut off power to the facility and generators as they worked to put out the fire. We are still awaiting permission to turn the power back on, and once we have, we will ensure we restore power and connectivity safely. It will take several hours to restore connectivity to the impacted AZ. The other AZs in the region are functioning normally. Customers who were running their applications redundantly across the AZs are not impacted by this event. EC2 Instance launches will continue to be impaired in the impacted AZ. We recommend that customers continue to retry any failed API requests. If immediate recovery of an affected resource (EC2 Instance, EBS Volume, RDS DB Instance, etc.) is required, we recommend restoring from your most recent backup, by launching replacement resources in one of the unaffected zones, or an alternate AWS Region. We will provide an update by 12:30 PM PST, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772386871
+      },
+      {
+        "message": "We are aware that some customers are experiencing errors when calling EC2 APIs, specifically networking related APIs (AllocateAddress, AssociateAddress, DescribeRouteTable, DescribeNetworkInterfaces). We are actively working on multiple paths to mitigate these issues. For customers experiencing throttling errors on the AllocateAddress APIs, we recommend retrying any failed API requests. We are deploying a configuration change to mitigate the AssociateAddress API errors and expect recovery in the next few hours. DescribeRouteTable and DescribeNetworkInterfaces API calls without specifying zone, Interface or Instance IDs are expected to fail until we restore the impacted zone. We recommend customers to pass these IDs explicitly in these API requests. For customers that can, we recommend considering using alternate AWS Regions. We will provide another update by 3:30 PM PST, or sooner if we have more to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772396043
+      },
+      {
+        "message": "We are seeing positive signs of recovery for many of the EC2 APIs, such as Describes and AllocateAddress. We recognize that customers are still experiencing errors when attempting to call the AssociateAddress API, and are unable to disassociate addresses from resources that are affected by the underlying power issue. We continue to work on multiple parallel paths to mitigate both of these issues. We recommend continuing to retry requests wherever possible. We expect our current mitigation efforts for these specific issues to complete within the the two to three hours. As we progress with these mitigation efforts, customers will observe higher success rates for these operations. Additionally, we are investigating ways to speed up these specific mitigation efforts, but are ensuring we do so safely. As of this time, power restoration is still several hours away. We will provide another update by 5:30 PM PST, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772404099
+      },
+      {
+        "message": "We are seeing significant signs of recovery for AssociateAddress requests, and continue to work toward fully mitigating this issue. This combined with the earlier recovery of the AllocateAddress API means customers can now successfully create and associate new network addresses in the unaffected AZs. Other AWS Services are also now observing sustained improvement as a result of the EC2 Networking APIs recovery. We are now focusing on implementing a change that will allow customers to Disassociate Elastic IP addresses from resources that are impacted by the underlying power issue. We expect this specific mitigation to take another hour to complete. We do not have an ETA for power restoration at this time. For customers that can, we recommend using alternate Availability Zones or other AWS Regions where applicable. We will provide another update by 6:30 PM, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772411201
+      },
+      {
+        "message": "We confirm the recovery of the AssociateAddress API requests. We have also applied a change that enables customers to disassociate Elastic IP addresses from resources that are impacted by the underlying power issue. With these mitigations, customers can now successfully create and associate new network addresses in the unaffected AZs as well as re-associate Elastic IPs from resources in the affected zone to resources in the unaffected zones. We still do not have an ETA for power restoration at this time. For customers that can, we recommend using alternate Availability Zones or other AWS Regions where applicable. We will provide another update by 10:00 PM, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772416907
+      },
+      {
+        "message": "We are investigating additional connectivity issues and error rates in the ME-CENTRAL-1 Region.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772431169
+      },
+      {
+        "message": "We can confirm that a localized power issue has affected another Availability Zone in the ME-CENTRAL-1 Region (mec1-az3). Customers are also experiencing increased EC2 APIs and instance launch errors for the remaining zone (mec1-az1). At this point it is not possible to launch new instances in the region, although existing instances should not be affected in mec1-az1. Other AWS Services, such as DynamoDB and S3 are also experiencing significant error rates and latencies. We are actively working to restore power and connectivity, at which time we will begin to work to recover affected resources. As of this time, we expect recovery is multiple hours away. For customers that can, we recommend failing away to another AWS Region at this time. We will provide an update by 12:00 AM PST, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772433960
+      },
+      {
+        "message": "We continue to work on a localized power issue affecting multiple Availability Zones in the ME-CENTRAL-1 Region (mec1-az2 and mec1-az3). Customers are experiencing increased EC2 API errors and instance launch failures across the region, and it is not currently possible to launch new instances; existing instances in mec1-az1 should not be affected. Amazon DynamoDB and Amazon S3 are also experiencing significant error rates and elevated latencies. We are actively working to restore power and connectivity, after which we will begin recovery of affected resources; full recovery is still expected to be many hours away. We recommend that affected customers failover, and backup any critical data, to another AWS Region. We will provide an update by 2:00 AM PST, or sooner if the situation changes.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772441520
+      },
+      {
+        "message": "We wanted to provide more information on Amazon S3 given that there are two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. Amazon S3 is a regional service and designed to withstand the total loss of a single Availability Zone while maintaining S3's durability and availability. When the mec1-az2 AZ was powered off at approximately 4:00 AM PST on Sunday, March 1, S3 continued to operate normally. As the second AZ became impaired, S3 error rates increased. With two Availability Zones significantly impacted, customers are seeing high failure rates for data ingest and egress. We strongly advise customers to update their applications to ingest S3 data to an alternate AWS Region. As soon as practically possible, we will begin the restoration of our two Availability Zones which will include a careful assessment of data health and any repair of storage if necessary.\n\nIn addition, we can confirm that the AWS Management Console and command line interface (CLI) are disrupted by the failure of two Availability Zones. We continue to work towards recovery across all services, and we will provide an update by 6:00 AM PST on March 2, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772448800
+      },
+      {
+        "message": "We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. We are expecting recovery to take at least a day, as it requires repair of facilities, cooling and power systems, coordination with local authorities, and careful assessment to ensure the safety of our operators. EC2, Amazon DynamoDB and other AWS Services continue to experience significant error rates and elevated latencies.\nWe recommend customers enact their disaster recovery plans and recover from remote backups into alternate AWS Regions, ideally in Europe. Further, we strongly advise customers to update their applications to ingest S3 data to an alternate AWS Region. We will provide an update by 11:00 AM PST on March 2, or sooner if we have additional information to share.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772461323
+      },
+      {
+        "message": "We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. The impact is causing elevated errors rates for both the Management Console and CLI. Our current expectation is that recovery will take at least a day to complete. We continue to recommend customers enact their disaster recovery plans and recover from remote backups into alternate AWS Regions. We will continue to provide periodic updates on recovery efforts. Our next update will be by 2:00 PM PST or sooner if new information becomes available.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772474389
+      },
+      {
+        "message": "We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region. We have partially restored access to the AWS Management Console, however, some pages will continue to load unsuccessfully until we have recovered core services and power. In parallel to the power and recovery efforts, we are working to restore access to tools and utilities to allow customers to backup and migrate their data. We have no updated guidance on expected recovery times, and still expect this to take at least a day to fully restore power and connectivity. We continue advising customers enact their disaster recovery plans and recover from remote backups into alternate AWS Regions. We will provide you with another update by 6:00 PM PST, or sooner if new information becomes available.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772487370
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1) and the AWS Middle East (Bahrain) Region (ME-SOUTH-1). Due to the ongoing conflict in the Middle East, both affected regions have experienced physical impacts to infrastructure as a result of drone strikes. In the UAE, two of our facilities were directly struck, while in Bahrain, a drone strike in close proximity to one of our facilities caused physical impacts to our infrastructure. These strikes have caused structural damage, disrupted power delivery to our infrastructure, and in some cases required fire suppression activities that resulted in additional water damage. We are working closely with local authorities and prioritizing the safety of our personnel throughout our recovery efforts.\n\nIn the ME-CENTRAL-1 (UAE) Region, two of our three Availability Zones (mec1-az2 and mec1-az3) remain significantly impaired. The third Availability Zone (mec1-az1) continues to operate normally, though some services have experienced indirect impact due to dependencies on the affected zones. In the ME-SOUTH-1 (Bahrain) Region, one facility has been impacted. Across both regions, customers are experiencing elevated error rates and degraded availability for services including Amazon EC2, Amazon S3, Amazon DynamoDB, AWS Lambda, Amazon Kinesis, Amazon CloudWatch, Amazon RDS, and the AWS Management Console and CLI. We are working to restore full service availability as quickly as possible, though we expect recovery to be prolonged given the nature of the physical damage involved.\n\nIn parallel with efforts to restore the physical infrastructure at the affected sites, we are pursuing multiple software-based recovery paths that do not depend on the underlying facilities being fully brought back online. For Amazon S3 and Amazon DynamoDB, we are actively working to restore data access and service availability through software mitigations, including deploying updates to enable S3 to operate within the current infrastructure constraints and remediating impaired DynamoDB tables to restore read and write availability for dependent services. Our focus on restoring these foundational services is deliberate, as recovery of Amazon S3 and Amazon DynamoDB will in turn enable a broad range of dependent AWS services to recover. For other affected service APIs, we are deploying targeted software updates to reduce error rates and restore functionality where possible, independent of the physical recovery timeline. We are also working to restore access to the AWS Management Console and CLI through network-level changes that route traffic away from the affected infrastructure. While these software-based mitigations can address many of the service-level impacts, some recovery actions are constrained by the physical state of the affected facilities — meaning that full restoration of certain services will require the underlying infrastructure to be repaired and brought back online. Across all services, our teams are working in parallel on both the physical restoration of the affected facilities and these software-based mitigations, with the goal of restoring as much customer access as possible as quickly as possible, even ahead of full infrastructure recovery. In addition, we are prioritizing the restoration of services and tools that enable customers to back up and migrate their data and applications out of the affected regions.\n\nFinally, even as we work to restore these facilities, the ongoing conflict in the region means that the broader operating environment in the Middle East remains unpredictable. We recommend that customers with workloads running in the Middle East consider taking action now to backup data and potentially migrate your workloads to alternate AWS Regions. We recommend customers exercise their disaster recovery plans, recover from remote backups stored in other regions, and update their applications to direct traffic away from the affected regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.\n\nWe will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 9:00 PM PST on March 2, 2026, or sooner if new information becomes available.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772497188
+      },
+      {
+        "message": "We continue to work towards recovery of the two impaired Availability Zones (mec1-az2 and mec1-az3) in the ME-CENTRAL-1 Region with a focus on restoring functionality to foundational services. Since our last update we have made incremental progress in recovering the DynamoDB control plane which will not be visible to external customers but are required for the restoration of service. Similarly we have made progress with the S3 control plane. The recovery of these foundational services, when complete, will enable a broad range of dependent AWS services to recover. We still estimate that the recovery time is at least a day before we are able to fully restore power and connectivity. We will provide you with another update by March 3 2:00 AM PST, or sooner if new information becomes available.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772514818
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). The overall state of the region remains largely unchanged from our previous update. We continue to work closely with local authorities and are prioritizing the safety of our personnel throughout our recovery efforts. Teams continue to assess the damage to the affected facilities and are working to restore infrastructure impacted by the event.\n\nWith respect to Amazon S3, we are seeing improvement in PUT and LIST availability. We continue to work on improving GET error rates, but full recovery will be dependent on restoring the affected infrastructure, which our teams continue to work toward.\n\nFor Amazon DynamoDB, error rates remain elevated and our teams continue to focus on recovery efforts. We have not yet seen meaningful improvement in DynamoDB availability, but expect conditions to improve over the coming hours as recovery work progresses.\n\nAmazon EC2 instance launches remain throttled in the ME-CENTRAL-1 Region. We will begin relaxing these throttles as soon as we have fully recovered our foundational services and have sufficient capacity to support new launches safely.\n\nThe AWS Management Console is now operational, though customers may continue to experience errors on certain pages and operations as the underlying services work through their recovery. We recommend customers continue to retry requests where possible.\n\nAWS Lambda, Amazon Kinesis, Amazon CloudWatch, Amazon RDS, and a number of other AWS services that were impacted by this event remain degraded. The availability of these services is dependent on the recovery of our foundational services — primarily Amazon S3 and Amazon DynamoDB — and we expect to see improvement across these services as that recovery progresses.\n\nFinally, even as we work to restore these facilities, the ongoing conflict in the region means that the broader operating environment in the Middle East remains unpredictable. We strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other regions, and update their applications to direct traffic away from the affected regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.\n\nWe will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 5:00 AM PST on March 3, or sooner if new information becomes available.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772528640
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). The overall state of the region remains largely unchanged, though our teams continue to make progress on recovery efforts across multiple workstreams. \n\nFor Amazon S3, we are seeing continued improvement in PUT and LIST availability. Newly written objects are now able to be successfully retrieved, and we continue to work on reducing GET error rates for objects written prior to the event. Full recovery of GET operations for pre-existing data remains dependent on restoring the affected infrastructure. For Amazon DynamoDB, error rates remain elevated and our teams continue to focus on recovery; we expect to see improvement over the coming hours. As these foundational services recover, dependent services — including AWS Lambda, Amazon Kinesis, Amazon CloudWatch, and Amazon RDS will follow. Amazon EC2 instance launches remain throttled in the ME-CENTRAL-1 Region and will be relaxed as foundational service recovery and capacity allow. \n\nThe AWS Management Console is operational, though customers may continue to experience errors on certain pages as underlying services work through their recovery. We recommend that customers continue to retry requests where possible. \n\nWe strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other Regions, and update their applications to direct traffic away from the affected Regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements. \n\nWe will provide another update by March 3 at 10:00 AM PST, or sooner if new information becomes available. ",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772542694
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). We continue to make progress on recovery efforts across multiple workstreams.\n\nFor Amazon S3, we are seeing continued improvement in PUT and LIST availability. Newly written objects are now able to be successfully retrieved, and we continue to work on reducing GET error rates for objects written prior to the event. Full recovery of GET operations for pre-existing data remains dependent on restoring the affected infrastructure. For Amazon DynamoDB, error rates remain elevated and our teams continue to focus on recovery; we expect to see improvement over the coming hours. As these foundational services recover, dependent services — including AWS Lambda, Amazon Kinesis, Amazon CloudWatch, and Amazon RDS — will follow. Amazon EC2 instance launches remain throttled in the ME-CENTRAL-1 Region and will be relaxed as foundational service recovery and capacity allow. The AWS Management Console is operational, though customers may continue to experience errors on certain pages as underlying services work through their recovery.\n\nWith the immediate phase of this event now better understood, we are moving to a more targeted communication model. Going forward, updates will be delivered directly to affected customers through the AWS Personal Health Dashboard. Customers who require assistance with this event are encouraged to contact AWS Support through the AWS Management Console or the AWS Support Center.\n\nWe continue to strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other Regions, and update their applications to direct traffic away from the affected Regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1772554485
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruption. The Middle East (UAE) Region (ME-CENTRAL-1) has suffered damage as a result of the conflict in the Middle East and is currently unable to reliably support customer applications. While some workloads continue to function normally, we strongly recommend customers migrate all accessible resources to other Regions and restore inaccessible resources from remote backups as soon as possible. Relevant billing operations are currently suspended while we restore normal operations in this AWS Region. This process is expected to take several months. ",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1777533954
+      },
+      {
+        "message": "We are providing an update on the disruption affecting the Middle East (UAE) (me-central-1) Region. After a thorough assessment, we have determined that we are unable to restore access to the resources and data hosted exclusively in the mec1-az2 Availability Zone. We continue to work on recovering regional resources, as well as zonal resources hosted in the other affected Availability Zones (mec1-az1 and mec1-az3).\n\nSince the disruption began in March, most customers have been able to re-establish their operations in other Regions by restoring backups or copying data that remained accessible. AWS Support remains available to help customers who need assistance moving their applications to alternate Regions.\n\nWe remain committed to supporting our customers in the UAE. We are working on replacing the affected infrastructure and will provide an update on the restoration of our services in the coming months. We have notified the relevant authorities and continue to work with them toward that goal.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1789468030
+      }
+    ],
+    "impacted_service_status_changes": [
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "acm-pca-me-central-1",
+        "service_name": "AWS Private Certificate Authority",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "airflow-me-central-1",
+        "service_name": "Amazon Managed Workflows for Apache Airflow",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "amplify",
+        "service_name": "AWS Amplify",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "apigateway-me-central-1",
+        "service_name": "Amazon API Gateway",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appconfig-me-central-1",
+        "service_name": "AWS AppConfig",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "applicationinsights-me-central-1",
+        "service_name": "Amazon CloudWatch Application Insights",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appsync-me-central-1",
+        "service_name": "AWS AppSync",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appwizard-me-central-1",
+        "service_name": "AWS Launch Wizard",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "aps",
+        "service_name": "Amazon Managed Service for Prometheus",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "athena-me-central-1",
+        "service_name": "Amazon Athena",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "autoscaling-me-central-1",
+        "service_name": "Auto Scaling",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "awsiot-me-central-1",
+        "service_name": "AWS IoT Core",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "awsiotdevicemanagement-me-central-1",
+        "service_name": "AWS IoT Device Management",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "awswaf-me-central-1",
+        "service_name": "AWS WAF",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "backup-me-central-1",
+        "service_name": "AWS Backup",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "batch-me-central-1",
+        "service_name": "AWS Batch",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "bedrock-me-central-1",
+        "service_name": "Amazon Bedrock",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "certificatemanager-me-central-1",
+        "service_name": "AWS Certificate Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "clientvpn-me-central-1",
+        "service_name": "AWS Client VPN",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudformation-me-central-1",
+        "service_name": "AWS CloudFormation",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "cloudfront",
+        "service_name": "Amazon CloudFront",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudhsm-me-central-1",
+        "service_name": "AWS CloudHSM",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudshell-me-central-1",
+        "service_name": "AWS CloudShell",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudtrail-me-central-1",
+        "service_name": "AWS CloudTrail",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "cloudwan",
+        "service_name": "AWS Cloud WAN",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudwatch-me-central-1",
+        "service_name": "Amazon CloudWatch",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudwatchsynthetics-me-central-1",
+        "service_name": "Amazon CloudWatch Synthetics",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codebuild-me-central-1",
+        "service_name": "AWS CodeBuild",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codecommit-me-central-1",
+        "service_name": "AWS CodeCommit",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codedeploy-me-central-1",
+        "service_name": "AWS CodeDeploy",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codepipeline-me-central-1",
+        "service_name": "AWS CodePipeline",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cognito-me-central-1",
+        "service_name": "Amazon Cognito",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "computeoptimizer-me-central-1",
+        "service_name": "AWS Compute Optimizer",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "config-me-central-1",
+        "service_name": "AWS Config",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "consolemobileapp-me-central-1",
+        "service_name": "AWS Console Mobile App",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "controlcatalog-me-central-1",
+        "service_name": "Control Catalog",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "controltower-me-central-1",
+        "service_name": "AWS Control Tower",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "datasync-me-central-1",
+        "service_name": "AWS DataSync",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "directconnect-me-central-1",
+        "service_name": "AWS Direct Connect",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "directoryservice-me-central-1",
+        "service_name": "AWS Directory Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "dlm-me-central-1",
+        "service_name": "Amazon Data Lifecycle Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "dms-me-central-1",
+        "service_name": "AWS Database Migration Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "docdb-me-central-1",
+        "service_name": "Amazon DocumentDB",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "drs-me-central-1",
+        "service_name": "AWS Elastic Disaster Recovery",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "dynamodb-me-central-1",
+        "service_name": "Amazon DynamoDB",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ec2-me-central-1",
+        "service_name": "Amazon Elastic Compute Cloud",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ec2serialconsole-me-central-1",
+        "service_name": "EC2 Serial Console",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ec2systemsmanager-me-central-1",
+        "service_name": "AWS Systems Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ecr-me-central-1",
+        "service_name": "Amazon Elastic Container Registry",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ecs-me-central-1",
+        "service_name": "Amazon Elastic Container Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "eks-me-central-1",
+        "service_name": "Amazon Elastic Kubernetes Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticache-me-central-1",
+        "service_name": "Amazon ElastiCache",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticbeanstalk-me-central-1",
+        "service_name": "AWS Elastic Beanstalk",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticfilesystem-me-central-1",
+        "service_name": "Amazon Elastic File System",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticsearch-me-central-1",
+        "service_name": "Amazon OpenSearch Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elb-me-central-1",
+        "service_name": "Amazon Elastic Load Balancing",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elemental-me-central-1",
+        "service_name": "AWS Elemental",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "emr-me-central-1",
+        "service_name": "Amazon Elastic MapReduce",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "emrserverless-me-central-1",
+        "service_name": "Amazon EMR Serverless",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "endusermessaging-me-central-1",
+        "service_name": "AWS End User Messaging",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "events-me-central-1",
+        "service_name": "Amazon EventBridge",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fargate-me-central-1",
+        "service_name": "AWS Fargate",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "firehose-me-central-1",
+        "service_name": "Amazon Data Firehose",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fis-me-central-1",
+        "service_name": "AWS Fault Injection Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fms-me-central-1",
+        "service_name": "AWS Firewall Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fsx-me-central-1",
+        "service_name": "Amazon FSx",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "glacier-me-central-1",
+        "service_name": "Amazon Glacier",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "globalaccelerator",
+        "service_name": "AWS Global Accelerator",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "glue-me-central-1",
+        "service_name": "AWS Glue",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "grafana",
+        "service_name": "Amazon Managed Grafana",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "guardduty-me-central-1",
+        "service_name": "Amazon GuardDuty",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "iamidentitycenter-me-central-1",
+        "service_name": "AWS IAM Identity Center",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "iamrolesanywhere-me-central-1",
+        "service_name": "AWS Identity and Access Management Roles Anywhere",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "imagebuilder-me-central-1",
+        "service_name": "EC2 Image Builder",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "infrastructureperformance-me-central-1",
+        "service_name": "Infrastructure Performance",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "inspector-me-central-1",
+        "service_name": "Amazon Inspector",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "internetconnectivity-me-central-1",
+        "service_name": "AWS Internet Connectivity",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "internetmonitor-me-central-1",
+        "service_name": "Amazon CloudWatch Internet Monitor",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "iotdevicedefender-me-central-1",
+        "service_name": "AWS IoT Device Defender",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ipam-me-central-1",
+        "service_name": "Amazon VPC IP Address Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kafka-me-central-1",
+        "service_name": "Amazon Managed Streaming for Apache Kafka",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kinesis-me-central-1",
+        "service_name": "Amazon Kinesis Data Streams",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kinesisanalytics-me-central-1",
+        "service_name": "Amazon Managed Service for Apache Flink",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kms-me-central-1",
+        "service_name": "AWS Key Management Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "lakeformation-me-central-1",
+        "service_name": "AWS Lake Formation",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "lambda-me-central-1",
+        "service_name": "AWS Lambda",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "licensemanager-me-central-1",
+        "service_name": "AWS License Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "managedssh-me-central-1",
+        "service_name": "Amazon EC2 Instance Connect",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "management-console",
+        "service_name": "AWS Management Console",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "mgn-me-central-1",
+        "service_name": "AWS Application Migration Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "mq-me-central-1",
+        "service_name": "Amazon MQ",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "natgateway-me-central-1",
+        "service_name": "AWS NAT Gateway",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "neptune-db-me-central-1",
+        "service_name": "Amazon Neptune",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "networkfirewall-me-central-1",
+        "service_name": "AWS Network Firewall",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "outposts-me-central-1",
+        "service_name": "AWS Outposts",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "pca-connector-scep-me-central-1",
+        "service_name": "AWS Private CA Connector for SCEP",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "pcaconnectorad-me-central-1",
+        "service_name": "AWS Private CA Connector for Active Directory",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "privatelink-me-central-1",
+        "service_name": "AWS VPCE PrivateLink",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "quicksight-me-central-1",
+        "service_name": "Amazon Quick Suite",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ram-me-central-1",
+        "service_name": "AWS Resource Access Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "rds-me-central-1",
+        "service_name": "Amazon Relational Database Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "reachabilityanalyzer",
+        "service_name": "Reachability Analyzer",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "redshift-me-central-1",
+        "service_name": "Amazon Redshift",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resourceexplorer-me-central-1",
+        "service_name": "AWS Resource Explorer",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resourcegroups-me-central-1",
+        "service_name": "AWS Resource Groups",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resourcegroupstaggingapi-me-central-1",
+        "service_name": "AWS Resource Groups Tagging API",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "2",
+        "previous_status": "0",
+        "service": "route53",
+        "service_name": "Amazon Route 53",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "route53privatedns-me-central-1",
+        "service_name": "Amazon Route 53 Private DNS",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "route53resolver-me-central-1",
+        "service_name": "Amazon Route 53 Resolver",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "rum-me-central-1",
+        "service_name": "Amazon CloudWatch RUM",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "s3-me-central-1",
+        "service_name": "Amazon Simple Storage Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "s3rtc-me-central-1",
+        "service_name": "Amazon S3 Replication Time Control",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sagemaker-me-central-1",
+        "service_name": "Amazon SageMaker",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "scheduler-me-central-1",
+        "service_name": "Amazon EventBridge Scheduler",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "secretsmanager-me-central-1",
+        "service_name": "AWS Secrets Manager",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "security-ir-me-central-1",
+        "service_name": "AWS Security Incident Response",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "securityhub-me-central-1",
+        "service_name": "AWS Security Hub",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "servicecatalog-me-central-1",
+        "service_name": "AWS Service Catalog",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "servicediscovery-me-central-1",
+        "service_name": "AWS Cloud Map",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "servicequotas-me-central-1",
+        "service_name": "AWS Service Quotas",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ses-me-central-1",
+        "service_name": "Amazon Simple Email Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "signin-me-central-1",
+        "service_name": "AWS Sign-In",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sns-me-central-1",
+        "service_name": "Amazon Simple Notification Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sqs-me-central-1",
+        "service_name": "Amazon Simple Queue Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ssmsap-me-central-1",
+        "service_name": "AWS Systems Manager for SAP",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "state-me-central-1",
+        "service_name": "AWS Step Functions",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "storagegateway-me-central-1",
+        "service_name": "AWS Storage Gateway",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sts-me-central-1",
+        "service_name": "AWS Security Token Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "swf-me-central-1",
+        "service_name": "Amazon Simple Workflow Service",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "trafficmirroring-me-central-1",
+        "service_name": "Traffic Mirroring",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "transfer-me-central-1",
+        "service_name": "AWS Transfer Family",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "transitgateway-me-central-1",
+        "service_name": "AWS Transit Gateway",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "verifiedaccess",
+        "service_name": "AWS Verified Access",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "verifiedpermissions-me-central-1",
+        "service_name": "Amazon Verified Permissions",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vmimportexport-me-central-1",
+        "service_name": "VM Import/Export",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vpc-me-central-1",
+        "service_name": "Amazon Virtual Private Cloud",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vpclattice-me-central-1",
+        "service_name": "Amazon VPC Lattice",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vpnvpc-me-central-1",
+        "service_name": "AWS Site-to-Site VPN",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "workspaces",
+        "service_name": "Amazon WorkSpaces",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "xray-me-central-1",
+        "service_name": "AWS X-Ray",
+        "timestamp": 1772369485000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "cloudfront",
+        "service_name": "Amazon CloudFront",
+        "timestamp": 1789468743000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "cloudwan",
+        "service_name": "AWS Cloud WAN",
+        "timestamp": 1789468743000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "globalaccelerator",
+        "service_name": "AWS Global Accelerator",
+        "timestamp": 1789468743000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "3",
+        "service": "management-console",
+        "service_name": "AWS Management Console",
+        "timestamp": 1789468743000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "2",
+        "service": "route53",
+        "service_name": "Amazon Route 53",
+        "timestamp": 1789468743000
+      }
+    ],
+    "impacted_services": {
+      "acm-pca-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Private Certificate Authority"
+      },
+      "airflow-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Workflows for Apache Airflow"
+      },
+      "amplify": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Amplify"
+      },
+      "apigateway-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon API Gateway"
+      },
+      "appconfig-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS AppConfig"
+      },
+      "applicationinsights-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch Application Insights"
+      },
+      "appsync-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS AppSync"
+      },
+      "appwizard-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Launch Wizard"
+      },
+      "aps": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Service for Prometheus"
+      },
+      "athena-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Athena"
+      },
+      "autoscaling-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Auto Scaling"
+      },
+      "awsiot-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IoT Core"
+      },
+      "awsiotdevicemanagement-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IoT Device Management"
+      },
+      "awswaf-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS WAF"
+      },
+      "backup-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Backup"
+      },
+      "batch-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Batch"
+      },
+      "bedrock-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Bedrock"
+      },
+      "certificatemanager-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Certificate Manager"
+      },
+      "clientvpn-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Client VPN"
+      },
+      "cloudformation-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudFormation"
+      },
+      "cloudfront": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon CloudFront"
+      },
+      "cloudhsm-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudHSM"
+      },
+      "cloudshell-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudShell"
+      },
+      "cloudtrail-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudTrail"
+      },
+      "cloudwan": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Cloud WAN"
+      },
+      "cloudwatch-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch"
+      },
+      "cloudwatchsynthetics-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch Synthetics"
+      },
+      "codebuild-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodeBuild"
+      },
+      "codecommit-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodeCommit"
+      },
+      "codedeploy-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodeDeploy"
+      },
+      "codepipeline-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodePipeline"
+      },
+      "cognito-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Cognito"
+      },
+      "computeoptimizer-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Compute Optimizer"
+      },
+      "config-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Config"
+      },
+      "consolemobileapp-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Console Mobile App"
+      },
+      "controlcatalog-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Control Catalog"
+      },
+      "controltower-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Control Tower"
+      },
+      "datasync-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS DataSync"
+      },
+      "directconnect-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Direct Connect"
+      },
+      "directoryservice-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Directory Service"
+      },
+      "dlm-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Data Lifecycle Manager"
+      },
+      "dms-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Database Migration Service"
+      },
+      "docdb-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon DocumentDB"
+      },
+      "drs-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Elastic Disaster Recovery"
+      },
+      "dynamodb-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon DynamoDB"
+      },
+      "ec2-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Compute Cloud"
+      },
+      "ec2serialconsole-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "EC2 Serial Console"
+      },
+      "ec2systemsmanager-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Systems Manager"
+      },
+      "ecr-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Container Registry"
+      },
+      "ecs-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Container Service"
+      },
+      "eks-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Kubernetes Service"
+      },
+      "elasticache-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon ElastiCache"
+      },
+      "elasticbeanstalk-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Elastic Beanstalk"
+      },
+      "elasticfilesystem-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic File System"
+      },
+      "elasticsearch-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon OpenSearch Service"
+      },
+      "elb-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Load Balancing"
+      },
+      "elemental-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Elemental"
+      },
+      "emr-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic MapReduce"
+      },
+      "emrserverless-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EMR Serverless"
+      },
+      "endusermessaging-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS End User Messaging"
+      },
+      "events-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EventBridge"
+      },
+      "fargate-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Fargate"
+      },
+      "firehose-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Data Firehose"
+      },
+      "fis-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Fault Injection Service"
+      },
+      "fms-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Firewall Manager"
+      },
+      "fsx-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon FSx"
+      },
+      "glacier-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Glacier"
+      },
+      "globalaccelerator": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Global Accelerator"
+      },
+      "glue-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Glue"
+      },
+      "grafana": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Grafana"
+      },
+      "guardduty-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon GuardDuty"
+      },
+      "iamidentitycenter-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IAM Identity Center"
+      },
+      "iamrolesanywhere-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Identity and Access Management Roles Anywhere"
+      },
+      "imagebuilder-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "EC2 Image Builder"
+      },
+      "infrastructureperformance-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Infrastructure Performance"
+      },
+      "inspector-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Inspector"
+      },
+      "internetconnectivity-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Internet Connectivity"
+      },
+      "internetmonitor-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch Internet Monitor"
+      },
+      "iotdevicedefender-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IoT Device Defender"
+      },
+      "ipam-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon VPC IP Address Manager"
+      },
+      "kafka-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Streaming for Apache Kafka"
+      },
+      "kinesis-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Kinesis Data Streams"
+      },
+      "kinesisanalytics-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Service for Apache Flink"
+      },
+      "kms-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Key Management Service"
+      },
+      "lakeformation-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Lake Formation"
+      },
+      "lambda-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Lambda"
+      },
+      "licensemanager-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS License Manager"
+      },
+      "managedssh-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EC2 Instance Connect"
+      },
+      "management-console": {
+        "current": "0",
+        "max": "3",
+        "service_name": "AWS Management Console"
+      },
+      "mgn-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Application Migration Service"
+      },
+      "mq-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon MQ"
+      },
+      "natgateway-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS NAT Gateway"
+      },
+      "neptune-db-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Neptune"
+      },
+      "networkfirewall-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Network Firewall"
+      },
+      "outposts-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Outposts"
+      },
+      "pca-connector-scep-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Private CA Connector for SCEP"
+      },
+      "pcaconnectorad-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Private CA Connector for Active Directory"
+      },
+      "privatelink-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS VPCE PrivateLink"
+      },
+      "quicksight-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Quick Suite"
+      },
+      "ram-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Access Manager"
+      },
+      "rds-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Relational Database Service"
+      },
+      "reachabilityanalyzer": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Reachability Analyzer"
+      },
+      "redshift-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Redshift"
+      },
+      "resourceexplorer-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Explorer"
+      },
+      "resourcegroups-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Groups"
+      },
+      "resourcegroupstaggingapi-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Groups Tagging API"
+      },
+      "route53": {
+        "current": "0",
+        "max": "2",
+        "service_name": "Amazon Route 53"
+      },
+      "route53privatedns-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Route 53 Private DNS"
+      },
+      "route53resolver-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Route 53 Resolver"
+      },
+      "rum-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch RUM"
+      },
+      "s3-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Storage Service"
+      },
+      "s3rtc-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon S3 Replication Time Control"
+      },
+      "sagemaker-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon SageMaker"
+      },
+      "scheduler-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EventBridge Scheduler"
+      },
+      "secretsmanager-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Secrets Manager"
+      },
+      "security-ir-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Security Incident Response"
+      },
+      "securityhub-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Security Hub"
+      },
+      "servicecatalog-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Service Catalog"
+      },
+      "servicediscovery-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Cloud Map"
+      },
+      "servicequotas-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Service Quotas"
+      },
+      "ses-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Email Service"
+      },
+      "signin-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Sign-In"
+      },
+      "sns-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Notification Service"
+      },
+      "sqs-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Queue Service"
+      },
+      "ssmsap-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Systems Manager for SAP"
+      },
+      "state-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Step Functions"
+      },
+      "storagegateway-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Storage Gateway"
+      },
+      "sts-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Security Token Service"
+      },
+      "swf-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Workflow Service"
+      },
+      "trafficmirroring-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Traffic Mirroring"
+      },
+      "transfer-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Transfer Family"
+      },
+      "transitgateway-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Transit Gateway"
+      },
+      "verifiedaccess": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Verified Access"
+      },
+      "verifiedpermissions-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Verified Permissions"
+      },
+      "vmimportexport-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "VM Import/Export"
+      },
+      "vpc-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Virtual Private Cloud"
+      },
+      "vpclattice-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon VPC Lattice"
+      },
+      "vpnvpc-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Site-to-Site VPN"
+      },
+      "workspaces": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon WorkSpaces"
+      },
+      "xray-me-central-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS X-Ray"
+      }
+    },
+    "region_name": "UAE",
+    "service": "multipleservices-me-central-1",
+    "service_name": "Multiple services",
+    "status": "3",
+    "summary": "Region Availability"
+  },
+  {
+    "arn": "arn:aws:health:me-south-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_E6426_01AD72B4E1E",
+    "date": "1772430987",
+    "event_log": [
+      {
+        "message": "We are investigating increased API error rates in a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region.",
+        "status": 1,
+        "summary": "Increased connectivity issues and API Error Rates",
+        "timestamp": 1772430987
+      },
+      {
+        "message": "We are investigating connectivity and power issues affecting APIs and instances in a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region due to a localized power issue. Existing instances in this zone will also be affected. Other AWS Services may also be experiencing increased errors and latencies for their workflows, and we are working to route requests away from this affected Availability Zone. We recommend customers make use of other Availability Zones at this time. During this time, we are also experiencing delays in propagating DNS changes for Route53 to pops (Points of Presence) in ME-SOUTH-1.  Targeting new launches using RunInstances in the remaining AZs should succeed. Existing instances in the other AZs are not affected.",
+        "status": 1,
+        "summary": "Increased connectivity issues and API Error Rates",
+        "timestamp": 1772435343
+      },
+      {
+        "message": "We continue to work on a localized power issue affecting a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. In the impacted Availability Zone, EC2 Instances, DB Instances, EBS Volumes, and other AWS Services are also experiencing elevated error rates and latencies for some workflows. As part of our recovery effort, we have shifted traffic away from the impacted Availability Zone for most services. We recommend customers utilize one of the other Availability Zones in the ME-SOUTH-1 Region, as existing instances in other AZs remain unaffected by this issue. We are actively working to restore power and connectivity, at which time we will begin recovering affected resources. Currently, we expect recovery to take many hours. We will provide an update by 2:30 AM PST, or sooner if we have additional information to share.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772442207
+      },
+      {
+        "message": "We continue to work toward restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. At this time, some AWS services have shifted traffic away from the affected Availability Zone and are seeing recovery for their affected operations and workflows. EC2 Instances, EBS Volumes, and other resources impacted in the affected Availability Zone will require a longer recovery timeline. Power has not yet been restored to the affected Availability Zone. If immediate recovery is required, we recommend customers restore from EBS Snapshots and/or launch replacement resources in one of the unaffected Availability Zones or an alternate Region. In parallel, we are actively working on reducing the error rates and latencies that some customers are experiencing with EC2 APIs. For now, we recommend continuing to retry any failed API requests. We will provide an update by 6:00 AM PST on March 2, or sooner if we have additional information to share.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772448060
+      },
+      {
+        "message": "We continue to work toward restoring power in the impacted Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. Meanwhile, EC2 instance and networking APIs have been restored for the other Availability Zones. Additionally, we have made improvements to the availability of RDS multi-AZ databases while operating with the impaired Availability Zone. These improvements will help customers create database exports to preserve data, and we recommend customers with databases in the affected Availability Zone consider creating exports as a precautionary measure. EC2 Instances, EBS Volumes, and other resources impacted in the affected Availability Zone will require a longer recovery timeline, as power has not yet been restored. We are expecting recovery to take at least a day, as it requires repair of facilities, cooling and power systems, coordination with local authorities, and careful assessment to ensure the safety of our operators. If immediate recovery is required, we recommend customers restore from EBS Snapshots and/or launch replacement resources in one of the unaffected Availability Zones or an alternate AWS Region. We will provide an update by 11:00 AM PST on March 2, or sooner if we have additional information to share.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772461399
+      },
+      {
+        "message": "We continue to work towards restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. We currently expect our recovery efforts to take at least a day. Our current guidance regarding immediate recovery remains unchanged from our previous update. Customers are able to disassociate Elastic IP addresses from resources in the affected Availability Zone and associate those with resources in the unaffected Availability Zones. This can be done by specifying --allow-reassociation when attempting to associate the Elastic IP to the new resource. We will provide you with further updates by 2:00 PM PST or sooner if new information becomes available.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772477520
+      },
+      {
+        "message": "We continue to work towards restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. We have no updated guidance on expected recovery times, and still expect this to take at least a day to fully restore power and connectivity. We continue to advise customers to launch replacement resources in one of the unaffected Availability Zones or an alternate AWS Region. At this time we recommend that customers that are capable of backing up data outside of the region consider doing so. You can view the current status of affected AWS services below. We will provide you with another update by 7:00 PM PST, or sooner if we have additional information to share.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772490547
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1) and the AWS Middle East (Bahrain) Region (ME-SOUTH-1). Due to the ongoing conflict in the Middle East, both affected regions have experienced physical impacts to infrastructure as a result of drone strikes. In the UAE, two of our facilities were directly struck, while in Bahrain, a drone strike in close proximity to one of our facilities caused physical impacts to our infrastructure. These strikes have caused structural damage, disrupted power delivery to our infrastructure, and in some cases required fire suppression activities that resulted in additional water damage. We are working closely with local authorities and prioritizing the safety of our personnel throughout our recovery efforts.\n\nIn the ME-CENTRAL-1 (UAE) Region, two of our three Availability Zones (mec1-az2 and mec1-az3) remain significantly impaired. The third Availability Zone (mec1-az1) continues to operate normally, though some services have experienced indirect impact due to dependencies on the affected zones. In the ME-SOUTH-1 (Bahrain) Region, one facility has been impacted. Across both regions, customers are experiencing elevated error rates and degraded availability for services including Amazon EC2, Amazon S3, Amazon DynamoDB, AWS Lambda, Amazon Kinesis, Amazon CloudWatch, Amazon RDS, and the AWS Management Console and CLI. We are working to restore full service availability as quickly as possible, though we expect recovery to be prolonged given the nature of the physical damage involved.\n\nIn parallel with efforts to restore the physical infrastructure at the affected sites, we are pursuing multiple software-based recovery paths that do not depend on the underlying facilities being fully brought back online. For Amazon S3 and Amazon DynamoDB, we are actively working to restore data access and service availability through software mitigations, including deploying updates to enable S3 to operate within the current infrastructure constraints and remediating impaired DynamoDB tables to restore read and write availability for dependent services. Our focus on restoring these foundational services is deliberate, as recovery of Amazon S3 and Amazon DynamoDB will in turn enable a broad range of dependent AWS services to recover. For other affected service APIs, we are deploying targeted software updates to reduce error rates and restore functionality where possible, independent of the physical recovery timeline. We are also working to restore access to the AWS Management Console and CLI through network-level changes that route traffic away from the affected infrastructure. While these software-based mitigations can address many of the service-level impacts, some recovery actions are constrained by the physical state of the affected facilities — meaning that full restoration of certain services will require the underlying infrastructure to be repaired and brought back online. Across all services, our teams are working in parallel on both the physical restoration of the affected facilities and these software-based mitigations, with the goal of restoring as much customer access as possible as quickly as possible, even ahead of full infrastructure recovery. In addition, we are prioritizing the restoration of services and tools that enable customers to back up and migrate their data and applications out of the affected regions.\n\nFinally, even as we work to restore these facilities, the ongoing conflict in the region means that the broader operating environment in the Middle East remains unpredictable. We recommend that customers with workloads running in the Middle East consider taking action now to backup data and potentially migrate your workloads to alternate AWS Regions. We recommend customers exercise their disaster recovery plans, recover from remote backups stored in other regions, and update their applications to direct traffic away from the affected regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.\n\nWe will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 9:00 PM PST on March 2, 2026, or sooner if new information becomes available.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772497351
+      },
+      {
+        "message": "We continue to work towards restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. We have no updated guidance on expected recovery times, and still expect this to take at least a day to fully restore power and connectivity. AWS infrastructure is designed to be highly resilient, but given the uncertainty of the current situation, we encourage our customers to replicate Amazon S3 and critical data from the ME-SOUTH-1 Region to another AWS Region. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements. We will provide another update by March 3 at 3:00 AM PST, or sooner if new information becomes available. \n\nFor more information on Cross-Region Replication, refer [1]. For more information on S3 Batch Replication, see [2]. For a simple script to quickly set up and start S3 Replication, see [3]. If you have questions or concerns, please contact AWS Support [4].\n\n[1] <a href=\"https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html\">https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html</a>\n[2] <a href=\"https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html\">https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html</a>\n[3] <a href=\"https://github.com/awslabs/aws-support-tools/blob/master/S3/Setup_Replication/setup_replication.py\">https://github.com/awslabs/aws-support-tools/blob/master/S3/Setup_Replication/setup_replication.py</a>\n[4] <a href=\"https://aws.amazon.com/support\">https://aws.amazon.com/support</a>",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772519220
+      },
+      {
+        "message": "We continue to work toward restoring power in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region. The overall state of the region remains largely unchanged from our previous update. At this time, we have no updated guidance on expected timelines for fully restoring power and connectivity. We are taking all necessary steps to support the recovery process. While progress is being made, significant work remains before full restoration is complete. \n\nGiven the ongoing uncertainty, we encourage customers to replicate their Amazon S3 data and other critical data from the ME-SOUTH-1 Region to another AWS Region, using the guidance provided in our previous update. We will continue to provide updates as recovery progresses and as the situation evolves. Our next update will be provided by 6:00 AM PST on March 3, or sooner if new information becomes available.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772536238
+      },
+      {
+        "message": "Recovery efforts in the affected Availability Zone (mes1-az2) in the ME-SOUTH-1 Region are ongoing, with the situation remaining consistent with our last update. We have no change to expected timelines for fully restoring power and connectivity. While progress is being made, significant work remains before full restoration is complete. We continue to recommend customers launch replacement resources in one of the unaffected Availability Zones or an alternate AWS Region.\n\nGiven the extended nature of this event, we continue to encourage customers to replicate Amazon S3 data and other critical workloads from ME-SOUTH-1 to another AWS Region using the guidance shared previously. We will provide our next update by 12:00 PM PST on March 3, or sooner if conditions change.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772546577
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (Bahrain) Region (ME-SOUTH-1). We continue to make progress on recovery efforts across multiple workstreams. With the immediate phase of this event now better understood, we are moving to a more targeted communication model. Going forward, updates will be delivered directly to affected customers through the AWS Personal Health Dashboard. Customers who require assistance with this event are encouraged to contact AWS Support through the AWS Management Console or the AWS Support Center.\n\nWe continue to strongly recommend that customers with workloads running in the Middle East take action now to migrate those workloads to alternate AWS Regions. Customers should enact their disaster recovery plans, recover from remote backups stored in other Regions, and update their applications to direct traffic away from the affected Regions. For customers requiring guidance on alternate regions, we recommend considering AWS Regions in the United States, Europe, or Asia Pacific, as appropriate for your latency and data residency requirements.",
+        "status": 1,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1772556000
+      },
+      {
+        "message": "We are providing an update on the ongoing service disruption. The Middle East (Bahrain) Region (ME-SOUTH-1) has suffered damage due to the conflict in the Middle East and is currently unavailable. Customers should recover their resources in other Regions from remote backups. Relevant billing operations are currently suspended while we restore normal operations in this AWS Region. This process is expected to take several months.  ",
+        "status": 3,
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "timestamp": 1777532831
+      },
+      {
+        "message": "We are providing an update on the disruption affecting the Middle East (Bahrain) (me-south-1) Region. The damage to our infrastructure spanned multiple Availability Zones and exceeded what our regional and multi-AZ services are designed to withstand. After a thorough assessment, we have determined that we are unable to restore access to the resources and data hosted exclusively in this Region.\n\nWhen the first Availability Zone was damaged in March, we began recommending that customers migrate their workloads to other Regions, and most did so before the Region became unavailable following the disruption of a second Availability Zone in April. Since then, we have supported the remaining customers in re-establishing their operations in alternate Regions, using backups where available or implementing alternative solutions to mitigate the impact of inaccessible data. In parallel, we assessed all affected infrastructure and exhausted every option for restoring data and resources that had not been migrated before the Region became unavailable.\n\nWe remain committed to supporting our customers in Bahrain in the long term and will share a further update in early 2027. We have notified the relevant authorities and continue to work with them toward that goal.",
+        "status": 3,
+        "summary": "Increased Error Rates",
+        "timestamp": 1789467748
+      }
+    ],
+    "impacted_service_status_changes": [
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "acm-pca-me-south-1",
+        "service_name": "AWS Private Certificate Authority",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "airflow-me-south-1",
+        "service_name": "Amazon Managed Workflows for Apache Airflow",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "amplify-me-south-1",
+        "service_name": "AWS Amplify",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "amplifyadmin-me-south-1",
+        "service_name": "AWS Amplify Admin",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "apigateway-me-south-1",
+        "service_name": "Amazon API Gateway",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appconfig-me-south-1",
+        "service_name": "AWS AppConfig",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "applicationinsights-me-south-1",
+        "service_name": "Amazon CloudWatch Application Insights",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appmesh-me-south-1",
+        "service_name": "AWS App Mesh",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appsync-me-south-1",
+        "service_name": "AWS AppSync",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "appwizard-me-south-1",
+        "service_name": "AWS Launch Wizard",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "athena-me-south-1",
+        "service_name": "Amazon Athena",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "autoscaling-me-south-1",
+        "service_name": "Auto Scaling",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "awsiot-me-south-1",
+        "service_name": "AWS IoT Core",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "awsiotdevicemanagement-me-south-1",
+        "service_name": "AWS IoT Device Management",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "awswaf-me-south-1",
+        "service_name": "AWS WAF",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "backup-me-south-1",
+        "service_name": "AWS Backup",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "batch-me-south-1",
+        "service_name": "AWS Batch",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "bedrock-me-south-1",
+        "service_name": "Amazon Bedrock",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cassandra-me-south-1",
+        "service_name": "Amazon Keyspaces",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "certificatemanager-me-south-1",
+        "service_name": "AWS Certificate Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "clientvpn-me-south-1",
+        "service_name": "AWS Client VPN",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloud9-me-south-1",
+        "service_name": "AWS Cloud9",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudformation-me-south-1",
+        "service_name": "AWS CloudFormation",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "cloudfront",
+        "service_name": "Amazon CloudFront",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudhsm-me-south-1",
+        "service_name": "AWS CloudHSM",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudshell-me-south-1",
+        "service_name": "AWS CloudShell",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudtrail-me-south-1",
+        "service_name": "AWS CloudTrail",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "cloudwan",
+        "service_name": "AWS Cloud WAN",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudwatch-me-south-1",
+        "service_name": "Amazon CloudWatch",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cloudwatchsynthetics-me-south-1",
+        "service_name": "Amazon CloudWatch Synthetics",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codebuild-me-south-1",
+        "service_name": "AWS CodeBuild",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codecommit-me-south-1",
+        "service_name": "AWS CodeCommit",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codedeploy-me-south-1",
+        "service_name": "AWS CodeDeploy",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "codepipeline-me-south-1",
+        "service_name": "AWS CodePipeline",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "cognito-me-south-1",
+        "service_name": "Amazon Cognito",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "computeoptimizer-me-south-1",
+        "service_name": "AWS Compute Optimizer",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "config-me-south-1",
+        "service_name": "AWS Config",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "consolemobileapp-me-south-1",
+        "service_name": "AWS Console Mobile App",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "controlcatalog-me-south-1",
+        "service_name": "Control Catalog",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "controltower-me-south-1",
+        "service_name": "AWS Control Tower",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "datasync-me-south-1",
+        "service_name": "AWS DataSync",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "detective-me-south-1",
+        "service_name": "Amazon Detective",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "directconnect-me-south-1",
+        "service_name": "AWS Direct Connect",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "directoryservice-me-south-1",
+        "service_name": "AWS Directory Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "dlm-me-south-1",
+        "service_name": "Amazon Data Lifecycle Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "dms-me-south-1",
+        "service_name": "AWS Database Migration Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "drs-me-south-1",
+        "service_name": "AWS Elastic Disaster Recovery",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "dynamodb-me-south-1",
+        "service_name": "Amazon DynamoDB",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ec2-me-south-1",
+        "service_name": "Amazon Elastic Compute Cloud",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ec2serialconsole-me-south-1",
+        "service_name": "EC2 Serial Console",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ec2systemsmanager-me-south-1",
+        "service_name": "AWS Systems Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ecr-me-south-1",
+        "service_name": "Amazon Elastic Container Registry",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ecs-me-south-1",
+        "service_name": "Amazon Elastic Container Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "eks-me-south-1",
+        "service_name": "Amazon Elastic Kubernetes Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticache-me-south-1",
+        "service_name": "Amazon ElastiCache",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticbeanstalk-me-south-1",
+        "service_name": "AWS Elastic Beanstalk",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticfilesystem-me-south-1",
+        "service_name": "Amazon Elastic File System",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elasticsearch-me-south-1",
+        "service_name": "Amazon OpenSearch Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "elb-me-south-1",
+        "service_name": "Amazon Elastic Load Balancing",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "emr-me-south-1",
+        "service_name": "Amazon Elastic MapReduce",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "emrserverless-me-south-1",
+        "service_name": "Amazon EMR Serverless",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "endusermessaging-me-south-1",
+        "service_name": "AWS End User Messaging",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "events-me-south-1",
+        "service_name": "Amazon EventBridge",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fargate-me-south-1",
+        "service_name": "AWS Fargate",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "firehose-me-south-1",
+        "service_name": "Amazon Data Firehose",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fis-me-south-1",
+        "service_name": "AWS Fault Injection Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fms-me-south-1",
+        "service_name": "AWS Firewall Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "freertos-me-south-1",
+        "service_name": "Amazon FreeRTOS",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "fsx-me-south-1",
+        "service_name": "Amazon FSx",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "gameliftstreams",
+        "service_name": "Amazon GameLift Streams",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "glacier-me-south-1",
+        "service_name": "Amazon Glacier",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "globalaccelerator",
+        "service_name": "AWS Global Accelerator",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "glue-me-south-1",
+        "service_name": "AWS Glue",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "groundstation-me-south-1",
+        "service_name": "AWS Ground Station",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "guardduty-me-south-1",
+        "service_name": "Amazon GuardDuty",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "iamidentitycenter-me-south-1",
+        "service_name": "AWS IAM Identity Center",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "iamrolesanywhere-me-south-1",
+        "service_name": "AWS Identity and Access Management Roles Anywhere",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "imagebuilder-me-south-1",
+        "service_name": "EC2 Image Builder",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "infrastructureperformance-me-south-1",
+        "service_name": "Infrastructure Performance",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "inspector-me-south-1",
+        "service_name": "Amazon Inspector",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "internetconnectivity-me-south-1",
+        "service_name": "AWS Internet Connectivity",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "internetmonitor-me-south-1",
+        "service_name": "Amazon CloudWatch Internet Monitor",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "iotdevicedefender-me-south-1",
+        "service_name": "AWS IoT Device Defender",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ipam-me-south-1",
+        "service_name": "Amazon VPC IP Address Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kafka-me-south-1",
+        "service_name": "Amazon Managed Streaming for Apache Kafka",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kinesis-me-south-1",
+        "service_name": "Amazon Kinesis Data Streams",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kinesisanalytics-me-south-1",
+        "service_name": "Amazon Managed Service for Apache Flink",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kinesisvideo-me-south-1",
+        "service_name": "Amazon Kinesis Video Streams",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "kms-me-south-1",
+        "service_name": "AWS Key Management Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "lakeformation-me-south-1",
+        "service_name": "AWS Lake Formation",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "lambda-me-south-1",
+        "service_name": "AWS Lambda",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "licensemanager-me-south-1",
+        "service_name": "AWS License Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "macie-me-south-1",
+        "service_name": "Amazon Macie",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "managedssh-me-south-1",
+        "service_name": "Amazon EC2 Instance Connect",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "2",
+        "previous_status": "0",
+        "service": "management-console",
+        "service_name": "AWS Management Console",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "mgn-me-south-1",
+        "service_name": "AWS Application Migration Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "mq-me-south-1",
+        "service_name": "Amazon MQ",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "natgateway-me-south-1",
+        "service_name": "AWS NAT Gateway",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "neptune-db-me-south-1",
+        "service_name": "Amazon Neptune",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "networkaccessanalyzer-me-south-1",
+        "service_name": "Network Access Analyzer",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "networkfirewall-me-south-1",
+        "service_name": "AWS Network Firewall",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "outposts-me-south-1",
+        "service_name": "AWS Outposts",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "pca-connector-scep-me-south-1",
+        "service_name": "AWS Private CA Connector for SCEP",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "pcaconnectorad-me-south-1",
+        "service_name": "AWS Private CA Connector for Active Directory",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "polly-me-south-1",
+        "service_name": "Amazon Polly",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "privatelink-me-south-1",
+        "service_name": "AWS VPCE PrivateLink",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ram-me-south-1",
+        "service_name": "AWS Resource Access Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "rds-me-south-1",
+        "service_name": "Amazon Relational Database Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "reachabilityanalyzer-me-south-1",
+        "service_name": "Reachability Analyzer",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "redshift-me-south-1",
+        "service_name": "Amazon Redshift",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resiliencehub-me-south-1",
+        "service_name": "AWS Resilience Hub",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resourceexplorer-me-south-1",
+        "service_name": "AWS Resource Explorer",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resourcegroups-me-south-1",
+        "service_name": "AWS Resource Groups",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "resourcegroupstaggingapi-me-south-1",
+        "service_name": "AWS Resource Groups Tagging API",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "route53",
+        "service_name": "Amazon Route 53",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "route53privatedns-me-south-1",
+        "service_name": "Amazon Route 53 Private DNS",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "route53resolver-me-south-1",
+        "service_name": "Amazon Route 53 Resolver",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "rum-me-south-1",
+        "service_name": "Amazon CloudWatch RUM",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "s3-me-south-1",
+        "service_name": "Amazon Simple Storage Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "s3rtc-me-south-1",
+        "service_name": "Amazon S3 Replication Time Control",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sagemaker-me-south-1",
+        "service_name": "Amazon SageMaker",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "scheduler-me-south-1",
+        "service_name": "Amazon EventBridge Scheduler",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "secretsmanager-me-south-1",
+        "service_name": "AWS Secrets Manager",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "security-ir-me-south-1",
+        "service_name": "AWS Security Incident Response",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "securityhub-me-south-1",
+        "service_name": "AWS Security Hub",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "serverlessrepo-me-south-1",
+        "service_name": "AWS Serverless Application Repository",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "servicecatalog-me-south-1",
+        "service_name": "AWS Service Catalog",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "servicediscovery-me-south-1",
+        "service_name": "AWS Cloud Map",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "servicequotas-me-south-1",
+        "service_name": "AWS Service Quotas",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ses-me-south-1",
+        "service_name": "Amazon Simple Email Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "signin-me-south-1",
+        "service_name": "AWS Sign-In",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sns-me-south-1",
+        "service_name": "Amazon Simple Notification Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sqs-me-south-1",
+        "service_name": "Amazon Simple Queue Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "ssmsap-me-south-1",
+        "service_name": "AWS Systems Manager for SAP",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "state-me-south-1",
+        "service_name": "AWS Step Functions",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "storagegateway-me-south-1",
+        "service_name": "AWS Storage Gateway",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "sts-me-south-1",
+        "service_name": "AWS Security Token Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "swf-me-south-1",
+        "service_name": "Amazon Simple Workflow Service",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "trafficmirroring-me-south-1",
+        "service_name": "Traffic Mirroring",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "transcribe-me-south-1",
+        "service_name": "Amazon Transcribe",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "transfer-me-south-1",
+        "service_name": "AWS Transfer Family",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "transitgateway-me-south-1",
+        "service_name": "AWS Transit Gateway",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "verifiedpermissions-me-south-1",
+        "service_name": "Amazon Verified Permissions",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vmimportexport-me-south-1",
+        "service_name": "VM Import/Export",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vpc-me-south-1",
+        "service_name": "Amazon Virtual Private Cloud",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vpclattice-me-south-1",
+        "service_name": "Amazon VPC Lattice",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "vpnvpc-me-south-1",
+        "service_name": "AWS Site-to-Site VPN",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "wellarchitected-me-south-1",
+        "service_name": "AWS Well-Architected Tool",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "3",
+        "previous_status": "0",
+        "service": "xray-me-south-1",
+        "service_name": "AWS X-Ray",
+        "timestamp": 1772430987000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "cloudfront",
+        "service_name": "Amazon CloudFront",
+        "timestamp": 1789484347000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "cloudwan",
+        "service_name": "AWS Cloud WAN",
+        "timestamp": 1789484347000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "globalaccelerator",
+        "service_name": "AWS Global Accelerator",
+        "timestamp": 1789484347000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "2",
+        "service": "management-console",
+        "service_name": "AWS Management Console",
+        "timestamp": 1789484347000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "route53",
+        "service_name": "Amazon Route 53",
+        "timestamp": 1789484347000
+      }
+    ],
+    "impacted_services": {
+      "acm-pca-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Private Certificate Authority"
+      },
+      "airflow-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Workflows for Apache Airflow"
+      },
+      "amplify-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Amplify"
+      },
+      "amplifyadmin-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Amplify Admin"
+      },
+      "apigateway-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon API Gateway"
+      },
+      "appconfig-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS AppConfig"
+      },
+      "applicationinsights-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch Application Insights"
+      },
+      "appmesh-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS App Mesh"
+      },
+      "appsync-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS AppSync"
+      },
+      "appwizard-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Launch Wizard"
+      },
+      "athena-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Athena"
+      },
+      "autoscaling-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Auto Scaling"
+      },
+      "awsiot-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IoT Core"
+      },
+      "awsiotdevicemanagement-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IoT Device Management"
+      },
+      "awswaf-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS WAF"
+      },
+      "backup-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Backup"
+      },
+      "batch-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Batch"
+      },
+      "bedrock-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Bedrock"
+      },
+      "cassandra-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Keyspaces"
+      },
+      "certificatemanager-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Certificate Manager"
+      },
+      "clientvpn-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Client VPN"
+      },
+      "cloud9-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Cloud9"
+      },
+      "cloudformation-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudFormation"
+      },
+      "cloudfront": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon CloudFront"
+      },
+      "cloudhsm-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudHSM"
+      },
+      "cloudshell-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudShell"
+      },
+      "cloudtrail-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CloudTrail"
+      },
+      "cloudwan": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Cloud WAN"
+      },
+      "cloudwatch-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch"
+      },
+      "cloudwatchsynthetics-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch Synthetics"
+      },
+      "codebuild-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodeBuild"
+      },
+      "codecommit-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodeCommit"
+      },
+      "codedeploy-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodeDeploy"
+      },
+      "codepipeline-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS CodePipeline"
+      },
+      "cognito-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Cognito"
+      },
+      "computeoptimizer-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Compute Optimizer"
+      },
+      "config-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Config"
+      },
+      "consolemobileapp-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Console Mobile App"
+      },
+      "controlcatalog-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Control Catalog"
+      },
+      "controltower-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Control Tower"
+      },
+      "datasync-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS DataSync"
+      },
+      "detective-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Detective"
+      },
+      "directconnect-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Direct Connect"
+      },
+      "directoryservice-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Directory Service"
+      },
+      "dlm-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Data Lifecycle Manager"
+      },
+      "dms-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Database Migration Service"
+      },
+      "drs-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Elastic Disaster Recovery"
+      },
+      "dynamodb-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon DynamoDB"
+      },
+      "ec2-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Compute Cloud"
+      },
+      "ec2serialconsole-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "EC2 Serial Console"
+      },
+      "ec2systemsmanager-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Systems Manager"
+      },
+      "ecr-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Container Registry"
+      },
+      "ecs-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Container Service"
+      },
+      "eks-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Kubernetes Service"
+      },
+      "elasticache-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon ElastiCache"
+      },
+      "elasticbeanstalk-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Elastic Beanstalk"
+      },
+      "elasticfilesystem-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic File System"
+      },
+      "elasticsearch-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon OpenSearch Service"
+      },
+      "elb-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic Load Balancing"
+      },
+      "emr-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Elastic MapReduce"
+      },
+      "emrserverless-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EMR Serverless"
+      },
+      "endusermessaging-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS End User Messaging"
+      },
+      "events-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EventBridge"
+      },
+      "fargate-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Fargate"
+      },
+      "firehose-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Data Firehose"
+      },
+      "fis-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Fault Injection Service"
+      },
+      "fms-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Firewall Manager"
+      },
+      "freertos-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon FreeRTOS"
+      },
+      "fsx-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon FSx"
+      },
+      "gameliftstreams": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon GameLift Streams"
+      },
+      "glacier-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Glacier"
+      },
+      "globalaccelerator": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Global Accelerator"
+      },
+      "glue-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Glue"
+      },
+      "groundstation-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Ground Station"
+      },
+      "guardduty-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon GuardDuty"
+      },
+      "iamidentitycenter-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IAM Identity Center"
+      },
+      "iamrolesanywhere-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Identity and Access Management Roles Anywhere"
+      },
+      "imagebuilder-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "EC2 Image Builder"
+      },
+      "infrastructureperformance-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Infrastructure Performance"
+      },
+      "inspector-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Inspector"
+      },
+      "internetconnectivity-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Internet Connectivity"
+      },
+      "internetmonitor-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch Internet Monitor"
+      },
+      "iotdevicedefender-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS IoT Device Defender"
+      },
+      "ipam-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon VPC IP Address Manager"
+      },
+      "kafka-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Streaming for Apache Kafka"
+      },
+      "kinesis-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Kinesis Data Streams"
+      },
+      "kinesisanalytics-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Managed Service for Apache Flink"
+      },
+      "kinesisvideo-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Kinesis Video Streams"
+      },
+      "kms-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Key Management Service"
+      },
+      "lakeformation-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Lake Formation"
+      },
+      "lambda-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Lambda"
+      },
+      "licensemanager-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS License Manager"
+      },
+      "macie-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Macie"
+      },
+      "managedssh-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EC2 Instance Connect"
+      },
+      "management-console": {
+        "current": "0",
+        "max": "2",
+        "service_name": "AWS Management Console"
+      },
+      "mgn-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Application Migration Service"
+      },
+      "mq-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon MQ"
+      },
+      "natgateway-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS NAT Gateway"
+      },
+      "neptune-db-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Neptune"
+      },
+      "networkaccessanalyzer-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Network Access Analyzer"
+      },
+      "networkfirewall-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Network Firewall"
+      },
+      "outposts-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Outposts"
+      },
+      "pca-connector-scep-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Private CA Connector for SCEP"
+      },
+      "pcaconnectorad-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Private CA Connector for Active Directory"
+      },
+      "polly-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Polly"
+      },
+      "privatelink-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS VPCE PrivateLink"
+      },
+      "ram-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Access Manager"
+      },
+      "rds-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Relational Database Service"
+      },
+      "reachabilityanalyzer-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Reachability Analyzer"
+      },
+      "redshift-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Redshift"
+      },
+      "resiliencehub-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resilience Hub"
+      },
+      "resourceexplorer-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Explorer"
+      },
+      "resourcegroups-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Groups"
+      },
+      "resourcegroupstaggingapi-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Resource Groups Tagging API"
+      },
+      "route53": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon Route 53"
+      },
+      "route53privatedns-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Route 53 Private DNS"
+      },
+      "route53resolver-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Route 53 Resolver"
+      },
+      "rum-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon CloudWatch RUM"
+      },
+      "s3-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Storage Service"
+      },
+      "s3rtc-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon S3 Replication Time Control"
+      },
+      "sagemaker-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon SageMaker"
+      },
+      "scheduler-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon EventBridge Scheduler"
+      },
+      "secretsmanager-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Secrets Manager"
+      },
+      "security-ir-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Security Incident Response"
+      },
+      "securityhub-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Security Hub"
+      },
+      "serverlessrepo-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Serverless Application Repository"
+      },
+      "servicecatalog-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Service Catalog"
+      },
+      "servicediscovery-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Cloud Map"
+      },
+      "servicequotas-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Service Quotas"
+      },
+      "ses-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Email Service"
+      },
+      "signin-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Sign-In"
+      },
+      "sns-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Notification Service"
+      },
+      "sqs-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Queue Service"
+      },
+      "ssmsap-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Systems Manager for SAP"
+      },
+      "state-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Step Functions"
+      },
+      "storagegateway-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Storage Gateway"
+      },
+      "sts-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Security Token Service"
+      },
+      "swf-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Simple Workflow Service"
+      },
+      "trafficmirroring-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Traffic Mirroring"
+      },
+      "transcribe-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Transcribe"
+      },
+      "transfer-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Transfer Family"
+      },
+      "transitgateway-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Transit Gateway"
+      },
+      "verifiedpermissions-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Verified Permissions"
+      },
+      "vmimportexport-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "VM Import/Export"
+      },
+      "vpc-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon Virtual Private Cloud"
+      },
+      "vpclattice-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "Amazon VPC Lattice"
+      },
+      "vpnvpc-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Site-to-Site VPN"
+      },
+      "wellarchitected-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS Well-Architected Tool"
+      },
+      "xray-me-south-1": {
+        "current": "3",
+        "max": "3",
+        "service_name": "AWS X-Ray"
+      }
+    },
+    "region_name": "Bahrain",
+    "service": "multipleservices-me-south-1",
+    "service_name": "Multiple services",
+    "status": "3",
+    "summary": "Region Availability"
+  },
+  {
+    "arn": "arn:aws:health:us-west-2::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_926DB_F0036494EA4",
+    "date": "1788472198",
+    "end_time": "1788480474",
+    "event_log": [
+      {
+        "message": "Starting at 2:12 PM PDT, we began experiencing increased API error rates for STS and Sign In when using SAML in the US-WEST-2 Region. Our engineering team was automatically engaged at 2:19 PM to begin investigating the root cause. There is no work around available at this time. We will provide another update by 3:30 PM PDT.",
+        "status": 1,
+        "summary": "Increased API Error Rates",
+        "timestamp": 1788472198
+      },
+      {
+        "message": "We are seeing early signs of recovery and continue to monitor for full recovery. We will provide another update at 4:15 PM, or sooner if we have additional information to share.",
+        "status": 1,
+        "summary": "Increased API Error Rates",
+        "timestamp": 1788474388
+      },
+      {
+        "message": "We continue to see recovery holding steady for the STS AssumeRoleWithSAML and AssumeRoleWithWebIdentity APIs in the US-WEST-2 Region. Error rates are now back to pre-event levels, and we continue actively monitoring to confirm full recovery. We will provide another update by 5:15 PM or earlier.",
+        "status": 1,
+        "summary": "Increased API Error Rates",
+        "timestamp": 1788477609
+      },
+      {
+        "message": "Between 2:12 PM and 3:18 PM PDT, we experienced increased API error rates affecting the STS AssumeRoleWithSAML  and AssumeRoleWithWebIdentity APIs in the US-WEST-2 Region. The root cause was determined to be due to an issue with an STS subsystem responsible for communicating with external identity providers. Other AWS Services that rely on these identity federation protocols were also affected. At 3:18 PM, we observed signs of recovery and continued to monitor to ensure stability and full recovery. The issue is resolved and the service is operating normally at this time.",
+        "status": 0,
+        "summary": "[RESOLVED] Increased API Error Rates",
+        "timestamp": 1788480474
+      }
+    ],
+    "impacted_service_status_changes": [
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "connect-us-west-2",
+        "service_name": "Amazon Connect",
+        "timestamp": 1788472198000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "iamidentitycenter-us-west-2",
+        "service_name": "AWS IAM Identity Center",
+        "timestamp": 1788472198000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "signin-us-west-2",
+        "service_name": "AWS Sign-In",
+        "timestamp": 1788472198000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "sts-us-west-2",
+        "service_name": "AWS Security Token Service",
+        "timestamp": 1788472198000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "connect-us-west-2",
+        "service_name": "Amazon Connect",
+        "timestamp": 1788480474000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "iamidentitycenter-us-west-2",
+        "service_name": "AWS IAM Identity Center",
+        "timestamp": 1788480474000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "signin-us-west-2",
+        "service_name": "AWS Sign-In",
+        "timestamp": 1788480474000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "sts-us-west-2",
+        "service_name": "AWS Security Token Service",
+        "timestamp": 1788480474000
+      }
+    ],
+    "impacted_services": {
+      "connect-us-west-2": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon Connect"
+      },
+      "iamidentitycenter-us-west-2": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS IAM Identity Center"
+      },
+      "signin-us-west-2": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Sign-In"
+      },
+      "sts-us-west-2": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Security Token Service"
+      }
+    },
+    "region_name": "Oregon",
+    "service": "multipleservices-us-west-2",
+    "service_name": "Multiple services",
+    "status": "0",
+    "summary": "[RESOLVED] Increased API Error Rates"
+  },
+  {
+    "arn": "arn:aws:health:us-east-1::event/EC2/AWS_EC2_OPERATIONAL_ISSUE/AWS_EC2_OPERATIONAL_ISSUE_79073_047629764F9",
+    "date": "1790033208",
+    "end_time": "1790036735",
+    "event_log": [
+      {
+        "message": "We are investigating increased API error rates in the US-EAST-1 Region.",
+        "status": 1,
+        "summary": "Increased Error Rates",
+        "timestamp": 1790033208
+      },
+      {
+        "message": "We can confirm increased error rates affecting new instance launches, including elevated API error rates for RunInstances, CreateFleet, and related EC2 launch workflows in the US-EAST-1 Region. Customers attempting to launch new EC2 instances may experience launch failures or elevated API response latency. Our engineers are actively engaged and working towards recovering the issue. We are seeing initial signs of recovery. Existing instances remain unaffected. We recommend retrying failed RunInstances and CreateFleet API calls. We will provide an update by 5:30 PM PDT or sooner. ",
+        "status": 1,
+        "summary": "Increased Error Rates",
+        "timestamp": 1790034255
+      },
+      {
+        "message": "Between 3:49 PM and 5:06 PM PDT, we experienced increased error rates affecting new instance launches in the US-EAST-1 Region. During this time, customers may have experienced elevated error rates when attempting to launch new EC2 instances through RunInstances, CreateFleet, and related EC2 launch workflows. AWS services that launch EC2 instances on behalf of customers, including Amazon ECS, AWS Fargate, Amazon EMR, amongst others were also impacted during this period. We identified the root cause as a recent deployment to a subsystem within the EC2 service responsible for processing instance launch requests. We initiated a rollback of the problematic deployment and began observing initial signs of recovery at 4:44 PM. Existing instances remain unaffected. The issue has been resolved and the service is operating normally.",
+        "status": 1,
+        "summary": "Increased Error Rates",
+        "timestamp": 1790036658
+      }
+    ],
+    "impacted_service_status_changes": [
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "appstream2-us-east-1",
+        "service_name": "Amazon WorkSpaces Applications",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "appsync-us-east-1",
+        "service_name": "AWS AppSync",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "cloudfront",
+        "service_name": "Amazon CloudFront",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "datasync-us-east-1",
+        "service_name": "AWS DataSync",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "ecs-us-east-1",
+        "service_name": "Amazon Elastic Container Service",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "eks-us-east-1",
+        "service_name": "Amazon Elastic Kubernetes Service",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "elasticsearch-us-east-1",
+        "service_name": "Amazon OpenSearch Service",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "elb-us-east-1",
+        "service_name": "Amazon Elastic Load Balancing",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "emr-us-east-1",
+        "service_name": "Amazon Elastic MapReduce",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "fargate-us-east-1",
+        "service_name": "AWS Fargate",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "globalaccelerator",
+        "service_name": "AWS Global Accelerator",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "ipam-us-east-1",
+        "service_name": "Amazon VPC IP Address Manager",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "natgateway-us-east-1",
+        "service_name": "AWS NAT Gateway",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "privatelink-us-east-1",
+        "service_name": "AWS VPCE PrivateLink",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "sagemaker-us-east-1",
+        "service_name": "Amazon SageMaker",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "trafficmirroring-us-east-1",
+        "service_name": "Traffic Mirroring",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "transitgateway-us-east-1",
+        "service_name": "AWS Transit Gateway",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "vpnvpc-us-east-1",
+        "service_name": "AWS Site-to-Site VPN",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "1",
+        "previous_status": "0",
+        "service": "workspaces-us-east-1",
+        "service_name": "Amazon WorkSpaces",
+        "timestamp": 1790033208000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "appstream2-us-east-1",
+        "service_name": "Amazon WorkSpaces Applications",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "appsync-us-east-1",
+        "service_name": "AWS AppSync",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "cloudfront",
+        "service_name": "Amazon CloudFront",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "datasync-us-east-1",
+        "service_name": "AWS DataSync",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "ecs-us-east-1",
+        "service_name": "Amazon Elastic Container Service",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "eks-us-east-1",
+        "service_name": "Amazon Elastic Kubernetes Service",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "elasticsearch-us-east-1",
+        "service_name": "Amazon OpenSearch Service",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "elb-us-east-1",
+        "service_name": "Amazon Elastic Load Balancing",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "emr-us-east-1",
+        "service_name": "Amazon Elastic MapReduce",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "fargate-us-east-1",
+        "service_name": "AWS Fargate",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "globalaccelerator",
+        "service_name": "AWS Global Accelerator",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "ipam-us-east-1",
+        "service_name": "Amazon VPC IP Address Manager",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "natgateway-us-east-1",
+        "service_name": "AWS NAT Gateway",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "privatelink-us-east-1",
+        "service_name": "AWS VPCE PrivateLink",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "sagemaker-us-east-1",
+        "service_name": "Amazon SageMaker",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "trafficmirroring-us-east-1",
+        "service_name": "Traffic Mirroring",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "transitgateway-us-east-1",
+        "service_name": "AWS Transit Gateway",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "vpnvpc-us-east-1",
+        "service_name": "AWS Site-to-Site VPN",
+        "timestamp": 1790036735000
+      },
+      {
+        "current_status": "0",
+        "previous_status": "1",
+        "service": "workspaces-us-east-1",
+        "service_name": "Amazon WorkSpaces",
+        "timestamp": 1790036735000
+      }
+    ],
+    "impacted_services": {
+      "appstream2-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon WorkSpaces Applications"
+      },
+      "appsync-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS AppSync"
+      },
+      "cloudfront": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon CloudFront"
+      },
+      "datasync-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS DataSync"
+      },
+      "ecs-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon Elastic Container Service"
+      },
+      "eks-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon Elastic Kubernetes Service"
+      },
+      "elasticsearch-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon OpenSearch Service"
+      },
+      "elb-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon Elastic Load Balancing"
+      },
+      "emr-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon Elastic MapReduce"
+      },
+      "fargate-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Fargate"
+      },
+      "globalaccelerator": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Global Accelerator"
+      },
+      "ipam-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon VPC IP Address Manager"
+      },
+      "natgateway-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS NAT Gateway"
+      },
+      "privatelink-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS VPCE PrivateLink"
+      },
+      "sagemaker-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon SageMaker"
+      },
+      "trafficmirroring-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Traffic Mirroring"
+      },
+      "transitgateway-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Transit Gateway"
+      },
+      "vpnvpc-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "AWS Site-to-Site VPN"
+      },
+      "workspaces-us-east-1": {
+        "current": "0",
+        "max": "1",
+        "service_name": "Amazon WorkSpaces"
+      }
+    },
+    "region_name": "N. Virginia",
+    "service": "ec2-us-east-1",
+    "service_name": "Amazon Elastic Compute Cloud",
+    "status": "0",
+    "summary": "[RESOLVED] Increased Error Rates"
+  }
+]
