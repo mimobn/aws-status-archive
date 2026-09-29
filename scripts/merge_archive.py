@@ -25,6 +25,16 @@ sys.path.insert(0, str(Path(__file__).parent))
 from fetch_archive import canonical_json
 
 
+class ArchiveCorrupt(Exception):
+    """The existing archive file can't be parsed; merging would destroy it."""
+
+
+def log_key(entry):
+    """Identity of an event_log entry: AWS may reword an update in place, so
+    the newest text for a (timestamp, status) pair replaces the old one."""
+    return (int(entry["timestamp"]), str(entry.get("status", "")))
+
+
 def safe_read_json(path):
     """Read JSON file, return parsed data or None if missing/unparseable."""
     if not path.exists():
@@ -76,20 +86,12 @@ def merge_historyevents(archived, new_data):
                 # Merge with existing event
                 old_event = existing_map[key]
                 # Merge event_log entries
-                old_log = {
-                    (entry["timestamp"], str(entry.get("status", "")), entry.get("message", "")): entry
-                    for entry in old_event.get("event_log", [])
-                }
+                old_log = {log_key(entry): entry for entry in old_event.get("event_log", [])}
                 for new_entry in new_event.get("event_log", []):
-                    log_key = (
-                        new_entry["timestamp"],
-                        str(new_entry.get("status", "")),
-                        new_entry.get("message", ""),
-                    )
-                    old_log[log_key] = new_entry
+                    old_log[log_key(new_entry)] = new_entry
 
                 # Sort event_log by timestamp
-                merged_log = sorted(old_log.values(), key=lambda x: x.get("timestamp", 0))
+                merged_log = sorted(old_log.values(), key=lambda x: int(x.get("timestamp", 0)))
 
                 # Update event with new values (newest wins) but keep merged log
                 merged_event = dict(new_event)
@@ -183,9 +185,12 @@ def merge_all(data_dir, archive_dir):
         data_path = data_dir / fname
         archive_path = archive_dir / fname
 
-        # Read current archive
+        # Read current archive. A present-but-unreadable archive must never be
+        # replaced, or every aged-out event it holds would be lost.
         archived_data = safe_read_json(archive_path)
         if archived_data is None:
+            if archive_path.exists():
+                raise ArchiveCorrupt(f"{archive_path} exists but could not be read; refusing to overwrite")
             archived_data = {} if fname == "historyevents.json" else []
 
         # Read new data
@@ -260,12 +265,14 @@ def backfill_from_git(data_dir, archive_dir):
 
     print(f"[INFO] Found {len(commits)} commits to backfill", file=sys.stderr)
 
-    # Initialize archive data
-    archive_data = {
-        "historyevents.json": {},
-        "currentevents.json": [],
-        "services.json": [],
-    }
+    # Seed from the existing archive so a backfill can only ever add data.
+    archive_data = {}
+    for fname, empty in (("historyevents.json", {}), ("currentevents.json", []), ("services.json", [])):
+        path = archive_dir / fname
+        existing = safe_read_json(path)
+        if existing is None and path.exists():
+            raise ArchiveCorrupt(f"{path} exists but could not be read; refusing to overwrite")
+        archive_data[fname] = existing if existing is not None else empty
 
     # Process each commit
     for sha in commits:
@@ -355,10 +362,14 @@ def main():
 
     args = parser.parse_args()
 
-    if args.backfill_from_git:
-        backfill_from_git(args.data_dir, args.archive_dir)
-    else:
-        merge_all(args.data_dir, args.archive_dir)
+    try:
+        if args.backfill_from_git:
+            backfill_from_git(args.data_dir, args.archive_dir)
+        else:
+            merge_all(args.data_dir, args.archive_dir)
+    except ArchiveCorrupt as exc:
+        print(f"[FAIL] {exc}", file=sys.stderr)
+        return 1
 
     return 0
 

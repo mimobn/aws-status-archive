@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from merge_archive import (
+    ArchiveCorrupt,
     merge_all,
     merge_currentevents,
     merge_historyevents,
@@ -331,6 +332,31 @@ class TestMergeAllIntegration(unittest.TestCase):
             archive_data = json.loads(archive_file.read_text())
             self.assertIn("service-us-east-1", archive_data)
             self.assertEqual(len(archive_data["service-us-east-1"]), 1)
+
+    def test_corrupt_archive_is_never_overwritten(self):
+        """A corrupt archive file must stop the merge, not be replaced."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir = Path(tmpdir)
+            data_dir = tmpdir / "data"
+            archive_dir = tmpdir / "archive"
+            data_dir.mkdir()
+            archive_dir.mkdir()
+            archive_file = archive_dir / "historyevents.json"
+            archive_file.write_text("{truncated", encoding="utf-8")
+            (data_dir / "historyevents.json").write_text(json.dumps({"s": []}), encoding="utf-8")
+
+            with self.assertRaises(ArchiveCorrupt):
+                merge_all(data_dir, archive_dir)
+            self.assertEqual(archive_file.read_text(encoding="utf-8"), "{truncated")
+
+    def test_reworded_update_replaces_old_text(self):
+        """AWS editing an update's message must not duplicate the entry."""
+        old = {"s": [{"arn": "a", "date": "100", "event_log": [
+            {"timestamp": 100, "status": "1", "summary": "x", "message": "old"}]}]}
+        new = {"s": [{"arn": "a", "date": "100", "event_log": [
+            {"timestamp": 100, "status": "1", "summary": "x", "message": "new"}]}]}
+        log = merge_historyevents(old, new)["s"][0]["event_log"]
+        self.assertEqual([e["message"] for e in log], ["new"])
 
     def test_missing_files_skipped(self):
         """Test that missing input files are skipped."""
