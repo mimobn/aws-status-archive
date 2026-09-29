@@ -243,19 +243,6 @@ button, input, select {
   letter-spacing: -0.02em;
 }
 
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  background: var(--operational-bg);
-  color: var(--operational);
-  border: 1px solid var(--operational-border);
-}
-
 .subtitle {
   margin: 2px 0 0;
   font-size: 0.82rem;

@@ -1086,27 +1086,6 @@ function parseUrlHash() {
   }
 }
 
-// Archive freshness pill in the header
-function renderFreshnessPill(metadata, failed) {
-  const pill = document.getElementById("liveStatusBadge");
-  if (!pill) return;
-  const label = pill.querySelector("span:last-child");
-  const stamp = metadata && (metadata.snapshot_fetched_at || metadata.rebuilt_at);
-  const ageMs = stamp ? Date.now() - new Date(stamp).getTime() : NaN;
-  let cls = "status-pill-active";
-  let text = "Archive fresh";
-  if (failed) {
-    cls = "status-pill-error";
-    text = "Archive unavailable";
-  } else if (!(ageMs < 48 * 3600 * 1000)) {
-    cls = "status-pill-stale";
-    text = stamp ? `Archive stale (last snapshot ${stamp.slice(0, 10)})` : "Archive age unknown";
-  }
-  pill.classList.remove("status-pill-active", "status-pill-stale", "status-pill-error");
-  pill.classList.add(cls);
-  if (label) label.textContent = text;
-}
-
 // Data Export Handler (CSV & JSON)
 function exportDataset() {
   const filtered = filterIncidents(state.allIncidents);
@@ -1456,7 +1435,6 @@ async function init() {
 
     parseUrlHash();
     renderAll();
-    renderFreshnessPill(metadata, false);
     window.addEventListener("hashchange", () => {
       parseUrlHash();
       renderAll();
@@ -1471,7 +1449,6 @@ async function init() {
     }
   } catch (err) {
     console.error("Initialization error:", err);
-    renderFreshnessPill(null, true);
     if (updatedAtEl) {
       updatedAtEl.textContent = "Error loading archived data";
     }
