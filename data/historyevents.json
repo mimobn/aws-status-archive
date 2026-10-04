@@ -2717,28 +2717,7 @@
   "emr-us-east-1": [],
   "glue-ap-northeast-1": [],
   "glue-us-east-1": [],
-  "iam": [
-    {
-      "arn": "arn:aws:health:global::event/IAM/AWS_IAM_OPERATIONAL_ISSUE/AWS_IAM_OPERATIONAL_ISSUE_38AEE_C340609D4FD",
-      "date": "1758943527",
-      "event_log": [
-        {
-          "message": "We are investigating increased error rates and latencies for the IAM APIs.",
-          "status": "1",
-          "summary": "Increased Error Rates and Latencies",
-          "timestamp": 1758943527
-        },
-        {
-          "message": "Between 7:59 PM and 8:32 PM PDT we experienced increased error rates and latencies for IAM API requests. Engineers were engaged at 8:02 PM and immediately began working on both mitigation and identification of root cause. Mitigations were applied by 8:28 PM and full recovery was observed by 8:32 PM. Authentication and authorization based on existing users, credentials, roles, and policies were not impacted during this time. Other AWS Services were also affected during this time. We do not expect this issue to reoccur. We recommend customers retry failed requests. The issue has been resolved and all AWS services are operating normally.",
-          "status": "0",
-          "summary": "[RESOLVED] Increased Error Rates and Latencies",
-          "timestamp": 1758945492
-        }
-      ],
-      "status": "1",
-      "summary": "[RESOLVED] Increased Error Rates and Latencies"
-    }
-  ],
+  "iam": [],
   "iamidentitycenter-ap-southeast-2": [],
   "internetconnectivity-ap-southeast-2": [],
   "internetconnectivity-sa-east-1": [
