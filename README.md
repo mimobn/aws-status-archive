@@ -243,45 +243,46 @@ This distinction prevents periods without incident data from being incorrectly i
 
 ### Metrics
 
-#### Activity Days
+A status carries forward from the update that set it until the next update. An incident therefore counts on every day it was in progress, not only on the days AWS posted about it. An open incident counts up to today.
 
-Days on which at least one incident update exists in the archive.
+#### Incidents
 
-Activity days indicate incident-related activity and do not represent confirmed healthy operation.
-
-#### Total Incidents
-
-The number of distinct service and Region incidents represented in the archive.
+The number of distinct service and Region incidents in the archive, with the total number of status updates.
 
 #### Impact Days
 
-Activity days on which at least one incident had a severity worse than operational.
+Days on which at least one incident was in progress with a status worse than operational (impacted, degraded or disrupted). Shown against the number of days the archive covers.
 
-This includes:
+#### Resolved-only Days
 
-* Degraded
-* Impacted
-* Disrupted
+Days on which the only incident activity was incidents recovering. These mark resolutions; they are not observations that a service was healthy all day.
 
-#### Resolution Days
+#### No-data Days
 
-Activity days on which all incident updates were operational status updates.
-
-These days generally represent the resolution of existing incidents rather than independent observations that a service was continuously healthy.
+Days in the archive period with no incident open or updated.
 
 ### Day Classification
 
-The heatmap and related metrics classify each day into one of three categories:
+The daily status strip and the service history grid classify each day:
 
-| Classification     | Meaning                                             |
-| ------------------ | --------------------------------------------------- |
-| **Impact Day**     | At least one non-operational status update occurred |
-| **Resolution Day** | Only operational status updates occurred            |
-| **No Data**        | No archived incident activity occurred              |
+| Classification       | Meaning                                                        |
+| -------------------- | -------------------------------------------------------------- |
+| **Impact**           | An incident was in progress with a non-operational status      |
+| **Resolved**         | The only activity was incidents returning to operational       |
+| **No data**          | No incident was open or updated                                |
+
+On the daily strip, a bar's colour shows that day's own updates and a line under the bar marks an incident still in progress. In the service history grid, a dash means "No reported event" for that service on that day.
 
 The classification is intentionally conservative.
 
 An absence of incidents is not treated as evidence that AWS services were operating normally.
+
+### Service History
+
+The site's Service history panel mirrors the two views of the AWS Health Dashboard:
+
+* **List of services**: one row per service and Region that has ever had an archived event, one column per day for a week. Selecting a status opens the incident.
+* **List of events**: every archived incident, newest first.
 
 ### Severity Levels
 

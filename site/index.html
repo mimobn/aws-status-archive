@@ -31,7 +31,7 @@
     <header class="site-header">
       <div class="header-inner">
         <div class="brand">
-          <img class="brand-mark" src="logo.svg" alt="" width="40" height="40" />
+          <img class="brand-mark" src="logo.svg" alt="" width="44" height="44" />
           <div>
             <h1>status-archive</h1>
             <p class="subtitle">
@@ -132,6 +132,7 @@
               <li><span class="dot dot-impacted"></span>Impacted</li>
               <li><span class="dot dot-resolved"></span>Resolved</li>
               <li><span class="dot dot-no_data"></span>No data</li>
+              <li><span class="legend-line"></span>Incident in progress</li>
             </ul>
           </div>
         </section>
@@ -192,15 +193,15 @@
                 <input type="checkbox" id="gridOnlyEvents" checked />
                 <span>Only services with events this week</span>
               </label>
+              <nav class="pager" data-pager="grid" aria-label="Service pages" hidden></nav>
             </div>
             <div class="grid-wrap" id="serviceGrid"></div>
-            <div class="list-footer">
-              <button type="button" class="btn" id="gridMoreBtn" hidden>Show more</button>
-            </div>
+            <nav class="pager pager-bottom" data-pager="grid" aria-label="Service pages" hidden></nav>
           </div>
 
           <div id="eventsView" hidden>
             <div class="events-toolbar">
+              <nav class="pager" data-pager="events" aria-label="Event pages" hidden></nav>
               <select id="incidentSortSelect" class="select" aria-label="Sort incidents">
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
@@ -208,9 +209,7 @@
               </select>
             </div>
             <div id="incidentList" class="incident-list" aria-live="polite"></div>
-            <div class="list-footer">
-              <button type="button" class="btn" id="showMoreBtn" hidden>Show more</button>
-            </div>
+            <nav class="pager pager-bottom" data-pager="events" aria-label="Event pages" hidden></nav>
           </div>
 
           <div id="emptyState" class="state" hidden>

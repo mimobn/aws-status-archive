@@ -52,12 +52,12 @@ const state = {
   query: "",
   regionQuery: "",
   sort: "newest",
-  limit: PAGE_SIZE,
+  page: 1,
   view: "services",
   serviceRows: [],
   gridEnd: null,
   gridOnlyEvents: true,
-  gridLimit: GRID_PAGE_SIZE,
+  gridPage: 1,
   gridSubtitle: "",
   eventsSubtitle: "",
   stripEnd: null,
@@ -226,9 +226,28 @@ function prepare(incident) {
     .join(" ")
     .toLowerCase();
 
+  // Status per day for as long as the incident lasted (to today if open).
+  let days = {};
+  const updateDays = {};
+  if (updates.length) {
+    const firstDay = dayKey(updates[0].published);
+    const lastDay = incident.open ? todayKey() : dayKey(latest.published);
+    days = dayStatuses(
+      updates.map((u) => ({ at: new Date(u.published).getTime(), severity: u.severity })),
+      firstDay,
+      lastDay
+    );
+    for (const u of updates) {
+      const key = dayKey(u.published);
+      updateDays[key] = (updateDays[key] || 0) + 1;
+    }
+  }
+
   return {
     ...incident,
     _updates: updates,
+    _days: days,
+    _updateDays: updateDays,
     _region: region,
     _worst: worstOf(updates.map((u) => u.severity)),
     _latest: latest,
@@ -237,12 +256,12 @@ function prepare(incident) {
   };
 }
 
-// Severity of one day's updates: "resolved" when only operational updates
-// were published, otherwise the worst non-operational severity.
-function daySeverity(updates) {
-  if (!updates || updates.length === 0) return "no_data";
-  if (updates.every((u) => u.severity === "operational")) return "resolved";
-  return worstOf(updates.map((u) => u.severity).filter((s) => s !== "operational"));
+// Severity of one day across the incidents active on it: the worst ongoing
+// status, or "resolved" when the only activity was incidents recovering.
+function daySeverity(entries) {
+  if (!entries || entries.length === 0) return "no_data";
+  const active = entries.map((e) => e.severity).filter((sev) => sev !== "resolved" && sev !== "operational");
+  return active.length ? worstOf(active) : "resolved";
 }
 
 // Per-day status of one service across an incident. A status carries forward
@@ -317,9 +336,7 @@ function buildServiceRows(incidents) {
 function matches(incident, { ignoreDate = false } = {}) {
   if (state.region && incident._region !== state.region) return false;
   if (state.severity !== "all" && incident._worst !== state.severity) return false;
-  if (!ignoreDate && state.date && !incident._updates.some((u) => dayKey(u.published) === state.date)) {
-    return false;
-  }
+  if (!ignoreDate && state.date && !incident._days[state.date]) return false;
   if (state.query && !incident._search.includes(state.query.toLowerCase())) return false;
   return true;
 }
@@ -338,9 +355,12 @@ function buildDayMap(incidents) {
   let first = null;
   let last = null;
   for (const incident of incidents) {
-    for (const update of incident._updates) {
-      const key = dayKey(update.published);
-      (byDay[key] = byDay[key] || []).push({ severity: update.severity, incident });
+    for (const key in incident._days) {
+      (byDay[key] = byDay[key] || []).push({
+        severity: incident._days[key],
+        incident,
+        updates: incident._updateDays[key] || 0,
+      });
       if (!first || key < first) first = key;
       if (!last || key > last) last = key;
     }
@@ -432,9 +452,9 @@ function renderStats(incidents) {
 
   $("summaryStats").innerHTML = [
     stat("Incidents", incidents.length.toLocaleString("en-US"), plural(totalUpdates, "status update")),
-    stat("Impact days", `${impactDays}<small> / ${spanDays}</small>`, "Days with a non-operational update"),
-    stat("Resolved-only days", resolvedDays, "Days with only resolution updates"),
-    stat("No-data days", Math.max(0, noDataDays), "No incident updates archived"),
+    stat("Impact days", `${impactDays}<small> / ${spanDays}</small>`, "Days with an incident in progress"),
+    stat("Resolved-only days", resolvedDays, "Days where incidents only recovered"),
+    stat("No-data days", Math.max(0, noDataDays), "No incident open or updated"),
   ].join("");
 }
 
@@ -476,11 +496,19 @@ function renderStrip(incidents) {
 
   strip.innerHTML = days
     .map((key) => {
-      const sev = daySeverity(byDay[key]);
+      // The bar shows that day's own updates; a line under it marks an
+      // incident still in progress, so a months-long one doesn't hide the rest.
+      const entries = byDay[key] || [];
+      const sev = daySeverity(entries.filter((e) => e.updates > 0));
+      const ongoing = daySeverity(entries);
+      const line = SEVERITY_RANK[ongoing] > 0 && SEVERITY_RANK[ongoing] > SEVERITY_RANK[sev] ? ongoing : null;
       const selected = key === state.date;
-      return `<span class="bar bar-${sev}${selected ? " bar-selected" : ""}" role="button" data-day="${key}"
+      const label = line
+        ? `${fmtDay(key)}: ${sev === "no_data" ? "no new update" : SEVERITY_LABEL[sev]}, ${SEVERITY_LABEL[line].toLowerCase()} incident in progress`
+        : `${fmtDay(key)}: ${SEVERITY_LABEL[sev]}`;
+      return `<span class="bar bar-${sev}${line ? ` bar-ongoing ongoing-${line}` : ""}${selected ? " bar-selected" : ""}" role="button" data-day="${key}"
         tabindex="${key === focusDay ? 0 : -1}" aria-pressed="${selected}"
-        aria-label="${escapeHtml(`${fmtDay(key)}: ${SEVERITY_LABEL[sev]}`)}"></span>`;
+        aria-label="${escapeHtml(label)}"></span>`;
     })
     .join("");
 
@@ -554,20 +582,53 @@ function renderChips() {
   $("activeFiltersBar").hidden = chips.length === 0;
 }
 
+// Numbered pages: first, last and the pages around the current one.
+function pagerHtml(kind, page, pages) {
+  if (pages <= 1) return "";
+  const wanted = new Set([1, 2, pages - 1, pages, page - 1, page, page + 1]);
+  const numbers = [...wanted].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
+  const items = [];
+  let previous = 0;
+  for (const n of numbers) {
+    if (n - previous > 1) items.push('<span class="page-gap" aria-hidden="true">…</span>');
+    items.push(
+      `<button type="button" class="page-btn" data-pager="${kind}" data-page="${n}"${
+        n === page ? ' aria-current="page"' : ""
+      } aria-label="Page ${n} of ${pages}">${n}</button>`
+    );
+    previous = n;
+  }
+  const arrow = (label, target, glyph, disabled) =>
+    `<button type="button" class="page-btn page-arrow" data-pager="${kind}" data-page="${target}" aria-label="${label}"${
+      disabled ? " disabled" : ""
+    }>${glyph}</button>`;
+  return `${arrow("Previous page", page - 1, "‹", page <= 1)}${items.join("")}${arrow("Next page", page + 1, "›", page >= pages)}`;
+}
+
+function paginate(items, page, size) {
+  const pages = Math.max(1, Math.ceil(items.length / size));
+  const current = Math.min(Math.max(1, page), pages);
+  return { pages, page: current, shown: items.slice((current - 1) * size, current * size) };
+}
+
+function setPagers(kind, page, pages) {
+  document.querySelectorAll(`.pager[data-pager="${kind}"]`).forEach((nav) => {
+    nav.innerHTML = pagerHtml(kind, page, pages);
+    nav.hidden = pages <= 1;
+  });
+}
+
 function renderList(incidents) {
-  const shown = incidents.slice(0, state.limit);
+  const { pages, page, shown } = paginate(incidents, state.page, PAGE_SIZE);
+  state.page = page;
   $("incidentList").innerHTML = shown.map(incidentCard).join("");
+  setPagers("events", page, pages);
 
   state.eventsSubtitle =
     incidents.length === state.incidents.length
       ? plural(incidents.length, "event")
       : `${incidents.length} of ${plural(state.incidents.length, "event")}`;
 
-  const remaining = incidents.length - shown.length;
-  const more = $("showMoreBtn");
-  more.hidden = remaining <= 0;
-  more.textContent =
-    remaining > PAGE_SIZE ? `Show ${PAGE_SIZE} more (${remaining} remaining)` : `Show ${remaining} more`;
 }
 
 function renderView(matchingIncidents) {
@@ -620,7 +681,6 @@ function renderServiceGrid() {
 
   state.gridSubtitle = `${plural(rows.length, "service")} with archived events · ${active.length} affected ${fmtDay(start)} – ${fmtDay(end)}`;
 
-  const more = $("gridMoreBtn");
   if (visible.length === 0) {
     const earlier = allDays.filter((day) => day < start).pop();
     container.innerHTML = `<div class="state">
@@ -628,11 +688,13 @@ function renderServiceGrid() {
       <p class="state-desc">That means AWS posted nothing for these services, not that they were confirmed healthy.</p>
       ${earlier ? `<button type="button" class="btn" data-grid-end="${earlier}">Go to the previous events (${fmtDay(earlier)})</button>` : ""}
     </div>`;
-    more.hidden = true;
+    setPagers("grid", 1, 1);
     return;
   }
 
-  const shown = visible.slice(0, state.gridLimit);
+  const { pages, page, shown } = paginate(visible, state.gridPage, GRID_PAGE_SIZE);
+  state.gridPage = page;
+  setPagers("grid", page, pages);
   const head = days
     .map((day) => `<th scope="col" class="day-col">${day === today ? "Today" : escapeHtml(fmtDay(day).replace(/, \d{4}$/, ""))}</th>`)
     .join("");
@@ -661,9 +723,6 @@ function renderServiceGrid() {
       <li><span class="cell-none">–</span>No reported event</li>
     </ul>`;
 
-  const remaining = visible.length - shown.length;
-  more.hidden = remaining <= 0;
-  more.textContent = remaining > GRID_PAGE_SIZE ? `Show ${GRID_PAGE_SIZE} more (${remaining} remaining)` : `Show ${remaining} more`;
 }
 
 function incidentCard(incident) {
@@ -699,16 +758,16 @@ function incidentCard(incident) {
 
 function showTooltip(bar) {
   const day = bar.dataset.day;
-  const updates = state.stripByDay[day] || [];
-  const sev = daySeverity(updates);
-  const titles = [...new Set(updates.map((u) => u.incident.title))];
+  const entries = state.stripByDay[day] || [];
+  const sev = daySeverity(entries);
+  const titles = [...new Set(entries.map((e) => e.incident.title))];
+  const updateCount = entries.reduce((sum, e) => sum + e.updates, 0);
+  const detail = entries.length ? (updateCount ? plural(updateCount, "update") : "in progress, no new update") : "";
   const tip = $("stripTooltip");
 
   tip.innerHTML = `
     <div class="tooltip-date">${fmtDayWithWeekday(day)}</div>
-    <div class="tooltip-status">${severityDot(sev)}${escapeHtml(SEVERITY_LABEL[sev])}${
-      updates.length ? ` · ${plural(updates.length, "update")}` : ""
-    }</div>
+    <div class="tooltip-status">${severityDot(sev)}${escapeHtml(SEVERITY_LABEL[sev])}${detail ? ` · ${detail}` : ""}</div>
     ${
       titles.length
         ? `<ul class="tooltip-list">${titles.slice(0, 3).map((t) => `<li>${escapeHtml(t)}</li>`).join("")}${
@@ -1079,8 +1138,8 @@ function readHash() {
   state.date = date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(dayToMs(date)) ? date : null;
   state.query = (params.get("q") || "").trim();
   state.view = params.get("view") === "events" ? "events" : "services";
-  state.limit = PAGE_SIZE;
-  state.gridLimit = GRID_PAGE_SIZE;
+  state.page = 1;
+  state.gridPage = 1;
 
   const wanted = params.get("incident");
   return wanted ? state.incidents.find((i) => i.key === wanted || i._short === wanted) || null : null;
@@ -1089,7 +1148,7 @@ function readHash() {
 /* ---------- Event wiring ---------- */
 
 function setFilter(changes) {
-  Object.assign(state, changes, { limit: PAGE_SIZE, gridLimit: GRID_PAGE_SIZE });
+  Object.assign(state, { page: 1, gridPage: 1 }, changes);
   render();
 }
 
@@ -1152,15 +1211,17 @@ function setupEvents() {
     const jump = e.target.closest("[data-grid-end]");
     if (jump) setFilter({ gridEnd: jump.dataset.gridEnd });
   });
-  $("gridMoreBtn").addEventListener("click", () => {
-    state.gridLimit += GRID_PAGE_SIZE;
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".page-btn");
+    if (!btn || btn.disabled) return;
+    const kind = btn.dataset.pager;
+    const fromBottom = Boolean(btn.closest(".pager-bottom"));
+    if (kind === "grid") state.gridPage = Number(btn.dataset.page);
+    else state.page = Number(btn.dataset.page);
     render();
-  });
-  $("showMoreBtn").addEventListener("click", () => {
-    const firstNew = state.limit;
-    state.limit += PAGE_SIZE;
-    render();
-    $("incidentList").children[firstNew]?.querySelector(".incident-title")?.focus();
+    // Paging from below the list: bring the top of the new page into view.
+    if (fromBottom) $("logTitle").scrollIntoView({ block: "start" });
+    document.querySelector(`.pager${fromBottom ? ".pager-bottom" : ":not(.pager-bottom)"}[data-pager="${kind}"] [aria-current="page"]`)?.focus();
   });
 
   // Titles and cards open the dialog; the copy button copies a link.
