@@ -110,16 +110,22 @@
           <div class="daily" id="dailyBlock">
             <div class="daily-head">
               <h3>Daily status</h3>
-              <div class="segmented" id="stripControls" role="group" aria-label="Timeline window">
-                <button type="button" class="seg-btn seg-arrow" id="stripPrev" aria-label="Previous 90 days">‹</button>
-                <button type="button" class="seg-btn seg-arrow" id="stripNext" aria-label="Next 90 days">›</button>
-                <button type="button" class="seg-btn" id="stripLatest">Latest</button>
-                <button type="button" class="seg-btn" id="stripAll" aria-pressed="false">All</button>
+              <div class="cal-controls" id="calControls">
+                <div class="segmented" id="calScale" role="group" aria-label="Calendar scale">
+                  <button type="button" class="seg-btn" data-scale="month" aria-pressed="false">Month</button>
+                  <button type="button" class="seg-btn" data-scale="year" aria-pressed="true">Year</button>
+                </div>
+                <div class="segmented cal-nav" role="group" aria-label="Period">
+                  <button type="button" class="seg-btn seg-arrow" id="stripPrev" aria-label="Previous year">‹</button>
+                  <span class="cal-label" id="stripWindowLabel" aria-live="polite"></span>
+                  <button type="button" class="seg-btn seg-arrow" id="stripNext" aria-label="Next year">›</button>
+                </div>
+                <button type="button" class="btn btn-sm" id="stripLatest">Today</button>
               </div>
             </div>
-            <p class="daily-window" id="stripWindowLabel"></p>
             <div class="strip-stage" id="stripStage">
-              <div class="strip" id="daysStrip" role="group" aria-label="Daily status, one bar per day"></div>
+              <div class="strip-months" id="stripMonths"></div>
+              <div class="strip" id="daysStrip" role="group" aria-label="Daily status, one cell per day"></div>
               <div class="tooltip" id="stripTooltip" role="tooltip" hidden></div>
             </div>
             <div class="strip-axis">

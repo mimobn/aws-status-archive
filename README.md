@@ -263,7 +263,7 @@ Days in the archive period with no incident open or updated.
 
 ### Day Classification
 
-The daily status strip and the service history grid classify each day:
+The daily status calendar and the service history grid classify each day:
 
 | Classification       | Meaning                                                        |
 | -------------------- | -------------------------------------------------------------- |
@@ -271,7 +271,7 @@ The daily status strip and the service history grid classify each day:
 | **Resolved**         | The only activity was incidents returning to operational       |
 | **No data**          | No incident was open or updated                                |
 
-On the daily strip, a bar's colour shows that day's own updates and a line under the bar marks an incident still in progress. In the service history grid, a dash means "No reported event" for that service on that day.
+The daily status calendar shows one year at a time (weeks across, weekdays down) or one month (a bar per day), with controls to step through years and months. A cell's colour shows that day's own updates, and a line under the cell marks an incident still in progress. In the service history grid, a dash means "No reported event" for that service on that day.
 
 The classification is intentionally conservative.
 

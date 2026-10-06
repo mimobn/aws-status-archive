@@ -367,17 +367,14 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
 .daily { border-top: 1px solid var(--border-soft); padding-top: 16px; }
 .daily-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .daily-head h3 { font-size: 0.9rem; font-weight: 600; }
-.daily-window { margin: 6px 0 10px; font-size: 0.8rem; color: var(--text-muted); }
+.cal-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.cal-nav { align-items: center; }
+.cal-label { min-width: 124px; padding: 0 8px; text-align: center; font-size: 0.85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.btn-sm { height: 34px; padding: 0 12px; font-size: 0.82rem; }
+.btn:disabled { opacity: 0.45; cursor: default; }
 
-.strip-stage { position: relative; }
-.strip { display: flex; gap: 2px; height: 36px; }
-.bar {
-  flex: 1 1 0;
-  min-width: 1px;
-  border-radius: 2px;
-  background: var(--no-data);
-  cursor: pointer;
-}
+.strip-stage { position: relative; margin-top: 12px; }
+.bar { border-radius: 2px; background: var(--no-data); cursor: pointer; }
 .bar-impacted { background: var(--impacted); }
 .bar-degraded { background: var(--degraded); }
 .bar-disrupted { background: var(--disrupted); }
@@ -385,15 +382,37 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
 .bar-informational { background: var(--informational); }
 .bar-unknown { background: var(--unknown); }
 .bar-no_data { cursor: default; }
-.bar-ongoing { cursor: pointer; }
-.ongoing-impacted { box-shadow: inset 0 -5px 0 var(--impacted); }
-.ongoing-degraded { box-shadow: inset 0 -5px 0 var(--degraded); }
-.ongoing-disrupted { box-shadow: inset 0 -5px 0 var(--disrupted); }
-.bar-ongoing.bar-selected { box-shadow: inset 0 -5px 0 var(--disrupted), 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
-.legend-line { display: inline-block; width: 14px; height: 5px; border-radius: 1px; background: var(--disrupted); }
-.bar:not(.bar-no_data):hover, .bar-ongoing:hover { opacity: 0.8; }
+.bar-future { background: transparent; box-shadow: inset 0 0 0 1px var(--border-soft); cursor: default; }
+.bar-ongoing { cursor: pointer; box-shadow: inset 0 calc(-1 * var(--line, 5px)) 0 var(--ongoing); }
+.ongoing-impacted { --ongoing: var(--impacted); }
+.ongoing-degraded { --ongoing: var(--degraded); }
+.ongoing-disrupted { --ongoing: var(--disrupted); }
+.bar:not(.bar-no_data):not(.bar-future):hover, .bar-ongoing:hover { opacity: 0.8; }
 .bar:focus-visible { outline-offset: 1px; }
-.bar-selected { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); position: relative; z-index: 1; }
+.bar-selected { outline: 2px solid var(--text); outline-offset: 1px; }
+.legend-line { display: inline-block; width: 14px; height: 5px; border-radius: 1px; background: var(--disrupted); }
+
+/* Month: one bar per day. */
+.strip-month { display: flex; gap: 3px; height: 44px; }
+.strip-month .bar { flex: 1 1 0; min-width: 2px; }
+
+/* Year: weeks across, weekdays down. */
+.strip-year { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, auto); grid-auto-columns: 1fr; gap: 3px; --line: 3px; }
+.strip-year .bar, .bar-pad { aspect-ratio: 1; min-width: 0; }
+.strip-months { display: grid; gap: 3px; margin-bottom: 4px; }
+.month-label {
+  grid-row: 1;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.month-label:hover:not(:disabled) { color: var(--accent); text-decoration: underline; }
+.month-label:disabled { opacity: 0.4; cursor: default; }
 
 .strip-axis { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.75rem; color: var(--text-subtle); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 0.78rem; color: var(--text-muted); }
@@ -675,7 +694,8 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
   .panel-header { flex-wrap: wrap; }
   .filter-bar .segmented { width: 100%; }
   .filter-bar .seg-btn { flex: 1; padding: 0 6px; }
-  .strip { gap: 1px; }
+  .strip-year, .strip-months { gap: 1px; }
+  .cal-label { min-width: 96px; }
   .svc-table .svc-col { min-width: 132px; }
   .svc-table th, .svc-table td { padding: 8px 6px; }
   .day-col { width: 44px; }

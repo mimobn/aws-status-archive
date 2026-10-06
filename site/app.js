@@ -12,7 +12,6 @@ const METADATA_URL = "parsed/metadata.json";
 const PAGE_SIZE = 20;
 const GRID_PAGE_SIZE = 25;
 const GRID_DAYS = 7;
-const WINDOW_DAYS = 90;
 const DAY_MS = 86400000;
 const GLOBAL_REGION = "Global Services";
 
@@ -60,8 +59,9 @@ const state = {
   gridPage: 1,
   gridSubtitle: "",
   eventsSubtitle: "",
-  stripEnd: null,
-  stripShowAll: false,
+  calScale: window.innerWidth < 600 ? "month" : "year",
+  calYear: null,
+  calMonth: null,
   stripFocusDay: null,
   stripByDay: {},
   archiveSpan: null,
@@ -458,71 +458,105 @@ function renderStats(incidents) {
   ].join("");
 }
 
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function monthKey(year, month, day = 1) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+// The calendar shows one year (a week-by-weekday heatmap) or one month (a bar
+// per day), so it stays readable however many years the archive covers.
 function renderStrip(incidents) {
-  const { byDay, first, last } = buildDayMap(incidents);
+  const { byDay, first } = buildDayMap(incidents);
   state.stripByDay = byDay;
   const strip = $("daysStrip");
   const hasData = Boolean(first);
-  for (const id of ["stripWindowLabel", "stripStage"]) $(id).hidden = !hasData;
+  for (const id of ["calControls", "stripStage"]) $(id).hidden = !hasData;
   document.querySelector(".strip-axis").hidden = !hasData;
   document.querySelector(".legend").hidden = !hasData;
   if (!hasData) {
-    $("stripControls").hidden = true;
     strip.innerHTML = "";
+    $("stripMonths").innerHTML = "";
     return;
   }
 
-  const maxDay = last > todayKey() ? last : todayKey();
-  const totalDays = daysBetween(first, maxDay) + 1;
-  const fitsWindow = totalDays <= WINDOW_DAYS;
-  const showAll = state.stripShowAll || fitsWindow;
+  const today = todayKey();
+  const [firstYear, firstMonth] = [Number(first.slice(0, 4)), Number(first.slice(5, 7)) - 1];
+  const [thisYear, thisMonth] = [Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1];
+  const yearly = state.calScale === "year";
 
-  // Clamp the window end between the first full window and the latest day.
-  let end = state.stripEnd && state.stripEnd < maxDay ? state.stripEnd : maxDay;
-  const earliestEnd = addDays(first, WINDOW_DAYS - 1);
-  if (end < earliestEnd) end = earliestEnd;
-  if (showAll) end = maxDay;
-  const start = showAll ? first : addDays(end, -(WINDOW_DAYS - 1));
-  state.stripEnd = showAll || end === maxDay ? null : end;
+  // Clamp the cursor to the period the archive covers.
+  let year = Math.min(Math.max(state.calYear ?? thisYear, firstYear), thisYear);
+  let month = state.calMonth ?? thisMonth;
+  if (year === firstYear && month < firstMonth) month = firstMonth;
+  if (year === thisYear && month > thisMonth) month = thisMonth;
+  state.calYear = year;
+  state.calMonth = month;
 
+  const start = yearly ? monthKey(year, 0) : monthKey(year, month);
+  const end = yearly ? monthKey(year, 11, 31) : new Date(Date.UTC(year, month + 1, 0)).toISOString().slice(0, 10);
   const days = [];
   for (let key = start; key <= end; key = addDays(key, 1)) days.push(key);
 
-  const focusDay = days.includes(state.stripFocusDay)
+  const selectable = days.filter((key) => key <= today);
+  const focusDay = selectable.includes(state.stripFocusDay)
     ? state.stripFocusDay
-    : days.includes(state.date)
+    : selectable.includes(state.date)
       ? state.date
-      : days[days.length - 1];
+      : selectable[selectable.length - 1];
 
-  strip.innerHTML = days
-    .map((key) => {
-      // The bar shows that day's own updates; a line under it marks an
-      // incident still in progress, so a months-long one doesn't hide the rest.
-      const entries = byDay[key] || [];
-      const sev = daySeverity(entries.filter((e) => e.updates > 0));
-      const ongoing = daySeverity(entries);
-      const line = SEVERITY_RANK[ongoing] > 0 && SEVERITY_RANK[ongoing] > SEVERITY_RANK[sev] ? ongoing : null;
-      const selected = key === state.date;
-      const label = line
-        ? `${fmtDay(key)}: ${sev === "no_data" ? "no new update" : SEVERITY_LABEL[sev]}, ${SEVERITY_LABEL[line].toLowerCase()} incident in progress`
-        : `${fmtDay(key)}: ${SEVERITY_LABEL[sev]}`;
-      return `<span class="bar bar-${sev}${line ? ` bar-ongoing ongoing-${line}` : ""}${selected ? " bar-selected" : ""}" role="button" data-day="${key}"
-        tabindex="${key === focusDay ? 0 : -1}" aria-pressed="${selected}"
-        aria-label="${escapeHtml(label)}"></span>`;
-    })
-    .join("");
+  const cell = (key) => {
+    if (key > today) return '<span class="bar bar-future" aria-hidden="true"></span>';
+    // The colour is that day's own updates; a line under it marks an incident
+    // still in progress, so a months-long one doesn't hide the days around it.
+    const entries = byDay[key] || [];
+    const sev = daySeverity(entries.filter((e) => e.updates > 0));
+    const ongoing = daySeverity(entries);
+    const line = SEVERITY_RANK[ongoing] > 0 && SEVERITY_RANK[ongoing] > SEVERITY_RANK[sev] ? ongoing : null;
+    const selected = key === state.date;
+    const label = line
+      ? `${fmtDay(key)}: ${sev === "no_data" ? "no new update" : SEVERITY_LABEL[sev]}, ${SEVERITY_LABEL[line].toLowerCase()} incident in progress`
+      : `${fmtDay(key)}: ${SEVERITY_LABEL[sev]}`;
+    return `<span class="bar bar-${sev}${line ? ` bar-ongoing ongoing-${line}` : ""}${selected ? " bar-selected" : ""}" role="button" data-day="${key}"
+      tabindex="${key === focusDay ? 0 : -1}" aria-pressed="${selected}" aria-label="${escapeHtml(label)}"></span>`;
+  };
 
-  $("stripStart").textContent = fmtDay(start);
-  $("stripEnd").textContent = fmtDay(end);
-  $("stripWindowLabel").textContent = showAll
-    ? `All ${plural(days.length, "day")} since ${fmtDay(start)}`
-    : `${WINDOW_DAYS} days · ${fmtDay(start)} – ${fmtDay(end)}`;
+  const months = $("stripMonths");
+  if (yearly) {
+    // Columns are weeks (Sunday on top); pad so Jan 1 lands on its weekday.
+    const offset = new Date(dayToMs(start)).getUTCDay();
+    const weeks = Math.ceil((offset + days.length) / 7);
+    strip.className = "strip strip-year";
+    strip.innerHTML = '<span class="bar-pad" aria-hidden="true"></span>'.repeat(offset) + days.map(cell).join("");
+    months.hidden = false;
+    months.style.gridTemplateColumns = `repeat(${weeks}, 1fr)`;
+    months.innerHTML = MONTHS.map((name, m) => {
+      const column = Math.floor((offset + daysBetween(start, monthKey(year, m))) / 7) + 1;
+      const hasMonth = monthKey(year, m) <= today && monthKey(year, m, 28) >= first.slice(0, 8) + "01";
+      return `<button type="button" class="month-label" style="grid-column:${column}" data-month="${m}"${hasMonth ? "" : " disabled"} aria-label="Open ${MONTH_NAMES[m]} ${year}">${name}</button>`;
+    }).join("");
+  } else {
+    strip.className = "strip strip-month";
+    strip.innerHTML = days.map(cell).join("");
+    months.hidden = true;
+    months.innerHTML = "";
+  }
 
-  $("stripControls").hidden = fitsWindow;
-  $("stripPrev").disabled = showAll || start <= first;
-  $("stripNext").disabled = showAll || end >= maxDay;
-  $("stripLatest").disabled = showAll || end >= maxDay;
-  $("stripAll").setAttribute("aria-pressed", String(state.stripShowAll));
+  $("stripWindowLabel").textContent = yearly ? String(year) : `${MONTH_NAMES[month]} ${year}`;
+  $("stripStart").textContent = yearly ? "" : fmtDay(start);
+  $("stripEnd").textContent = yearly ? "" : fmtDay(end);
+  document.querySelector(".strip-axis").hidden = yearly;
+
+  const atStart = yearly ? year <= firstYear : year === firstYear && month <= firstMonth;
+  const atEnd = yearly ? year >= thisYear : year === thisYear && month >= thisMonth;
+  $("stripPrev").disabled = atStart;
+  $("stripNext").disabled = atEnd;
+  $("stripPrev").setAttribute("aria-label", yearly ? "Previous year" : "Previous month");
+  $("stripNext").setAttribute("aria-label", yearly ? "Next year" : "Next month");
+  $("stripLatest").disabled = atEnd;
+  document.querySelectorAll("#calScale .seg-btn").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.scale === state.calScale));
+  });
 }
 
 function renderOpenIncidents() {
@@ -782,6 +816,7 @@ function showTooltip(bar) {
   const width = tip.offsetWidth;
   const center = rect.left - stage.left + rect.width / 2;
   tip.style.left = `${Math.max(0, Math.min(center - width / 2, stage.width - width))}px`;
+  tip.style.bottom = `${stage.bottom - rect.top + 8}px`;
 }
 
 function hideTooltip() {
@@ -811,7 +846,8 @@ function setupStrip() {
     if (bar) toggleDay(bar.dataset.day);
   });
 
-  // One tab stop for the whole strip; arrow keys move between days.
+  // One tab stop for the whole calendar; arrow keys move between days. In the
+  // year view a column is a week, so left/right move a week and up/down a day.
   strip.addEventListener("keydown", (e) => {
     const bar = e.target.closest(".bar");
     if (!bar) return;
@@ -820,15 +856,17 @@ function setupStrip() {
       toggleDay(bar.dataset.day);
       return;
     }
-    const bars = [...strip.querySelectorAll(".bar")];
+    const yearly = state.calScale === "year";
+    const steps = yearly
+      ? { ArrowLeft: -7, ArrowRight: 7, ArrowUp: -1, ArrowDown: 1 }
+      : { ArrowLeft: -1, ArrowRight: 1 };
+    const bars = [...strip.querySelectorAll(".bar[data-day]")];
     const index = bars.indexOf(bar);
-    const next = {
-      ArrowLeft: bars[index - 1],
-      ArrowRight: bars[index + 1],
-      Home: bars[0],
-      End: bars[bars.length - 1],
-    }[e.key];
-    if (!(e.key in { ArrowLeft: 1, ArrowRight: 1, Home: 1, End: 1 })) return;
+    let next = null;
+    if (e.key in steps) next = bars[index + steps[e.key]];
+    else if (e.key === "Home") next = bars[0];
+    else if (e.key === "End") next = bars[bars.length - 1];
+    else return;
     e.preventDefault();
     if (!next) return;
     bar.tabIndex = -1;
@@ -837,25 +875,35 @@ function setupStrip() {
     state.stripFocusDay = next.dataset.day;
   });
 
-  const windowEnd = () => {
-    const bars = strip.querySelectorAll(".bar");
-    return bars.length ? bars[bars.length - 1].dataset.day : todayKey();
+  const step = (direction) => {
+    if (state.calScale === "year") {
+      state.calYear += direction;
+    } else {
+      const moved = new Date(Date.UTC(state.calYear, state.calMonth + direction, 1));
+      state.calYear = moved.getUTCFullYear();
+      state.calMonth = moved.getUTCMonth();
+    }
+    render();
   };
-  $("stripPrev").addEventListener("click", () => {
-    state.stripEnd = addDays(windowEnd(), -WINDOW_DAYS);
-    render();
-  });
-  $("stripNext").addEventListener("click", () => {
-    state.stripEnd = addDays(windowEnd(), WINDOW_DAYS);
-    render();
-  });
+  $("stripPrev").addEventListener("click", () => step(-1));
+  $("stripNext").addEventListener("click", () => step(1));
   $("stripLatest").addEventListener("click", () => {
-    state.stripEnd = null;
+    state.calYear = null;
+    state.calMonth = null;
     render();
   });
-  $("stripAll").addEventListener("click", () => {
-    state.stripShowAll = !state.stripShowAll;
-    state.stripEnd = null;
+  $("calScale").addEventListener("click", (e) => {
+    const btn = e.target.closest(".seg-btn");
+    if (!btn) return;
+    state.calScale = btn.dataset.scale;
+    render();
+  });
+  // A month name in the year view opens that month.
+  $("stripMonths").addEventListener("click", (e) => {
+    const label = e.target.closest(".month-label");
+    if (!label || label.disabled) return;
+    state.calScale = "month";
+    state.calMonth = Number(label.dataset.month);
     render();
   });
 }
@@ -1138,6 +1186,10 @@ function readHash() {
   state.date = date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(dayToMs(date)) ? date : null;
   state.query = (params.get("q") || "").trim();
   state.view = params.get("view") === "events" ? "events" : "services";
+  if (state.date) {
+    state.calYear = Number(state.date.slice(0, 4));
+    state.calMonth = Number(state.date.slice(5, 7)) - 1;
+  }
   state.page = 1;
   state.gridPage = 1;
 
