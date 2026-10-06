@@ -45,6 +45,11 @@ jobs:
           cp -R site/* public/
           cp out/incidents.json public/parsed/incidents.json
           cp out/metadata.json public/parsed/metadata.json
+          # Stamp asset URLs with the commit so a browser never pairs a new
+          # page with a cached stylesheet or script from an older deploy.
+          v="${GITHUB_SHA::7}"
+          sed -i -E "s#(href|src)=\"(styles\.css|app\.js|logo\.svg|favicon\.svg)\"#\1=\"\2?v=${v}\"#g" public/index.html
+          grep -c "?v=${v}" public/index.html
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
