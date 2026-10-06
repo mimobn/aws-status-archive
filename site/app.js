@@ -1,115 +1,130 @@
 /**
- * status-archive — Main Application Engine
- * Renders AWS incident history, regions breakdown, timeline heatmap, modal inspector, and interactive filters.
+ * status-archive front end.
+ *
+ * Renders the archived AWS incident history from parsed/incidents.json:
+ * an overview with a daily status strip, the incidents that are still open,
+ * and a paged incident log with a detail dialog. All state lives in `state`
+ * and every change goes through render().
  */
 
-const DATA_URLS = ["parsed/incidents.json", "../out/incidents.json"];
-const METADATA_URLS = ["parsed/metadata.json", "../out/metadata.json"];
+const DATA_URL = "parsed/incidents.json";
+const METADATA_URL = "parsed/metadata.json";
+const PAGE_SIZE = 20;
+const WINDOW_DAYS = 90;
+const DAY_MS = 86400000;
+const GLOBAL_REGION = "Global Services";
 
+// AWS numeric order: impacted (1) < degraded (2) < disrupted (3).
 const SEVERITY_RANK = {
-  disrupted: 4,
-  impacted: 3,
+  disrupted: 3,
   degraded: 2,
-  informational: 1,
+  impacted: 1,
+  informational: 0.5,
   operational: 0,
+  resolved: 0,
   unknown: -1,
   no_data: -2,
 };
 
 const SEVERITY_LABEL = {
   disrupted: "Disrupted",
-  impacted: "Impacted",
   degraded: "Degraded",
+  impacted: "Impacted",
   informational: "Informational",
-  operational: "Operating Normally",
-  no_data: "No Data Available",
+  operational: "Operating normally",
+  resolved: "Resolved",
+  unknown: "Unknown",
+  no_data: "No data",
 };
 
-const MONTHS_SHORT = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const FILTER_SEVERITIES = ["all", "disrupted", "degraded", "impacted"];
+const THEME_MODES = ["auto", "light", "dark"];
+const THEME_LABEL = { auto: "Theme: match system", light: "Theme: light", dark: "Theme: dark" };
 
-const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const REGION_NAMES = {
-  "us-east-1": "US East (N. Virginia)",
-  "us-east-2": "US East (Ohio)",
-  "us-west-1": "US West (N. California)",
-  "us-west-2": "US West (Oregon)",
-  "ca-central-1": "Canada (Central)",
-  "ca-west-1": "Canada West (Calgary)",
-  "eu-west-1": "Europe (Ireland)",
-  "eu-central-1": "Europe (Frankfurt)",
-  "eu-west-2": "Europe (London)",
-  "eu-west-3": "Europe (Paris)",
-  "eu-north-1": "Europe (Stockholm)",
-  "eu-south-1": "Europe (Milan)",
-  "eu-south-2": "Europe (Spain)",
-  "eu-central-2": "Europe (Zurich)",
-  "ap-southeast-1": "Asia Pacific (Singapore)",
-  "ap-southeast-2": "Asia Pacific (Sydney)",
-  "ap-northeast-1": "Asia Pacific (Tokyo)",
-  "ap-northeast-2": "Asia Pacific (Seoul)",
-  "ap-northeast-3": "Asia Pacific (Osaka)",
-  "ap-south-1": "Asia Pacific (Mumbai)",
-  "ap-south-2": "Asia Pacific (Hyderabad)",
-  "ap-southeast-3": "Asia Pacific (Jakarta)",
-  "ap-southeast-4": "Asia Pacific (Melbourne)",
-  "sa-east-1": "South America (São Paulo)",
-  "me-central-1": "Middle East (UAE)",
-  "me-south-1": "Middle East (Bahrain)",
-  "af-south-1": "Africa (Cape Town)",
-  "us-gov-east-1": "AWS GovCloud (US-East)",
-  "us-gov-west-1": "AWS GovCloud (US-West)",
-  "global": "Global Services",
-};
-
-const REGION_CODE_RE = /\b([a-z]{2,3}(?:-[a-z0-9]+)*-\d)\b/i;
-
-// State Store
 const state = {
-  allIncidents: [],
-  archiveMetadata: null,
-  activeRegion: null,
-  activeSeverity: "all",
-  activeDate: null,
-  searchQuery: "",
-  regionSearchQuery: "",
-  impactedServicesOnly: false,
-  sortOrder: "newest",
-  theme: localStorage.getItem("theme") || "dark",
-  // Modal state
-  activeModalIncident: null,
-  // Strip window state
-  windowDays: 90,
-  stripWindowEnd: null,
+  incidents: [],
+  metadata: null,
+  region: null,
+  severity: "all",
+  date: null,
+  query: "",
+  regionQuery: "",
+  sort: "newest",
+  limit: PAGE_SIZE,
+  stripEnd: null,
   stripShowAll: false,
-  stripFirstDay: null,
+  stripFocusDay: null,
+  stripByDay: {},
+  modalIncident: null,
+  lastFocus: null,
 };
 
-// Date utilities
-function fmtDate(iso) {
+/* ---------- Small utilities ---------- */
+
+const $ = (id) => document.getElementById(id);
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// AWS descriptions sometimes carry <a href> links: keep only plain http(s)
+// anchors and escape everything else.
+function renderDescription(text) {
+  return escapeHtml(text).replace(
+    /&lt;a\s+href=(?:&quot;|&#39;)(https?:\/\/[^"'\s<>]+?)(?:&quot;|&#39;)[^&]*?&gt;(.*?)&lt;\/a&gt;/gi,
+    (_, href, label) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`
+  );
+}
+
+function plainText(text) {
+  return String(text ?? "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+
+function plural(n, word, pluralWord = `${word}s`) {
+  return `${n.toLocaleString("en-US")} ${n === 1 ? word : pluralWord}`;
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function fmtDay(key) {
+  if (!key) return "—";
+  const [y, m, d] = key.split("-").map(Number);
+  return `${MONTHS[m - 1]} ${d}, ${y}`;
+}
+
+function fmtDayWithWeekday(key) {
+  return `${WEEKDAYS[new Date(dayToMs(key)).getUTCDay()]}, ${fmtDay(key)}`;
+}
+
+function fmtDateTime(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
-  return d.toUTCString().replace(" GMT", " UTC");
+  if (Number.isNaN(d.getTime())) return "—";
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()} ${hh}:${mm} UTC`;
 }
 
-function fmtShortDate(dayStr) {
-  if (!dayStr) return "—";
-  const [y, m, d] = dayStr.split("-").map(Number);
-  return `${MONTHS_SHORT[m - 1]} ${d}, ${y}`;
-}
-
-function fmtShortDay(dayStr) {
-  if (!dayStr) return "—";
-  const [y, m, d] = dayStr.split("-").map(Number);
-  const dateObj = new Date(Date.UTC(y, m - 1, d));
-  return `${fmtShortDate(dayStr)} · ${DAY_KEYS[dateObj.getUTCDay()]}`;
+function fmtDuration(startIso, endIso) {
+  const minutes = Math.round((new Date(endIso) - new Date(startIso)) / 60000);
+  if (!Number.isFinite(minutes) || minutes <= 0) return null;
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+  if (days) return `${days}d ${hours}h`;
+  if (hours) return `${hours}h ${mins}m`;
+  return `${mins}m`;
 }
 
 function dayKey(iso) {
-  return new Date(iso).toISOString().slice(0, 10);
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 }
 
 function dayToMs(key) {
@@ -117,1129 +132,893 @@ function dayToMs(key) {
   return Date.UTC(y, m - 1, d);
 }
 
-function keyFromMs(ms) {
-  return new Date(ms).toISOString().slice(0, 10);
+function addDays(key, n) {
+  return new Date(dayToMs(key) + n * DAY_MS).toISOString().slice(0, 10);
 }
 
-function addDays(key, n) {
-  return keyFromMs(dayToMs(key) + n * 86400000);
+function daysBetween(a, b) {
+  return Math.round((dayToMs(b) - dayToMs(a)) / DAY_MS);
 }
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function escapeHtml(text) {
-  return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function worstSeverity(candidates) {
+function worstOf(severities) {
   let worst = "unknown";
-  let worstRank = -1;
-  for (const s of candidates) {
-    const rank = SEVERITY_RANK[s] ?? -1;
-    if (rank > worstRank) {
-      worstRank = rank;
-      worst = s;
-    }
+  for (const s of severities) {
+    if ((SEVERITY_RANK[s] ?? -1) > (SEVERITY_RANK[worst] ?? -1)) worst = s;
   }
   return worst;
 }
 
-function regionLabel(incident) {
-  if (incident.region_name) return incident.region_name;
-  if (incident.region) return REGION_NAMES[incident.region] || incident.region;
-  const match = incident.key ? incident.key.match(REGION_CODE_RE) : null;
-  if (match) {
-    const code = match[1].toLowerCase();
-    return REGION_NAMES[code] || code.toUpperCase();
-  }
-  return null;
+function severityDot(severity) {
+  return `<span class="dot dot-${escapeHtml(severity)}" aria-hidden="true"></span>`;
 }
 
-function worstSeverityFromUpdates(incident) {
-  let worst = "unknown";
-  for (const update of incident.updates || []) {
-    if ((SEVERITY_RANK[update.severity] ?? -1) > SEVERITY_RANK[worst]) {
-      worst = update.severity;
-    }
-  }
-  return worst;
+function severityBadge(severity) {
+  return `<span class="badge">${severityDot(severity)}${escapeHtml(SEVERITY_LABEL[severity] || severity)}</span>`;
 }
 
-// Data Fetching with Fallback
-async function loadIncidentsData() {
-  let lastErr = null;
-  for (const url of DATA_URLS) {
-    try {
-      const resp = await fetch(url);
-      if (resp.ok) {
-        return await resp.json();
-      }
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  throw new Error(lastErr ? lastErr.message : "Failed to load incidents dataset");
-}
-
-async function loadMetadata() {
-  for (const url of METADATA_URLS) {
-    try {
-      const resp = await fetch(url);
-      if (resp.ok) {
-        return await resp.json();
-      }
-    } catch (_) { /* ignore */ }
-  }
-  return null;
-}
-
-// Toast Notifications
-function showToast(message) {
-  const container = document.getElementById("toastContainer");
-  if (!container) return;
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
-    <span>${escapeHtml(message)}</span>
-  `;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateY(8px)";
-    setTimeout(() => toast.remove(), 250);
-  }, 2600);
-}
-
-// Theme Management
-function initTheme() {
-  document.documentElement.setAttribute("data-theme", state.theme);
-  const btn = document.getElementById("themeToggleBtn");
-  if (btn) {
-    btn.addEventListener("click", () => {
-      state.theme = state.theme === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", state.theme);
-      localStorage.setItem("theme", state.theme);
-    });
+function storageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (_) {
+    return null;
   }
 }
 
-// Modal Inspector Dialog
-function openModal(incident) {
-  state.activeModalIncident = incident;
-  const modal = document.getElementById("incidentModal");
-  const title = document.getElementById("modalTitle");
-  const sub = document.getElementById("modalSub");
-  const body = document.getElementById("modalBody");
-  if (!modal || !title || !body) return;
-
-  const regLabel = regionLabel(incident) || "Global";
-  const updates = incident.updates || [];
-  const worstSev = worstSeverityFromUpdates(incident);
-
-  title.textContent = incident.title;
-  if (sub) sub.textContent = `${regLabel} · ${updates.length} update(s) · Started ${fmtDate(updates[0]?.published)}`;
-
-  let servicesHtml = "";
-  if (incident.services) {
-    const list = Object.entries(incident.services).map(([slug, svc]) => `
-      <div class="service-chip">
-        <span class="dot dot-${svc.current || "unknown"}"></span>
-        <span class="service-chip-name">${escapeHtml(svc.service_name || slug)}: ${escapeHtml(SEVERITY_LABEL[svc.current] || svc.current)}</span>
-      </div>
-    `).join("");
-    servicesHtml = `
-      <div style="margin-bottom:16px;">
-        <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Impacted Services (${Object.keys(incident.services).length})</h5>
-        <div class="service-grid">${list}</div>
-      </div>
-    `;
-  }
-
-  const timelineHtml = `
-    <ul class="timeline">
-      ${updates.map(u => `
-        <li>
-          <div class="timeline-meta">
-            <span class="dot dot-${u.severity}"></span>
-            <span class="timeline-time">${fmtDate(u.published)}</span>
-            <span class="badge badge-${u.severity}">${SEVERITY_LABEL[u.severity] ?? u.severity}</span>
-          </div>
-          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
-        </li>
-      `).join("")}
-    </ul>
-  `;
-
-  body.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
-      <span class="badge badge-${worstSev}">${SEVERITY_LABEL[worstSev] ?? worstSev}</span>
-      <span class="incident-region">${escapeHtml(regLabel)}</span>
-      <span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);font-family:monospace;">Key: ${escapeHtml(incident.key)}</span>
-    </div>
-    ${servicesHtml}
-    <h5 style="margin:0 0 8px;font-size:0.82rem;text-transform:uppercase;color:var(--text-muted);">Update History Logs</h5>
-    ${timelineHtml}
-  `;
-
-  modal.hidden = false;
-}
-
-function closeModal() {
-  const modal = document.getElementById("incidentModal");
-  if (modal) modal.hidden = true;
-  state.activeModalIncident = null;
-}
-
-// Build Day Map for Timeline Strip
-function buildDayMap(incidents) {
-  const byDay = {};
-  let firstDay = null;
-  let lastDay = null;
-  for (const incident of incidents) {
-    for (const update of incident.updates || []) {
-      const key = dayKey(update.published);
-      (byDay[key] = byDay[key] || []).push({
-        severity: update.severity,
-        title: update.title,
-        incidentTitle: incident.title,
-        incidentKey: incident.key,
-      });
-      if (!firstDay || key < firstDay) firstDay = key;
-      if (!lastDay || key > lastDay) lastDay = key;
-    }
-  }
-  return { byDay, firstDay, lastDay };
-}
-
-// Compute activity-based stats from the incident day map.
-// "Activity days" are days where at least one incident update occurred.
-// "Impact days" are activity days with non-operational status.
-// "Resolution days" are activity days where every update is operational
-// (i.e. the only activity was an incident being resolved — NOT evidence
-// that the service was independently observed healthy).
-function computeActivityStats(byDay, firstDay, lastDay) {
-  if (!firstDay || !lastDay) {
-    return { activityDays: 0, impactDays: 0, resolutionDays: 0, calendarDays: 0, noDataDays: 0 };
-  }
-  const startMs = dayToMs(firstDay);
-  const endMs = dayToMs(lastDay);
-  const calendarDays = Math.max(1, Math.round((endMs - startMs) / 86400000) + 1);
-  const activityDays = Object.keys(byDay).length;
-
-  let impactDays = 0;
-  let resolutionDays = 0;
-  for (const key in byDay) {
-    const updates = byDay[key];
-    const worst = worstSeverity(updates.map((u) => u.severity));
-    if (worst !== "operational" && worst !== "unknown" && worst !== "no_data") {
-      impactDays += 1;
-    } else if (updates.every((u) => u.severity === "operational")) {
-      resolutionDays += 1;
-    }
-  }
-  const noDataDays = calendarDays - activityDays;
-  return { activityDays, impactDays, resolutionDays, calendarDays, noDataDays };
-}
-
-// Render KPI Summary Stats Cards
-function renderStatsCards(incidents) {
-  const container = document.getElementById("summaryStats");
-  if (!container) return;
-
-  const dayMap = buildDayMap(incidents);
-  const { activityDays, impactDays, resolutionDays, calendarDays, noDataDays } = computeActivityStats(
-    dayMap.byDay,
-    dayMap.firstDay,
-    dayMap.lastDay
-  );
-
-  const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
-
-  // Scope label for filtered vs global
-  let scopeLabel = "Global archive";
-  if (state.activeRegion) {
-    scopeLabel = `Filtered to ${state.activeRegion}`;
-  } else if (state.activeSeverity !== "all") {
-    scopeLabel = `Filtered to ${SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity}`;
-  }
-
-  container.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Activity Days</div>
-      <div class="stat-value">${activityDays}<span class="stat-unit"> / ${calendarDays}</span></div>
-      <div class="stat-sub">Days with archived incident activity</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total Incidents</div>
-      <div class="stat-value">${incidents.length}</div>
-      <div class="stat-sub">${totalUpdates} status updates</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Impact Days</div>
-      <div class="stat-value ${impactDays > 0 ? "stat-val-degraded" : "stat-val-operational"}">${impactDays}</div>
-      <div class="stat-sub">Days with non-operational status</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Resolution Days</div>
-      <div class="stat-value">${resolutionDays}</div>
-      <div class="stat-sub">Days containing only resolution updates</div>
-    </div>
-  `;
-}
-
-// Render Regions Sidebar Navigation
-function renderSidebar(allIncidents) {
-  const container = document.getElementById("regionList");
-  const totalBadge = document.getElementById("regionTotalBadge");
-  const mobileList = document.getElementById("mobileRegionList");
-  if (!container) return;
-
-  const counts = {};
-  for (const inc of allIncidents) {
-    const label = regionLabel(inc);
-    if (label) {
-      counts[label] = (counts[label] || 0) + 1;
-    }
-  }
-
-  const entries = Object.entries(counts).sort((a, b) => a[0].localeCompare(b[0]));
-  if (totalBadge) totalBadge.textContent = entries.length;
-
-  const query = state.regionSearchQuery.toLowerCase();
-  const filteredEntries = entries.filter(([label]) => label.toLowerCase().includes(query));
-
-  const items = [];
-  const allActiveClass = state.activeRegion === null ? "sidebar-item active" : "sidebar-item";
-  items.push(`
-    <a class="${allActiveClass}" data-region="" href="#">
-      <span>All Regions</span>
-      <span class="sidebar-count">${allIncidents.length}</span>
-    </a>
-  `);
-
-  for (const [label, count] of filteredEntries) {
-    const isActive = state.activeRegion === label;
-    const cls = isActive ? "sidebar-item active" : "sidebar-item";
-    items.push(`
-      <a class="${cls}" data-region="${escapeHtml(label)}" href="#region=${encodeURIComponent(label)}">
-        <span class="region-item-name">${escapeHtml(label)}</span>
-        <span class="sidebar-count">${count}</span>
-      </a>
-    `);
-  }
-
-  container.innerHTML = items.join("");
-
-  // Mobile horizontal region tab buttons
-  if (mobileList) {
-    const mobileBtns = entries.map(([label]) => {
-      const activeCls = state.activeRegion === label ? "mobile-region-btn active" : "mobile-region-btn";
-      return `<button type="button" class="${activeCls}" data-region="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
-    });
-    mobileList.innerHTML = mobileBtns.join("");
+function storageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (_) {
+    /* storage blocked: the choice just won't persist */
   }
 }
 
-// Render Heatmap Strip Timeline
-function renderDayStrip(incidents) {
-  const { byDay, firstDay, lastDay } = buildDayMap(incidents);
-  const strip = document.getElementById("daysStrip");
-  const controls = document.getElementById("stripControls");
-  const windowLabel = document.getElementById("stripWindowLabel");
-  const labels = document.querySelectorAll(".strip-axis span");
+/* ---------- Data preparation ---------- */
 
-  if (!strip || !firstDay) {
-    if (strip) strip.hidden = true;
-    if (controls) controls.hidden = true;
-    return { days: [], byDay: {} };
-  }
-
-  strip.hidden = false;
-  strip.innerHTML = "";
-  state.stripFirstDay = firstDay;
-
-  const today = todayKey();
-  const maxDay = lastDay > today ? lastDay : today;
-  const totalDays = Math.round((dayToMs(maxDay) - dayToMs(firstDay)) / 86400000) + 1;
-  const historyBeyondWindow = totalDays > state.windowDays;
-
-  if (!historyBeyondWindow) {
-    state.stripWindowEnd = maxDay;
-    state.stripShowAll = true;
-  }
-
-  if (state.stripWindowEnd === null || state.stripWindowEnd > maxDay) state.stripWindowEnd = maxDay;
-  if (state.stripWindowEnd < firstDay) state.stripWindowEnd = firstDay;
-  if (state.stripShowAll) state.stripWindowEnd = maxDay;
-
-  const endDay = state.stripWindowEnd;
-  let startDay = state.stripShowAll ? firstDay : addDays(endDay, -(state.windowDays - 1));
-  if (startDay < firstDay) startDay = firstDay;
-
-  const startMs = dayToMs(startDay);
-  const endMs = dayToMs(endDay);
-
-  const days = [];
-  let index = 0;
-
-  for (let ms = startMs; ms <= endMs; ms += 86400000, index++) {
-    const key = keyFromMs(ms);
-    days.push(key);
-    const updates = byDay[key];
-    const sev = updates ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
-
-    const cell = document.createElement("span");
-    const isSelected = state.activeDate === key;
-    cell.className = `bar bar-${sev}${isSelected ? " bar-selected" : ""}`;
-    cell.dataset.dayIndex = String(index);
-    cell.dataset.day = key;
-    cell.tabIndex = 0;
-    strip.appendChild(cell);
-  }
-
-  if (labels && labels.length >= 3) {
-    labels[0].textContent = fmtShortDate(startDay);
-    labels[2].textContent = endDay === maxDay ? "Latest (" + fmtShortDate(endDay) + ")" : fmtShortDate(endDay);
-  }
-
-  // Update strip controls UI
-  if (controls) {
-    controls.hidden = !historyBeyondWindow;
-    const prevBtn = document.getElementById("stripPrev");
-    const nextBtn = document.getElementById("stripNext");
-    const todayBtn = document.getElementById("stripToday");
-    const allBtn = document.getElementById("stripAll");
-
-    if (prevBtn) prevBtn.disabled = state.stripShowAll || state.stripWindowEnd <= addDays(firstDay, state.windowDays - 1);
-    if (nextBtn) nextBtn.disabled = state.stripShowAll || state.stripWindowEnd >= maxDay;
-    if (todayBtn) todayBtn.disabled = state.stripShowAll || state.stripWindowEnd >= maxDay;
-    if (allBtn) allBtn.classList.toggle("strip-btn-active", state.stripShowAll);
-
-    if (windowLabel) {
-      windowLabel.textContent = state.stripShowAll
-        ? `All available data (${totalDays} calendar days)`
-        : `Showing last ${state.windowDays} calendar days`;
-    }
-  }
-
-  return { days, byDay };
+// "https://status.aws.amazon.com/#ec2-us-east-1_1790033208" -> "ec2-us-east-1_1790033208"
+function shortKey(key) {
+  return String(key).split("#").pop();
 }
 
-// Tooltip Popover & Interactivity for Heatmap Strip
-function attachStripTooltip(stripState) {
-  const strip = document.getElementById("daysStrip");
-  const tooltip = document.getElementById("stripTooltip");
-  const stage = document.getElementById("stripStage");
-  if (!strip || !tooltip || !stage) return;
+function prepare(incident) {
+  const updates = [...(incident.updates || [])]
+    .filter((u) => dayKey(u.published))
+    .sort((a, b) => new Date(a.published) - new Date(b.published));
+  const region =
+    incident.region && incident.region !== "global"
+      ? incident.region_name || incident.region
+      : GLOBAL_REGION;
+  const latest = updates[updates.length - 1] || null;
+  const services = incident.services || {};
+  const search = [
+    incident.title,
+    incident.service,
+    incident.service_name,
+    region,
+    ...updates.map((u) => `${u.title} ${plainText(u.description)}`),
+    ...Object.values(services).map((s) => s.service_name),
+  ]
+    .join(" ")
+    .toLowerCase();
 
-  function positionTooltip(target) {
-    const stageRect = stage.getBoundingClientRect();
-    const barRect = target.getBoundingClientRect();
-
-    let left = barRect.left - stageRect.left + barRect.width / 2;
-    left = Math.max(110, Math.min(left, stageRect.width - 110));
-
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `-10px`;
-  }
-
-  function show(target) {
-    const day = target.dataset.day;
-    if (!day) return;
-
-    const updates = stripState.byDay[day] || [];
-    const severity = updates.length ? worstSeverity(updates.map((u) => u.severity)) : "no_data";
-    const isResolutionOnly = updates.length > 0 && updates.every((u) => u.severity === "operational");
-
-    const uniqueTitles = [...new Set(updates.map((u) => u.incidentTitle || u.title))].slice(0, 3);
-
-    const titleListHtml = uniqueTitles.length
-      ? `<ul class="tooltip-incidents-list">
-          ${uniqueTitles.map((t) => `<li>• ${escapeHtml(t)}</li>`).join("")}
-          ${updates.length > 3 ? `<li>+ ${updates.length - 3} more update(s)</li>` : ""}
-         </ul>`
-      : "";
-
-    const resolutionNote = isResolutionOnly
-      ? `<div style="margin-top:4px;font-size:0.7rem;color:var(--text-subtle);">Incident resolved on this day</div>`
-      : "";
-
-    tooltip.innerHTML = `
-      <div class="tooltip-date">${fmtShortDay(day)}</div>
-      <div class="tooltip-summary">
-        <span class="dot dot-${severity}"></span>
-        <span>${SEVERITY_LABEL[severity] ?? (severity === "no_data" ? "No Data Available" : severity)}</span>
-        ${updates.length ? `<span style="margin-left:auto;font-size:0.75rem;color:var(--text-subtle);">${updates.length} event(s)</span>` : ""}
-      </div>
-      ${titleListHtml}
-      ${resolutionNote}
-      <div style="margin-top:6px;font-size:0.7rem;color:var(--accent-primary);">Click bar to filter date</div>
-    `;
-
-    tooltip.classList.add("active");
-    tooltip.setAttribute("aria-hidden", "false");
-    positionTooltip(target);
-  }
-
-  function hide() {
-    tooltip.classList.remove("active");
-    tooltip.setAttribute("aria-hidden", "true");
-  }
-
-  // Mouse / Pointer listeners
-  strip.addEventListener("pointerover", (e) => {
-    const bar = e.target.closest(".bar");
-    if (bar) show(bar);
-  });
-  strip.addEventListener("pointerleave", hide);
-
-  strip.addEventListener("focusin", (e) => {
-    if (e.target.classList.contains("bar")) show(e.target);
-  });
-  strip.addEventListener("focusout", hide);
-
-  // Click on bar filters date!
-  strip.addEventListener("click", (e) => {
-    const bar = e.target.closest(".bar");
-    if (!bar) return;
-    const clickedDay = bar.dataset.day;
-    if (state.activeDate === clickedDay) {
-      state.activeDate = null; // toggle off
-    } else {
-      state.activeDate = clickedDay;
-    }
-    renderAll();
-  });
+  return {
+    ...incident,
+    _updates: updates,
+    _region: region,
+    _worst: worstOf(updates.map((u) => u.severity)),
+    _latest: latest,
+    _short: shortKey(incident.key),
+    _search: search,
+  };
 }
 
-// Render Service Status breakdown block per region
-function renderRegionServiceStates(incidents) {
-  const container = document.getElementById("regionServices");
-  if (!container) return;
-
-  const byRegion = {};
-  for (const inc of incidents) {
-    if (!inc.region) continue;
-    (byRegion[inc.region] = byRegion[inc.region] || []).push(inc);
-  }
-
-  const codes = Object.keys(byRegion).sort((a, b) =>
-    (regionLabel(byRegion[a][0]) || a).localeCompare(regionLabel(byRegion[b][0]) || b)
-  );
-
-  const blocks = [];
-
-  for (const code of codes) {
-    const regionIncidents = byRegion[code];
-    const label = regionLabel(regionIncidents[0]) || code;
-
-    if (state.activeRegion && label !== state.activeRegion) continue;
-
-    const services = {};
-    let fullMap = false;
-
-    for (const inc of regionIncidents) {
-      if (inc.services) {
-        fullMap = true;
-        Object.assign(services, inc.services);
-      }
-    }
-
-    if (!fullMap) {
-      for (const inc of regionIncidents) {
-        const slug = inc.service;
-        const worst = worstSeverityFromUpdates(inc);
-        if (!services[slug] || (SEVERITY_RANK[worst] ?? -1) > SEVERITY_RANK[services[slug].current]) {
-          services[slug] = {
-            service_name: inc.service_name || slug,
-            current: worst,
-          };
-        }
-      }
-    }
-
-    let serviceEntries = Object.entries(services).sort((a, b) =>
-      (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0])
-    );
-
-    if (state.impactedServicesOnly) {
-      serviceEntries = serviceEntries.filter(
-        ([, svc]) => svc.current && svc.current !== "operational" && svc.current !== "none"
-      );
-    }
-
-    if (serviceEntries.length === 0) continue;
-
-    let worst = "unknown";
-    let impactedCount = 0;
-    for (const [, svc] of serviceEntries) {
-      const cur = svc.current || "unknown";
-      if (SEVERITY_RANK[cur] > SEVERITY_RANK[worst]) worst = cur;
-      if (cur !== "operational" && cur !== "none" && cur !== "unknown") impactedCount++;
-    }
-
-    const chips = serviceEntries
-      .map(([slug, svc]) => {
-        const sev = svc.current || "unknown";
-        const sevLabel = SEVERITY_LABEL[sev] ?? sev;
-        return `
-          <span class="service-chip" title="${sevLabel} · ${escapeHtml(svc.service_name || slug)}">
-            <span class="dot dot-${sev}"></span>
-            <span class="service-chip-name">${escapeHtml(svc.service_name || slug)}</span>
-          </span>
-        `;
-      })
-      .join("");
-
-    const badgeCls = `badge badge-${worst}`;
-    const badgeLabel = SEVERITY_LABEL[worst] ?? worst;
-
-    blocks.push(`
-      <div class="region-services-block">
-        <div class="region-aggregate">
-          <span class="region-aggregate-label">${escapeHtml(label)}</span>
-          <span class="${badgeCls}">${badgeLabel}</span>
-          <span class="region-aggregate-text">${impactedCount} of ${serviceEntries.length} services impacted</span>
-        </div>
-        <div class="service-grid">${chips}</div>
-      </div>
-    `);
-  }
-
-  container.innerHTML = blocks.join("");
+// Severity of one day's updates: "resolved" when only operational updates
+// were published, otherwise the worst non-operational severity.
+function daySeverity(updates) {
+  if (!updates || updates.length === 0) return "no_data";
+  if (updates.every((u) => u.severity === "operational")) return "resolved";
+  return worstOf(updates.map((u) => u.severity).filter((s) => s !== "operational"));
 }
 
-// Render Individual Incident Cards
-function renderIncidentCard(incident) {
-  const updates = [...(incident.updates || [])].sort(
-    (a, b) => new Date(a.published) - new Date(b.published)
-  );
+/* ---------- Filtering ---------- */
 
-  const worstSev = worstSeverityFromUpdates(incident);
-  const worstBadgeHtml = `<span class="badge badge-${worstSev}">${SEVERITY_LABEL[worstSev] ?? worstSev}</span>`;
-
-  const regLabel = regionLabel(incident);
-  const regionBadge = regLabel
-    ? `<span class="incident-region">${escapeHtml(regLabel)}</span>`
-    : "";
-
-  // Duration calculation
-  let durationStr = "";
-  if (updates.length > 1) {
-    const startMs = new Date(updates[0].published).getTime();
-    const endMs = new Date(updates[updates.length - 1].published).getTime();
-    const diffMins = Math.round((endMs - startMs) / 60000);
-    if (diffMins > 0) {
-      const hrs = Math.floor(diffMins / 60);
-      const mins = diffMins % 60;
-        durationStr = ` · Updates span: ${hrs > 0 ? `${hrs}h ` : ""}${mins}m`;
-    }
+function matches(incident, { ignoreDate = false } = {}) {
+  if (state.region && incident._region !== state.region) return false;
+  if (state.severity !== "all" && incident._worst !== state.severity) return false;
+  if (!ignoreDate && state.date && !incident._updates.some((u) => dayKey(u.published) === state.date)) {
+    return false;
   }
-
-  const article = document.createElement("article");
-  article.className = `incident sev-${worstSev}`;
-  article.id = `incident-${encodeURIComponent(incident.key)}`;
-  article.dataset.key = incident.key;
-
-  article.innerHTML = `
-    <div class="incident-head">
-      <div class="incident-title-row">
-        <h4 class="incident-title-btn" style="cursor:pointer;" title="Click to view details">${escapeHtml(incident.title)}</h4>
-        ${regionBadge}
-      </div>
-      <div class="incident-badges">
-        ${worstBadgeHtml}
-        <button type="button" class="icon-btn copy-link-btn" data-key="${escapeHtml(incident.key)}" title="Copy permalink to incident">
-          🔗 Copy Link
-        </button>
-      </div>
-    </div>
-
-    <div class="incident-meta">
-      <span>${fmtDate(updates[0]?.published)}</span>
-      <span>→</span>
-      <span>${fmtDate(updates[updates.length - 1]?.published)}</span>
-      <span class="muted">· ${updates.length} update(s)${durationStr}</span>
-    </div>
-
-    <ul class="timeline">
-      ${updates
-        .map(
-          (u) => `
-        <li>
-          <div class="timeline-meta">
-            <span class="dot dot-${u.severity}"></span>
-            <span class="timeline-time">${fmtDate(u.published)}</span>
-            <span class="badge badge-${u.severity}">${SEVERITY_LABEL[u.severity] ?? u.severity}</span>
-          </div>
-          <div class="timeline-desc">${escapeHtml(u.description) || "—"}</div>
-        </li>`
-        )
-        .join("")}
-    </ul>
-  `;
-
-  return article;
+  if (state.query && !incident._search.includes(state.query.toLowerCase())) return false;
+  return true;
 }
 
-// Active Filter Chips Bar
-function renderActiveFiltersBar() {
-  const container = document.getElementById("activeFiltersBar");
-  const chipsWrapper = document.getElementById("activeChipsContainer");
-  if (!container || !chipsWrapper) return;
-
-  const chips = [];
-
-  if (state.activeRegion) {
-    chips.push(`
-      <span class="filter-chip">
-        Region: ${escapeHtml(state.activeRegion)}
-        <span class="filter-chip-remove" data-remove="region">✕</span>
-      </span>
-    `);
-  }
-
-  if (state.activeSeverity !== "all") {
-    chips.push(`
-      <span class="filter-chip">
-        Severity: ${escapeHtml(SEVERITY_LABEL[state.activeSeverity] || state.activeSeverity)}
-        <span class="filter-chip-remove" data-remove="severity">✕</span>
-      </span>
-    `);
-  }
-
-  if (state.activeDate) {
-    chips.push(`
-      <span class="filter-chip">
-        Date: ${fmtShortDate(state.activeDate)}
-        <span class="filter-chip-remove" data-remove="date">✕</span>
-      </span>
-    `);
-  }
-
-  if (state.searchQuery) {
-    chips.push(`
-      <span class="filter-chip">
-        Query: "${escapeHtml(state.searchQuery)}"
-        <span class="filter-chip-remove" data-remove="query">✕</span>
-      </span>
-    `);
-  }
-
-  if (chips.length > 0) {
-    container.hidden = false;
-    chipsWrapper.innerHTML = chips.join("");
-  } else {
-    container.hidden = true;
-    chipsWrapper.innerHTML = "";
-  }
-}
-
-// Apply Filters to Incident List
-function filterIncidents(incidents) {
-  return incidents.filter((inc) => {
-    // 1. Region Filter
-    if (state.activeRegion && regionLabel(inc) !== state.activeRegion) {
-      return false;
-    }
-
-    // 2. Severity Filter
-    if (state.activeSeverity !== "all") {
-      const worst = worstSeverityFromUpdates(inc);
-      if (worst !== state.activeSeverity) return false;
-    }
-
-    // 3. Date Filter (incident overlaps or has update on activeDate)
-    if (state.activeDate) {
-      const hasDate = (inc.updates || []).some(
-        (u) => dayKey(u.published) === state.activeDate
-      );
-      if (!hasDate) return false;
-    }
-
-    // 4. Global Search Query
-    if (state.searchQuery) {
-      const q = state.searchQuery.toLowerCase();
-      const matchTitle = inc.title && inc.title.toLowerCase().includes(q);
-      const matchService = inc.service && inc.service.toLowerCase().includes(q);
-      const matchDesc = (inc.updates || []).some(
-        (u) => u.description && u.description.toLowerCase().includes(q)
-      );
-      if (!matchTitle && !matchService && !matchDesc) return false;
-    }
-
-    return true;
-  });
-}
-
-// Sort Filtered Incidents
-function sortIncidents(incidents) {
-  const sorted = [...incidents];
-  if (state.sortOrder === "newest") {
-    sorted.sort((a, b) => new Date(b.started_at || 0) - new Date(a.started_at || 0));
-  } else if (state.sortOrder === "oldest") {
-    sorted.sort((a, b) => new Date(a.started_at || 0) - new Date(b.started_at || 0));
-  } else if (state.sortOrder === "updates") {
-    sorted.sort((a, b) => (b.updates ? b.updates.length : 0) - (a.updates ? a.updates.length : 0));
-  }
+function sortIncidents(list) {
+  const byStart = (i) => new Date(i.started_at || 0).getTime();
+  const sorted = [...list];
+  if (state.sort === "oldest") sorted.sort((a, b) => byStart(a) - byStart(b));
+  else if (state.sort === "updates") sorted.sort((a, b) => b._updates.length - a._updates.length);
+  else sorted.sort((a, b) => byStart(b) - byStart(a));
   return sorted;
 }
 
-// Primary Render Orchestrator
-function renderAll() {
-  const filtered = filterIncidents(state.allIncidents);
-  const sorted = sortIncidents(filtered);
-
-  renderSidebar(state.allIncidents);
-  renderStatsCards(filtered);
-  renderRegionServiceStates(filtered);
-  renderActiveFiltersBar();
-
-  const stripState = renderDayStrip(filtered);
-  attachStripTooltip(stripState);
-
-  const list = document.getElementById("incidentList");
-  const empty = document.getElementById("emptyState");
-  const subtitle = document.getElementById("incidentListSubtitle");
-
-  if (subtitle) {
-    subtitle.textContent = `Showing ${sorted.length} of ${state.allIncidents.length} incidents`;
-  }
-
-  if (!list || !empty) return;
-  list.innerHTML = "";
-
-  if (sorted.length === 0) {
-    empty.hidden = false;
-  } else {
-    empty.hidden = true;
-    for (const incident of sorted) {
-      list.appendChild(renderIncidentCard(incident));
+function buildDayMap(incidents) {
+  const byDay = {};
+  let first = null;
+  let last = null;
+  for (const incident of incidents) {
+    for (const update of incident._updates) {
+      const key = dayKey(update.published);
+      (byDay[key] = byDay[key] || []).push({ severity: update.severity, incident });
+      if (!first || key < first) first = key;
+      if (!last || key > last) last = key;
     }
   }
+  return { byDay, first, last };
 }
 
-// Parse Hash State from Location Bar
-function parseUrlHash() {
-  const hash = window.location.hash.slice(1);
-  if (!hash) return;
+/* ---------- Rendering ---------- */
 
-  const params = new URLSearchParams(hash);
-  const region = params.get("region");
-  const date = params.get("date");
-  const sev = params.get("sev");
-  const incKey = params.get("incident");
+function render() {
+  syncControls();
+  const base = state.incidents.filter((i) => matches(i, { ignoreDate: true }));
+  const filtered = state.date ? base.filter((i) => matches(i)) : base;
 
-  if (region) state.activeRegion = region;
-  if (date) state.activeDate = date;
-  if (sev) state.activeSeverity = sev;
+  renderSidebar();
+  renderStats(filtered);
+  renderStrip(base);
+  renderOpenIncidents();
+  renderChips();
+  renderList(sortIncidents(filtered));
+  writeHash();
+}
 
-  if (incKey) {
-    const inc = state.allIncidents.find(i => i.key === incKey || i.key === decodeURIComponent(incKey));
-    if (inc) {
-      setTimeout(() => {
-        openModal(inc);
-        const card = document.getElementById(`incident-${encodeURIComponent(inc.key)}`);
-        if (card) {
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-          card.classList.add("incident-highlight");
-          setTimeout(() => card.classList.remove("incident-highlight"), 3000);
-        }
-      }, 100);
-    }
+function syncControls() {
+  document.querySelectorAll("#severityFilter .seg-btn").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.severity === state.severity));
+  });
+  const search = $("globalSearchInput");
+  if (search.value.trim() !== state.query) search.value = state.query;
+  $("incidentSortSelect").value = state.sort;
+}
+
+function regionCounts() {
+  const counts = new Map();
+  for (const incident of state.incidents) {
+    counts.set(incident._region, (counts.get(incident._region) || 0) + 1);
   }
+  return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 }
 
-// Data Export Handler (CSV & JSON)
-function exportDataset() {
-  const filtered = filterIncidents(state.allIncidents);
-  const jsonBlob = new Blob([JSON.stringify(filtered, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(jsonBlob);
+function renderSidebar() {
+  const entries = regionCounts();
+  $("regionTotalBadge").textContent = entries.length;
 
+  const q = state.regionQuery.toLowerCase();
+  const items = [
+    ["", "All regions", state.incidents.length],
+    ...entries.filter(([name]) => name.toLowerCase().includes(q)).map(([name, count]) => [name, name, count]),
+  ];
+  $("regionList").innerHTML = items
+    .map(([value, label, count]) => {
+      const current = (state.region || "") === value;
+      return `<a class="region-item" href="#" data-region="${escapeHtml(value)}"${current ? ' aria-current="true"' : ""}>
+        <span class="region-name">${escapeHtml(label)}</span><span class="count-pill">${count}</span></a>`;
+    })
+    .join("");
+
+  $("mobileRegionList").innerHTML = [["", "All regions"], ...entries.map(([name]) => [name, name])]
+    .map(([value, label]) => {
+      const pressed = (state.region || "") === value;
+      return `<button type="button" class="region-pill" data-region="${escapeHtml(value)}" aria-pressed="${pressed}">${escapeHtml(label)}</button>`;
+    })
+    .join("");
+}
+
+function renderStats(incidents) {
+  const { byDay, first, last } = buildDayMap(incidents);
+  const totalUpdates = incidents.reduce((sum, i) => sum + i._updates.length, 0);
+  let impactDays = 0;
+  let resolvedDays = 0;
+  for (const key in byDay) {
+    const sev = daySeverity(byDay[key]);
+    if (sev === "resolved") resolvedDays += 1;
+    else if (SEVERITY_RANK[sev] > 0) impactDays += 1;
+  }
+  const spanDays = first ? daysBetween(first, last) + 1 : 0;
+  const noDataDays = spanDays - Object.keys(byDay).length;
+
+  const stat = (label, value, sub) => `
+    <div class="stat">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value">${value}</div>
+      <div class="stat-sub">${sub}</div>
+    </div>`;
+
+  $("summaryStats").innerHTML = [
+    stat("Incidents", incidents.length.toLocaleString("en-US"), plural(totalUpdates, "status update")),
+    stat("Impact days", `${impactDays}<small> / ${spanDays}</small>`, "Days with a non-operational update"),
+    stat("Resolved-only days", resolvedDays, "Days with only resolution updates"),
+    stat("No-data days", noDataDays, "No incident updates archived"),
+  ].join("");
+}
+
+function renderStrip(incidents) {
+  const { byDay, first, last } = buildDayMap(incidents);
+  state.stripByDay = byDay;
+  const strip = $("daysStrip");
+  const hasData = Boolean(first);
+  for (const id of ["stripWindowLabel", "stripStage"]) $(id).hidden = !hasData;
+  document.querySelector(".strip-axis").hidden = !hasData;
+  document.querySelector(".legend").hidden = !hasData;
+  if (!hasData) {
+    $("stripControls").hidden = true;
+    strip.innerHTML = "";
+    return;
+  }
+
+  const maxDay = last > todayKey() ? last : todayKey();
+  const totalDays = daysBetween(first, maxDay) + 1;
+  const fitsWindow = totalDays <= WINDOW_DAYS;
+  const showAll = state.stripShowAll || fitsWindow;
+
+  // Clamp the window end between the first full window and the latest day.
+  let end = state.stripEnd && state.stripEnd < maxDay ? state.stripEnd : maxDay;
+  const earliestEnd = addDays(first, WINDOW_DAYS - 1);
+  if (end < earliestEnd) end = earliestEnd;
+  if (showAll) end = maxDay;
+  const start = showAll ? first : addDays(end, -(WINDOW_DAYS - 1));
+  state.stripEnd = showAll || end === maxDay ? null : end;
+
+  const days = [];
+  for (let key = start; key <= end; key = addDays(key, 1)) days.push(key);
+
+  const focusDay = days.includes(state.stripFocusDay)
+    ? state.stripFocusDay
+    : days.includes(state.date)
+      ? state.date
+      : days[days.length - 1];
+
+  strip.innerHTML = days
+    .map((key) => {
+      const sev = daySeverity(byDay[key]);
+      const selected = key === state.date;
+      return `<span class="bar bar-${sev}${selected ? " bar-selected" : ""}" role="button" data-day="${key}"
+        tabindex="${key === focusDay ? 0 : -1}" aria-pressed="${selected}"
+        aria-label="${escapeHtml(`${fmtDay(key)}: ${SEVERITY_LABEL[sev]}`)}"></span>`;
+    })
+    .join("");
+
+  $("stripStart").textContent = fmtDay(start);
+  $("stripEnd").textContent = fmtDay(end);
+  $("stripWindowLabel").textContent = showAll
+    ? `All ${plural(days.length, "day")} since ${fmtDay(start)}`
+    : `${WINDOW_DAYS} days · ${fmtDay(start)} – ${fmtDay(end)}`;
+
+  $("stripControls").hidden = fitsWindow;
+  $("stripPrev").disabled = showAll || start <= first;
+  $("stripNext").disabled = showAll || end >= maxDay;
+  $("stripLatest").disabled = showAll || end >= maxDay;
+  $("stripAll").setAttribute("aria-pressed", String(state.stripShowAll));
+}
+
+function renderOpenIncidents() {
+  const container = $("openIncidents");
+  const open = state.incidents.filter((i) => i.open && (!state.region || i._region === state.region));
+
+  if (open.length === 0) {
+    container.innerHTML = `<p class="note">No incidents are open in the latest AWS snapshot${
+      state.region ? ` for ${escapeHtml(state.region)}` : ""
+    }. That means AWS has no active event posted, not that every service is confirmed healthy.</p>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="open-list">${open
+    .map((incident) => {
+      const services = Object.entries(incident.services || {});
+      const affected = services
+        .filter(([, s]) => s.current && s.current !== "operational")
+        .sort((a, b) => (SEVERITY_RANK[b[1].current] ?? -1) - (SEVERITY_RANK[a[1].current] ?? -1));
+      const shown = affected.slice(0, 24);
+      const current = incident._latest ? incident._latest.severity : "unknown";
+      const chips = shown
+        .map(([slug, s]) => `<span class="service-chip" title="${escapeHtml(SEVERITY_LABEL[s.current] || s.current)}">${severityDot(s.current)}${escapeHtml(s.service_name || slug)}</span>`)
+        .join("");
+      const more =
+        affected.length > shown.length
+          ? `<button type="button" class="link-btn" data-open-modal="${escapeHtml(incident.key)}">+${affected.length - shown.length} more</button>`
+          : "";
+      const summary = services.length
+        ? `${affected.length} of ${plural(services.length, "listed service")} affected`
+        : "No per-service breakdown published";
+
+      return `<article class="open-card">
+        <div class="open-head">
+          <div>
+            <button type="button" class="incident-title" data-open-modal="${escapeHtml(incident.key)}">${escapeHtml(incident.title)}</button>
+            <p class="open-meta">${escapeHtml(incident._region)} · since ${fmtDateTime(incident.started_at)} · ${summary}</p>
+          </div>
+          ${severityBadge(current)}
+        </div>
+        ${affected.length ? `<div class="service-grid">${chips}${more}</div>` : ""}
+      </article>`;
+    })
+    .join("")}</div>`;
+}
+
+function renderChips() {
+  const chips = [];
+  const chip = (label, type) =>
+    `<span class="chip">${escapeHtml(label)}<button type="button" class="chip-remove" data-remove="${type}" aria-label="Remove filter: ${escapeHtml(label)}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>`;
+  if (state.region) chips.push(chip(`Region: ${state.region}`, "region"));
+  if (state.severity !== "all") chips.push(chip(`Worst: ${SEVERITY_LABEL[state.severity]}`, "severity"));
+  if (state.date) chips.push(chip(`Day: ${fmtDay(state.date)}`, "date"));
+  if (state.query) chips.push(chip(`Search: "${state.query}"`, "query"));
+  $("activeChipsContainer").innerHTML = chips.join("");
+  $("activeFiltersBar").hidden = chips.length === 0;
+}
+
+function renderList(incidents) {
+  const shown = incidents.slice(0, state.limit);
+  $("incidentList").innerHTML = shown.map(incidentCard).join("");
+
+  $("incidentListSubtitle").textContent =
+    incidents.length === state.incidents.length
+      ? plural(incidents.length, "incident")
+      : `${incidents.length} of ${plural(state.incidents.length, "incident")}`;
+  $("emptyState").hidden = incidents.length > 0;
+
+  const remaining = incidents.length - shown.length;
+  const more = $("showMoreBtn");
+  more.hidden = remaining <= 0;
+  more.textContent =
+    remaining > PAGE_SIZE ? `Show ${PAGE_SIZE} more (${remaining} remaining)` : `Show ${remaining} more`;
+}
+
+function incidentCard(incident) {
+  const start = incident._updates[0]?.published || incident.started_at;
+  const end = incident._latest?.published;
+  const duration = start && end ? fmtDuration(start, end) : null;
+  const meta = [
+    escapeHtml(incident._region),
+    fmtDateTime(start),
+    duration ? `lasted ${duration}` : null,
+    plural(incident._updates.length, "update"),
+  ].filter(Boolean);
+  const latest = incident._latest ? plainText(incident._latest.description) : "";
+
+  return `<article class="incident sev-${escapeHtml(incident._worst)}" data-key="${escapeHtml(incident.key)}">
+    <span class="incident-rail" aria-hidden="true"></span>
+    <div class="incident-body">
+      <button type="button" class="incident-title" data-open-modal="${escapeHtml(incident.key)}">${escapeHtml(incident.title)}</button>
+      <div class="incident-meta">${meta.map((m) => `<span>${m}</span>`).join("")}</div>
+      ${latest ? `<p class="incident-latest">${escapeHtml(latest)}</p>` : ""}
+    </div>
+    <div class="incident-side">
+      ${incident.open ? '<span class="badge badge-open">Open</span>' : ""}
+      ${severityBadge(incident._worst)}
+      <button type="button" class="icon-btn" data-copy="${escapeHtml(incident.key)}" aria-label="Copy link to this incident" title="Copy link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+      </button>
+    </div>
+  </article>`;
+}
+
+/* ---------- Strip interaction ---------- */
+
+function showTooltip(bar) {
+  const day = bar.dataset.day;
+  const updates = state.stripByDay[day] || [];
+  const sev = daySeverity(updates);
+  const titles = [...new Set(updates.map((u) => u.incident.title))];
+  const tip = $("stripTooltip");
+
+  tip.innerHTML = `
+    <div class="tooltip-date">${fmtDayWithWeekday(day)}</div>
+    <div class="tooltip-status">${severityDot(sev)}${escapeHtml(SEVERITY_LABEL[sev])}${
+      updates.length ? ` · ${plural(updates.length, "update")}` : ""
+    }</div>
+    ${
+      titles.length
+        ? `<ul class="tooltip-list">${titles.slice(0, 3).map((t) => `<li>${escapeHtml(t)}</li>`).join("")}${
+            titles.length > 3 ? `<li>+${plural(titles.length - 3, "more incident")}</li>` : ""
+          }</ul>`
+        : ""
+    }`;
+  tip.hidden = false;
+
+  const stage = $("stripStage").getBoundingClientRect();
+  const rect = bar.getBoundingClientRect();
+  const width = tip.offsetWidth;
+  const center = rect.left - stage.left + rect.width / 2;
+  tip.style.left = `${Math.max(0, Math.min(center - width / 2, stage.width - width))}px`;
+}
+
+function hideTooltip() {
+  $("stripTooltip").hidden = true;
+}
+
+function toggleDay(day) {
+  if (!state.stripByDay[day]) return;
+  state.stripFocusDay = day;
+  setFilter({ date: state.date === day ? null : day });
+  document.querySelector(`#daysStrip .bar[data-day="${day}"]`)?.focus();
+}
+
+function setupStrip() {
+  const strip = $("daysStrip");
+  strip.addEventListener("pointerover", (e) => {
+    const bar = e.target.closest(".bar");
+    if (bar) showTooltip(bar);
+  });
+  strip.addEventListener("pointerleave", hideTooltip);
+  strip.addEventListener("focusin", (e) => {
+    if (e.target.classList.contains("bar")) showTooltip(e.target);
+  });
+  strip.addEventListener("focusout", hideTooltip);
+  strip.addEventListener("click", (e) => {
+    const bar = e.target.closest(".bar");
+    if (bar) toggleDay(bar.dataset.day);
+  });
+
+  // One tab stop for the whole strip; arrow keys move between days.
+  strip.addEventListener("keydown", (e) => {
+    const bar = e.target.closest(".bar");
+    if (!bar) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleDay(bar.dataset.day);
+      return;
+    }
+    const bars = [...strip.querySelectorAll(".bar")];
+    const index = bars.indexOf(bar);
+    const next = {
+      ArrowLeft: bars[index - 1],
+      ArrowRight: bars[index + 1],
+      Home: bars[0],
+      End: bars[bars.length - 1],
+    }[e.key];
+    if (!(e.key in { ArrowLeft: 1, ArrowRight: 1, Home: 1, End: 1 })) return;
+    e.preventDefault();
+    if (!next) return;
+    bar.tabIndex = -1;
+    next.tabIndex = 0;
+    next.focus();
+    state.stripFocusDay = next.dataset.day;
+  });
+
+  const windowEnd = () => {
+    const bars = strip.querySelectorAll(".bar");
+    return bars.length ? bars[bars.length - 1].dataset.day : todayKey();
+  };
+  $("stripPrev").addEventListener("click", () => {
+    state.stripEnd = addDays(windowEnd(), -WINDOW_DAYS);
+    render();
+  });
+  $("stripNext").addEventListener("click", () => {
+    state.stripEnd = addDays(windowEnd(), WINDOW_DAYS);
+    render();
+  });
+  $("stripLatest").addEventListener("click", () => {
+    state.stripEnd = null;
+    render();
+  });
+  $("stripAll").addEventListener("click", () => {
+    state.stripShowAll = !state.stripShowAll;
+    state.stripEnd = null;
+    render();
+  });
+}
+
+/* ---------- Incident dialog ---------- */
+
+function focusableIn(el) {
+  return [...el.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(
+    (node) => node.offsetParent !== null
+  );
+}
+
+function openModal(incident) {
+  if (!state.modalIncident) state.lastFocus = document.activeElement;
+  state.modalIncident = incident;
+
+  const start = incident._updates[0]?.published || incident.started_at;
+  const end = incident._latest?.published;
+  const duration = start && end ? fmtDuration(start, end) : null;
+  $("modalTitle").textContent = incident.title;
+  $("modalSub").textContent = [
+    incident._region,
+    `Started ${fmtDateTime(start)}`,
+    duration ? `lasted ${duration}` : null,
+    plural(incident._updates.length, "update"),
+    incident.open ? "Open" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const byName = (a, b) => (a[1].service_name || a[0]).localeCompare(b[1].service_name || b[0]);
+  const services = Object.entries(incident.services || {})
+    .filter(([, s]) => s.max && s.max !== "operational")
+    .sort((a, b) => (SEVERITY_RANK[b[1].max] ?? -1) - (SEVERITY_RANK[a[1].max] ?? -1) || byName(a, b));
+
+  const servicesHtml = services.length
+    ? `<section class="modal-section">
+        <h3>Affected services (${services.length}), by worst status reached</h3>
+        <div class="service-grid${services.length > 30 ? " is-collapsed" : ""}">${services
+          .map(([slug, s]) => {
+            const now =
+              incident.open && s.current && s.current !== s.max
+                ? ` <span class="muted">· now ${escapeHtml((SEVERITY_LABEL[s.current] || s.current).toLowerCase())}</span>`
+                : "";
+            return `<span class="service-chip" title="Worst: ${escapeHtml(SEVERITY_LABEL[s.max] || s.max)}">${severityDot(s.max)}${escapeHtml(s.service_name || slug)}${now}</span>`;
+          })
+          .join("")}${
+          services.length > 30
+            ? `<button type="button" class="link-btn" data-expand-services>Show all ${services.length}</button>`
+            : ""
+        }</div>
+      </section>`
+    : "";
+
+  const shown = (sev) => (sev === "operational" ? "resolved" : sev);
+  const timeline = incident._updates
+    .map(
+      (u) => `<li>${severityDot(shown(u.severity))}
+        <div class="timeline-meta"><span>${fmtDateTime(u.published)}</span>${severityBadge(shown(u.severity))}</div>
+        <div class="timeline-desc">${renderDescription(u.description) || "—"}</div></li>`
+    )
+    .join("");
+
+  $("modalBody").innerHTML = `
+    ${servicesHtml}
+    <section class="modal-section">
+      <h3>Updates</h3>
+      <ol class="timeline">${timeline}</ol>
+    </section>`;
+
+  $("incidentModal").hidden = false;
+  document.body.classList.add("modal-open");
+  $("modalBody").scrollTop = 0;
+  $("modalCloseBtn").focus();
+  writeHash();
+}
+
+function closeModal() {
+  if (!state.modalIncident) return;
+  $("incidentModal").hidden = true;
+  document.body.classList.remove("modal-open");
+  state.modalIncident = null;
+  writeHash();
+  if (state.lastFocus && document.contains(state.lastFocus)) state.lastFocus.focus();
+  state.lastFocus = null;
+}
+
+function setupModal() {
+  const overlay = $("incidentModal");
+  $("modalCloseBtn").addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  overlay.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      closeModal();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const nodes = focusableIn(overlay.querySelector(".modal"));
+    if (nodes.length === 0) return;
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+  $("modalBody").addEventListener("click", (e) => {
+    const expand = e.target.closest("[data-expand-services]");
+    if (!expand) return;
+    expand.parentElement.classList.remove("is-collapsed");
+    expand.remove();
+  });
+  $("modalCopyBtn").addEventListener("click", () => {
+    if (state.modalIncident) copyLink(state.modalIncident.key);
+  });
+}
+
+/* ---------- Links, export, theme, toasts ---------- */
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  $("toastContainer").appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("toast-leaving");
+    setTimeout(() => toast.remove(), 250);
+  }, 2400);
+}
+
+function copyLink(key) {
+  const url = `${location.origin}${location.pathname}#incident=${encodeURIComponent(shortKey(key))}`;
+  if (!navigator.clipboard?.writeText) {
+    showToast("Couldn't copy the link in this browser");
+    return;
+  }
+  navigator.clipboard.writeText(url).then(
+    () => showToast("Link copied"),
+    () => showToast("Couldn't copy the link")
+  );
+}
+
+function download(filename, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
   const a = document.createElement("a");
   a.href = url;
-  a.download = `aws-status-archive-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  showToast(`Exported ${filtered.length} incidents to JSON`);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Attach Event Listeners
-function setupEventListeners() {
-  // Region Selection Click (Desktop Sidebar)
-  const regionList = document.getElementById("regionList");
-  if (regionList) {
-    regionList.addEventListener("click", (e) => {
-      const link = e.target.closest(".sidebar-item");
-      if (!link) return;
-      e.preventDefault();
-      const region = link.dataset.region || null;
-      state.activeRegion = region;
-      renderAll();
-    });
-  }
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
 
-  // Mobile Region Tabs
-  const mobileList = document.getElementById("mobileRegionList");
-  if (mobileList) {
-    mobileList.addEventListener("click", (e) => {
-      const btn = e.target.closest(".mobile-region-btn");
-      if (!btn) return;
-      state.activeRegion = btn.dataset.region || null;
-      renderAll();
-    });
+function exportIncidents(format) {
+  const rows = sortIncidents(state.incidents.filter((i) => matches(i)));
+  const stamp = todayKey();
+  if (format === "csv") {
+    const header = ["key", "title", "region", "service", "started_at", "last_update", "updates", "worst_severity", "open"];
+    const lines = rows.map((i) =>
+      [i.key, i.title, i._region, i.service, i.started_at, i.last_update, i._updates.length, i._worst, i.open ? "yes" : "no"]
+        .map(csvCell)
+        .join(",")
+    );
+    // BOM so spreadsheet apps read accented region names correctly.
+    download(`aws-status-archive-${stamp}.csv`, `﻿${[header.join(","), ...lines].join("\n")}\n`, "text/csv;charset=utf-8");
+  } else {
+    const clean = rows.map(({ _updates, _region, _worst, _latest, _short, _search, ...rest }) => rest);
+    download(`aws-status-archive-${stamp}.json`, JSON.stringify(clean, null, 2), "application/json");
   }
+  showToast(`Exported ${plural(rows.length, "incident")} as ${format.toUpperCase()}`);
+}
 
-  // Sidebar Region Search Input
-  const sidebarSearch = document.getElementById("sidebarSearchInput");
-  if (sidebarSearch) {
-    sidebarSearch.addEventListener("input", (e) => {
-      state.regionSearchQuery = e.target.value;
-      renderSidebar(state.allIncidents);
-    });
-  }
-
-  // Global Search Input
-  const globalSearch = document.getElementById("globalSearchInput");
-  const clearBtn = document.getElementById("searchClearBtn");
-  if (globalSearch) {
-    globalSearch.addEventListener("input", (e) => {
-      state.searchQuery = e.target.value;
-      if (clearBtn) clearBtn.hidden = !e.target.value;
-      renderAll();
-    });
-  }
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      state.searchQuery = "";
-      if (globalSearch) globalSearch.value = "";
-      clearBtn.hidden = true;
-      renderAll();
-    });
-  }
-
-  // Severity Filter Buttons
-  const sevGroup = document.querySelector(".severity-filter-group");
-  if (sevGroup) {
-    sevGroup.addEventListener("click", (e) => {
-      const btn = e.target.closest(".sev-filter-btn");
-      if (!btn) return;
-      sevGroup.querySelectorAll(".sev-filter-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      state.activeSeverity = btn.dataset.severity || "all";
-      renderAll();
-    });
-  }
-
-  // Active Filter Chips Removal
-  const chipsContainer = document.getElementById("activeChipsContainer");
-  if (chipsContainer) {
-    chipsContainer.addEventListener("click", (e) => {
-      const removeBtn = e.target.closest(".filter-chip-remove");
-      if (!removeBtn) return;
-      const type = removeBtn.dataset.remove;
-      if (type === "region") state.activeRegion = null;
-      if (type === "severity") state.activeSeverity = "all";
-      if (type === "date") state.activeDate = null;
-      if (type === "query") {
-        state.searchQuery = "";
-        const gs = document.getElementById("globalSearchInput");
-        if (gs) gs.value = "";
-      }
-      renderAll();
-    });
-  }
-
-  // Clear All Filters Button
-  const clearAllBtn = document.getElementById("clearAllFiltersBtn");
-  const emptyResetBtn = document.getElementById("emptyStateResetBtn");
-  const resetHandler = () => {
-    state.activeRegion = null;
-    state.activeSeverity = "all";
-    state.activeDate = null;
-    state.searchQuery = "";
-    const gs = document.getElementById("globalSearchInput");
-    if (gs) gs.value = "";
-    document.querySelectorAll(".sev-filter-btn").forEach((b) => {
-      b.classList.toggle("active", b.dataset.severity === "all");
-    });
-    renderAll();
+function setupExportMenu() {
+  const button = $("exportBtn");
+  const menu = $("exportMenu");
+  const close = (restoreFocus) => {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    button.setAttribute("aria-expanded", "false");
+    if (restoreFocus) button.focus();
   };
-  if (clearAllBtn) clearAllBtn.addEventListener("click", resetHandler);
-  if (emptyResetBtn) emptyResetBtn.addEventListener("click", resetHandler);
 
-  // Impacted Services Only Toggle
-  const impactedToggle = document.getElementById("impactedOnlyToggle");
-  if (impactedToggle) {
-    impactedToggle.addEventListener("change", (e) => {
-      state.impactedServicesOnly = e.target.checked;
-      renderAll();
-    });
-  }
-
-  // Incident Sort Select
-  const sortSelect = document.getElementById("incidentSortSelect");
-  if (sortSelect) {
-    sortSelect.addEventListener("change", (e) => {
-      state.sortOrder = e.target.value;
-      renderAll();
-    });
-  }
-
-  // Export Button
-  const exportBtn = document.getElementById("exportDataBtn");
-  if (exportBtn) exportBtn.addEventListener("click", exportDataset);
-
-  // Modal event listeners
-  const modalClose = document.getElementById("modalCloseBtn");
-  const modalOverlay = document.getElementById("incidentModal");
-  const modalCopy = document.getElementById("modalCopyBtn");
-  const modalRaw = document.getElementById("modalRawBtn");
-
-  if (modalClose) modalClose.addEventListener("click", closeModal);
-  if (modalOverlay) {
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) closeModal();
-    });
-  }
-  if (modalCopy) {
-    modalCopy.addEventListener("click", () => {
-      if (state.activeModalIncident) {
-        const linkUrl = `${window.location.origin}${window.location.pathname}#incident=${encodeURIComponent(state.activeModalIncident.key)}`;
-        navigator.clipboard.writeText(linkUrl).then(() => {
-          showToast("Incident permalink copied!");
-        });
-      }
-    });
-  }
-  if (modalRaw) {
-    modalRaw.addEventListener("click", () => {
-      if (state.activeModalIncident) {
-        const jsonStr = JSON.stringify(state.activeModalIncident, null, 2);
-        const w = window.open();
-        if (w) {
-          w.document.write(`<pre style="font-family:monospace;padding:16px;background:#0f172a;color:#f8fafc;white-space:pre-wrap;">${escapeHtml(jsonStr)}</pre>`);
-        }
-      }
-    });
-  }
-
-  // Incident title click opens Modal
-  const incidentList = document.getElementById("incidentList");
-  if (incidentList) {
-    incidentList.addEventListener("click", (e) => {
-      const titleBtn = e.target.closest(".incident-title-btn");
-      if (!titleBtn) return;
-      const card = titleBtn.closest(".incident");
-      if (!card) return;
-      const key = card.dataset.key;
-      const inc = state.allIncidents.find(i => i.key === key);
-      if (inc) openModal(inc);
-    });
-  }
-
-  // Keyboard shortcut (Escape closes modal)
+  button.addEventListener("click", () => {
+    if (!menu.hidden) {
+      close(false);
+      return;
+    }
+    const count = state.incidents.filter((i) => matches(i)).length;
+    $("exportMenuLabel").textContent = `Export ${plural(count, "incident")}${count === state.incidents.length ? "" : " (filtered)"}`;
+    menu.hidden = false;
+    button.setAttribute("aria-expanded", "true");
+    menu.querySelector(".menu-item").focus();
+  });
+  menu.addEventListener("click", (e) => {
+    const item = e.target.closest(".menu-item");
+    if (!item) return;
+    close(true);
+    exportIncidents(item.dataset.format);
+  });
+  menu.addEventListener("keydown", (e) => {
+    const items = [...menu.querySelectorAll(".menu-item")];
+    const index = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      items[(index + 1) % items.length].focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      items[(index - 1 + items.length) % items.length].focus();
+    } else if (e.key === "Tab") {
+      close(false);
+    }
+  });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
+    if (e.key === "Escape") close(true);
   });
-
-  // Copy Permalink Delegation
   document.addEventListener("click", (e) => {
-    const copyBtn = e.target.closest(".copy-link-btn");
-    if (!copyBtn) return;
-    const key = copyBtn.dataset.key;
-    const linkUrl = `${window.location.origin}${window.location.pathname}#incident=${encodeURIComponent(key)}`;
-    navigator.clipboard.writeText(linkUrl).then(() => {
-      showToast("Incident permalink copied to clipboard!");
-    });
+    if (!e.target.closest(".menu-wrap")) close(false);
   });
+}
 
-  // Strip Navigation Controls
-  const prevBtn = document.getElementById("stripPrev");
-  const nextBtn = document.getElementById("stripNext");
-  const todayBtn = document.getElementById("stripToday");
-  const allBtn = document.getElementById("stripAll");
+function currentTheme() {
+  const saved = storageGet("theme");
+  return THEME_MODES.includes(saved) ? saved : "auto";
+}
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      if (!state.stripShowAll) state.stripWindowEnd = addDays(state.stripWindowEnd, -state.windowDays);
-      renderAll();
-    });
-  }
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      if (!state.stripShowAll) state.stripWindowEnd = addDays(state.stripWindowEnd, state.windowDays);
-      renderAll();
-    });
-  }
-  if (todayBtn) {
-    todayBtn.addEventListener("click", () => {
-      state.stripShowAll = false;
-      state.stripWindowEnd = todayKey();
-      renderAll();
-    });
-  }
-  if (allBtn) {
-    allBtn.addEventListener("click", () => {
-      state.stripShowAll = !state.stripShowAll;
-      if (state.stripShowAll) state.stripWindowEnd = null;
-      renderAll();
-    });
+function applyTheme(mode) {
+  if (mode === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", mode);
+  const next = THEME_MODES[(THEME_MODES.indexOf(mode) + 1) % THEME_MODES.length];
+  const btn = $("themeToggleBtn");
+  btn.setAttribute("aria-label", `${THEME_LABEL[mode]}. Switch to ${next === "auto" ? "system" : next}.`);
+  btn.title = THEME_LABEL[mode];
+}
+
+function setupTheme() {
+  applyTheme(currentTheme());
+  $("themeToggleBtn").addEventListener("click", () => {
+    const next = THEME_MODES[(THEME_MODES.indexOf(currentTheme()) + 1) % THEME_MODES.length];
+    storageSet("theme", next);
+    applyTheme(next);
+  });
+}
+
+/* ---------- URL hash ---------- */
+
+function writeHash() {
+  const params = new URLSearchParams();
+  if (state.region) params.set("region", state.region);
+  if (state.severity !== "all") params.set("sev", state.severity);
+  if (state.date) params.set("date", state.date);
+  if (state.query) params.set("q", state.query);
+  if (state.modalIncident) params.set("incident", state.modalIncident._short);
+  const target = params.toString() ? `#${params}` : "";
+  if (location.hash !== target) {
+    history.replaceState(null, "", `${location.pathname}${location.search}${target}`);
   }
 }
 
-// Application Entry Point
+function readHash() {
+  // URLSearchParams already decodes values; never decode twice.
+  const params = new URLSearchParams(location.hash.slice(1));
+  const region = params.get("region");
+  const sev = params.get("sev");
+  const date = params.get("date");
+
+  state.region = region && state.incidents.some((i) => i._region === region) ? region : null;
+  state.severity = FILTER_SEVERITIES.includes(sev) ? sev : "all";
+  state.date = date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(dayToMs(date)) ? date : null;
+  state.query = (params.get("q") || "").trim();
+  state.limit = PAGE_SIZE;
+
+  const wanted = params.get("incident");
+  return wanted ? state.incidents.find((i) => i.key === wanted || i._short === wanted) || null : null;
+}
+
+/* ---------- Event wiring ---------- */
+
+function setFilter(changes) {
+  Object.assign(state, changes, { limit: PAGE_SIZE });
+  render();
+}
+
+function setupEvents() {
+  $("regionList").addEventListener("click", (e) => {
+    const item = e.target.closest(".region-item");
+    if (!item) return;
+    e.preventDefault();
+    setFilter({ region: item.dataset.region || null });
+  });
+  $("mobileRegionList").addEventListener("click", (e) => {
+    const pill = e.target.closest(".region-pill");
+    if (pill) setFilter({ region: pill.dataset.region || null });
+  });
+  $("sidebarSearchInput").addEventListener("input", (e) => {
+    state.regionQuery = e.target.value;
+    renderSidebar();
+  });
+
+  let searchTimer = null;
+  $("globalSearchInput").addEventListener("input", (e) => {
+    clearTimeout(searchTimer);
+    const value = e.target.value.trim();
+    searchTimer = setTimeout(() => setFilter({ query: value }), 150);
+  });
+
+  $("severityFilter").addEventListener("click", (e) => {
+    const btn = e.target.closest(".seg-btn");
+    if (btn) setFilter({ severity: btn.dataset.severity });
+  });
+
+  $("activeChipsContainer").addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip-remove");
+    if (!btn) return;
+    const reset = { region: { region: null }, severity: { severity: "all" }, date: { date: null }, query: { query: "" } };
+    setFilter(reset[btn.dataset.remove] || {});
+    $("globalSearchInput").focus();
+  });
+
+  const clearAll = () => setFilter({ region: null, severity: "all", date: null, query: "" });
+  $("clearAllFiltersBtn").addEventListener("click", clearAll);
+  $("emptyStateResetBtn").addEventListener("click", clearAll);
+
+  $("incidentSortSelect").addEventListener("change", (e) => setFilter({ sort: e.target.value }));
+  $("showMoreBtn").addEventListener("click", () => {
+    const firstNew = state.limit;
+    state.limit += PAGE_SIZE;
+    render();
+    $("incidentList").children[firstNew]?.querySelector(".incident-title")?.focus();
+  });
+
+  // Titles and cards open the dialog; the copy button copies a link.
+  document.addEventListener("click", (e) => {
+    const copy = e.target.closest("[data-copy]");
+    if (copy) {
+      copyLink(copy.dataset.copy);
+      return;
+    }
+    if (e.target.closest("a") || e.target.closest(".modal-overlay")) return;
+    const opener = e.target.closest("[data-open-modal]") || e.target.closest(".incident");
+    if (!opener) return;
+    const key = opener.dataset.openModal || opener.dataset.key;
+    const incident = state.incidents.find((i) => i.key === key);
+    if (incident) openModal(incident);
+  });
+
+  window.addEventListener("hashchange", () => {
+    const incident = readHash();
+    render();
+    if (incident) openModal(incident);
+    else closeModal();
+  });
+}
+
+/* ---------- Startup ---------- */
+
+async function loadJson(url) {
+  const response = await fetch(url, { cache: "no-cache" });
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  return response.json();
+}
+
+function renderHeaderMeta() {
+  const total = state.incidents.reduce((sum, i) => sum + i._updates.length, 0);
+  const meta = state.metadata;
+  const range =
+    meta?.archive_earliest_date && meta?.archive_latest_date
+      ? ` · ${fmtDay(meta.archive_earliest_date)} – ${fmtDay(meta.archive_latest_date)}`
+      : "";
+  $("updatedAt").textContent = `${plural(state.incidents.length, "incident")} · ${plural(total, "status update")}${range}`;
+  const rebuilt = meta?.rebuilt_at ? dayKey(meta.rebuilt_at) : null;
+  $("rebuiltAt").textContent = rebuilt ? ` · last rebuilt ${fmtDay(rebuilt)}` : "";
+}
+
 async function init() {
-  initTheme();
-  setupEventListeners();
+  setupTheme();
+  setupStrip();
+  setupModal();
+  setupExportMenu();
+  setupEvents();
 
-  const updatedAtEl = document.getElementById("updatedAt");
   try {
-    const [incidents, metadata] = await Promise.all([
-      loadIncidentsData(),
-      loadMetadata(),
-    ]);
-    state.allIncidents = incidents;
-    state.archiveMetadata = metadata;
-
-    parseUrlHash();
-    renderAll();
-
-    if (updatedAtEl) {
-      const totalUpdates = incidents.reduce((sum, i) => sum + (i.updates ? i.updates.length : 0), 0);
-      const freshness = metadata && metadata.archive_latest_date
-        ? ` · Incident data: ${metadata.archive_earliest_date} to ${metadata.archive_latest_date}`
-        : "";
-      updatedAtEl.textContent = `${incidents.length} incidents · ${totalUpdates} updates${freshness}`;
-    }
+    const [incidents, metadata] = await Promise.all([loadJson(DATA_URL), loadJson(METADATA_URL).catch(() => null)]);
+    state.incidents = incidents.map(prepare);
+    state.metadata = metadata;
   } catch (err) {
-    console.error("Initialization error:", err);
-    if (updatedAtEl) {
-      updatedAtEl.textContent = "Error loading archived data";
-    }
-    const list = document.getElementById("incidentList");
-    const empty = document.getElementById("emptyState");
-    if (list && empty) {
-      list.innerHTML = "";
-      empty.hidden = false;
-      empty.innerHTML = `
-        <div style="color:var(--impacted);font-weight:600;margin-bottom:8px;">Failed to load status archive dataset</div>
-        <div style="font-size:0.8rem;color:var(--text-muted);">${escapeHtml(err.message)}</div>
-      `;
-    }
+    console.error(err);
+    $("loadingState").hidden = true;
+    $("errorState").hidden = false;
+    $("errorMessage").textContent = `${err.message}. To run the site locally, use "uv run python scripts/serve.py".`;
+    $("updatedAt").textContent = "Archive unavailable";
+    $("dailyBlock").hidden = true;
+    return;
   }
+
+  $("loadingState").hidden = true;
+  renderHeaderMeta();
+  const incident = readHash();
+  render();
+  if (incident) openModal(incident);
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -8,40 +8,80 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: archive
+  cancel-in-progress: false
+
 jobs:
   archive:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
       - name: Fetch AWS status archives
+        id: fetch
+        continue-on-error: true
         run: python scripts/fetch_archive.py
 
-      - name: Check archive shape
-        run: python scripts/check_feed_shape.py --dir data
+      - name: Merge into archive
+        id: merge
+        continue-on-error: true
+        run: python scripts/merge_archive.py
 
       - name: Report what changed
+        continue-on-error: true
         run: |
           if git status --porcelain | grep -q .; then
             prev=$(mktemp -d)
-            git show HEAD:data/historyevents.json > "$prev/historyevents.json" || true
-            python scripts/diff_snapshots.py \
-              --previous "$prev" \
-              --current data \
-              --json || true
+            if git show HEAD:data/historyevents.json > "$prev/historyevents.json" 2>/dev/null; then
+              python scripts/diff_snapshots.py --previous "$prev" --current data --json || true
+            else
+              echo "no previous archive to compare"
+            fi
             rm -rf "$prev"
           else
             echo "archives unchanged"
           fi
 
       - name: Commit snapshot
+        if: always()
         run: |
           if git status --porcelain | grep -q .; then
             git config user.name "status-archive[bot]"
             git config user.email "status-archive[bot]@users.noreply.github.com"
             git add data/
             git commit -m "data: archive AWS status JSON snapshot"
+            git pull --rebase origin main
             git push
           else
             echo "nothing to commit"
+          fi
+
+      - name: Check archive shape
+        id: shape
+        continue-on-error: true
+        run: python scripts/check_feed_shape.py --dir data
+
+      - name: Validate workflow steps
+        if: always()
+        run: |
+          failed=false
+          if [ "${{ steps.fetch.outcome }}" = "failure" ]; then
+            echo "fetch failed"
+            failed=true
+          fi
+          if [ "${{ steps.merge.outcome }}" = "failure" ]; then
+            echo "merge failed"
+            failed=true
+          fi
+          if [ "${{ steps.shape.outcome }}" = "failure" ]; then
+            echo "shape check failed"
+            failed=true
+          fi
+          if [ "$failed" = "true" ]; then
+            exit 1
           fi

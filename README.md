@@ -55,6 +55,13 @@ The site is static and is rebuilt automatically when a new archive snapshot is a
 
 Everything displayed on the site is derived from the archived AWS data. No incidents or status observations are manually seeded or fabricated.
 
+### Site Features
+
+* **Interactive filters**: Region, severity, date, and search filters sync to the URL hash for shareable permalinks (e.g., `#region=eu-west-1&sev=degraded&date=2024-01-15`)
+* **Archive freshness**: A header pill displays the latest archive date
+* **Data export**: Download incidents as JSON or CSV for offline analysis
+* **Timeline heatmap**: Visual breakdown of incident activity across days
+
 ## Quick Start
 
 Requirements:
@@ -68,10 +75,11 @@ Install the project dependencies:
 uv sync
 ```
 
-Fetch the latest public data from AWS:
+Fetch the latest public data from AWS and merge into the permanent archive:
 
 ```bash
 uv run python scripts/fetch_archive.py
+uv run python scripts/merge_archive.py
 ```
 
 Rebuild the database and generated JSON:
@@ -85,6 +93,14 @@ Run the integrity checks:
 ```bash
 uv run python scripts/check_integrity.py
 ```
+
+Run the site locally:
+
+```bash
+uv run python scripts/serve.py
+```
+
+Then open **http://127.0.0.1:8000/** in your browser.
 
 Start the local API:
 
@@ -105,10 +121,10 @@ The public website uses the generated static data rather than exposing this API 
 | Endpoint               | Description                                             |
 | ---------------------- | ------------------------------------------------------- |
 | `GET /healthz`         | Health check, archive counts, and freshness information |
-| `GET /incidents`       | List archived incidents                                 |
-| `GET /incidents/{key}` | Incident details, timeline, and affected services       |
+| `GET /incidents`       | List archived incidents (supports `?region=`, `?service=`, `?open=true`)  |
+| `GET /incidents/{key}` | Incident details using full or short key (e.g. `slug_date`), timeline, and affected services |
 | `GET /regions`         | Regions with incident counts                            |
-| `GET /updates`         | Recent status updates, optionally filtered by severity  |
+| `GET /updates`         | Recent status updates (supports `?severity=`, `?limit=1–1000`)  |
 | `GET /metrics`         | Aggregate statistics and archive metadata               |
 | `GET /metadata`        | Archive date range, counts, and rebuild information     |
 
@@ -152,6 +168,24 @@ Snapshots are stored in Git, allowing the archive to preserve the state publishe
 
 ### Data Semantics
 
+#### Archive and Retention
+
+A daily GitHub Actions job fetches the latest AWS public health data and merges it into a permanent archive. The raw snapshots are stored in `data/`, and a parallel archive in `data/archive/` preserves all historical data by merging (never deleting) each snapshot.
+
+To merge the current `data/` files into the permanent archive:
+
+```bash
+uv run python scripts/merge_archive.py
+```
+
+To rebuild the entire archive from Git history:
+
+```bash
+uv run python scripts/merge_archive.py --backfill-from-git
+```
+
+During rebuild, the archive data sources (`data/archive/{historyevents,currentevents,services}.json`) are read first; if missing, the raw snapshot files in `data/` are used as a fallback.
+
 #### Archived Snapshot
 
 An archived snapshot represents a point-in-time dump of the public AWS Service Health Dashboard data.
@@ -170,16 +204,23 @@ An incident represents a service and Region event during a specific time window.
 For example:
 
 ```text
-ec2-us-east-1
+ec2-us-east-1#1234567890
 ```
 
-Incident records are keyed using the service identifier and event start timestamp.
+Incident records are keyed using the service identifier and event start timestamp. Each incident carries:
+
+* `arn`: AWS ARN identifier for the event
+* `open`: boolean indicating whether the incident is still open in the latest raw `currentevents.json`
 
 #### Status Update
 
 A status update is a timestamped entry in an incident's event log.
 
 The timestamps represent publication times recorded by AWS. They should not necessarily be interpreted as the exact moment when the underlying service state changed.
+
+#### Per-Service Breakdown
+
+Each incident includes a per-service breakdown derived from the history events' own `impacted_services` field. For open incidents, this breakdown is overlaid with the matching open event from `currentevents.json` (matched by ARN) to reflect the freshest per-service status.
 
 #### Absence of an Incident
 
@@ -224,7 +265,7 @@ This includes:
 
 #### Resolution Days
 
-Activity days containing only operational status updates.
+Activity days on which all incident updates were operational status updates.
 
 These days generally represent the resolution of existing incidents rather than independent observations that a service was continuously healthy.
 
@@ -244,14 +285,16 @@ An absence of incidents is not treated as evidence that AWS services were operat
 
 ### Severity Levels
 
-| Level         | Meaning                                               |
-| ------------- | ----------------------------------------------------- |
-| `operational` | Incident resolved with an explicit operational status |
-| `degraded`    | Service degraded                                      |
-| `impacted`    | Service impacted                                      |
-| `disrupted`   | Service disrupted                                     |
-| `no_data`     | No archived incident observation for the period       |
-| `unknown`     | Status could not be determined                        |
+Severity order follows AWS numeric status codes (0–3), from worst to best:
+
+| Level         | AWS Code | Meaning                                               |
+| ------------- | -------- | ----------------------------------------------------- |
+| `disrupted`   | 3        | Service disrupted                                     |
+| `degraded`    | 2        | Service degraded                                      |
+| `impacted`    | 1        | Service impacted                                      |
+| `operational` | 0        | Incident resolved with an explicit operational status |
+| `no_data`     | —        | No archived incident observation for the period       |
+| `unknown`     | —        | Status could not be determined                        |
 
 ## Technology
 

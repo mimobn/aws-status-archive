@@ -1,78 +1,77 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f172a" />
-    <title>status-archive — AWS Incident History & Status Archive</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <meta property="og:title" content="status-archive — AWS Incident History" />
-    <meta
-      property="og:description"
-      content="Reconstructed AWS incident history & service status timeline, archived directly from official AWS Service Health data."
-    />
+    <title>status-archive — AWS incident history</title>
+    <meta name="description" content="AWS incident history, archived daily from the AWS Health Dashboard and kept after AWS drops it from its 12-month window." />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="status-archive — AWS incident history" />
+    <meta property="og:description" content="AWS incident history, archived daily from the AWS Health Dashboard and kept after AWS drops it from its 12-month window." />
+    <meta property="og:url" content="https://mimobn.github.io/aws-status-archive/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="grain" aria-hidden="true"></div>
-
-    <!-- Site Header -->
     <header class="site-header">
       <div class="header-inner">
         <div class="brand">
-          <img class="brand-mark" src="logo.svg" alt="status-archive logo" width="52" height="52" />
-          <div class="brand-text">
-            <div class="brand-title-row">
-              <h1>status-archive</h1>
-              <span class="status-pill status-pill-active" id="liveStatusBadge">
-                <span class="status-pill-dot"></span>
-                <span>Archived Feed Active</span>
-              </span>
-            </div>
+          <img class="brand-mark" src="logo.svg" alt="" width="40" height="40" />
+          <div>
+            <h1>status-archive</h1>
             <p class="subtitle">
-              Comprehensive AWS incident history reconstructed from official
-              <a href="https://status.aws.amazon.com/" target="_blank" rel="noopener">Service Health Dashboard</a>
-              snapshots that AWS does not permanently retain.
+              AWS incident history, archived daily from the
+              <a href="https://health.aws.amazon.com/health/status" target="_blank" rel="noopener">AWS Health Dashboard</a>.
             </p>
           </div>
         </div>
 
         <div class="header-actions">
-          <button type="button" class="action-btn" id="themeToggleBtn" aria-label="Toggle color theme" title="Toggle Theme (Light / Dark / Auto)">
-            <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="5"></circle>
-              <line x1="12" y1="1" x2="12" y2="3"></line>
-              <line x1="12" y1="21" x2="12" y2="23"></line>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-              <line x1="1" y1="12" x2="3" y2="12"></line>
-              <line x1="21" y1="12" x2="23" y2="12"></line>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          <button type="button" class="icon-btn" id="themeToggleBtn">
+            <svg class="theme-icon" data-mode="light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
             </svg>
-            <svg class="theme-icon theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            <svg class="theme-icon" data-mode="dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+            </svg>
+            <svg class="theme-icon" data-mode="auto" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"></path>
             </svg>
           </button>
 
-          <button type="button" class="action-btn" id="exportDataBtn" title="Export incident history as JSON or CSV">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>Export</span>
-          </button>
+          <div class="menu-wrap">
+            <button type="button" class="btn" id="exportBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+              </svg>
+              <span>Export</span>
+            </button>
+            <div class="menu" id="exportMenu" role="menu" hidden>
+              <p class="menu-label" id="exportMenuLabel">Export incidents</p>
+              <button type="button" class="menu-item" role="menuitem" data-format="json">JSON</button>
+              <button type="button" class="menu-item" role="menuitem" data-format="csv">CSV</button>
+            </div>
+          </div>
 
-          <a href="https://github.com/mimobn/aws-status-archive" target="_blank" rel="noopener" class="action-btn action-btn-link" title="GitHub Repository">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <a class="icon-btn" href="https://github.com/mimobn/aws-status-archive" target="_blank" rel="noopener" aria-label="Source on GitHub" title="Source on GitHub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
             </svg>
           </a>
@@ -80,198 +79,161 @@
       </div>
     </header>
 
-    <!-- Main App Container -->
     <div class="layout">
-      <!-- Mobile Region Filter Bar -->
-      <div class="mobile-region-bar" id="mobileRegionBar">
-        <button type="button" class="mobile-region-btn active" data-region="">All Regions</button>
-        <div class="mobile-region-scroll" id="mobileRegionList"></div>
-      </div>
+      <nav class="region-pills" id="mobileRegionList" aria-label="Regions"></nav>
 
-      <!-- Desktop Sidebar -->
       <aside class="sidebar">
         <div class="panel sidebar-panel">
           <div class="sidebar-header">
-            <h2 class="sidebar-title">Regions</h2>
-            <span class="region-total-badge" id="regionTotalBadge">0</span>
+            <h2>Regions</h2>
+            <span class="count-pill" id="regionTotalBadge">0</span>
           </div>
-          <div class="sidebar-search">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="sidebarSearchInput" placeholder="Filter regions..." aria-label="Filter regions" />
-          </div>
-          <nav id="regionList" class="region-list"></nav>
+          <label class="search-field search-field-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+            <input type="search" id="sidebarSearchInput" placeholder="Filter regions" aria-label="Filter regions" />
+          </label>
+          <nav id="regionList" class="region-list" aria-label="Regions"></nav>
         </div>
       </aside>
 
-      <!-- Main Content Area -->
       <main class="main">
-        <!-- Hero Overview Panel -->
-        <section class="panel hero-panel" id="heroPanel" data-animate>
+        <section class="panel" aria-labelledby="overviewTitle">
           <div class="panel-header">
             <div>
-              <h3>AWS Health Overview</h3>
-              <span class="panel-sub" id="updatedAt">Loading data...</span>
-            </div>
-            <div class="panel-header-badges">
-              <span class="badge badge-info" id="activeWindowBadge">Calendar View</span>
+              <h2 id="overviewTitle">Overview</h2>
+              <p class="panel-sub" id="updatedAt">Loading archive…</p>
             </div>
           </div>
 
-          <!-- KPI Summary Cards -->
-          <div class="summary-stats" id="summaryStats"></div>
+          <div class="stats" id="summaryStats"></div>
 
-          <!-- Interactive Day Strip & Controls -->
-          <div class="strip-container">
-            <div class="strip-header-row">
-              <div class="strip-controls" id="stripControls" hidden>
-                <button type="button" class="strip-btn" id="stripPrev" aria-label="Show earlier 90 days">‹ Prev 90d</button>
-                <button type="button" class="strip-btn" id="stripNext" aria-label="Show later 90 days">Next 90d ›</button>
-                <button type="button" class="strip-btn" id="stripToday">Latest Snapshot</button>
-                <button type="button" class="strip-btn" id="stripAll">All Available Data</button>
+          <div class="daily" id="dailyBlock">
+            <div class="daily-head">
+              <h3>Daily status</h3>
+              <div class="segmented" id="stripControls" role="group" aria-label="Timeline window">
+                <button type="button" class="seg-btn seg-arrow" id="stripPrev" aria-label="Previous 90 days">‹</button>
+                <button type="button" class="seg-btn seg-arrow" id="stripNext" aria-label="Next 90 days">›</button>
+                <button type="button" class="seg-btn" id="stripLatest">Latest</button>
+                <button type="button" class="seg-btn" id="stripAll" aria-pressed="false">All</button>
               </div>
-              <span class="strip-window-label" id="stripWindowLabel"></span>
             </div>
-
+            <p class="daily-window" id="stripWindowLabel"></p>
             <div class="strip-stage" id="stripStage">
-              <div class="strip" id="daysStrip"></div>
-              <div class="strip-tooltip" id="stripTooltip" aria-hidden="true"></div>
+              <div class="strip" id="daysStrip" role="group" aria-label="Daily status, one bar per day"></div>
+              <div class="tooltip" id="stripTooltip" role="tooltip" hidden></div>
             </div>
-
             <div class="strip-axis">
-              <span id="stripStart">…</span>
-              <span class="axis-title">Daily Worst Status Heatmap</span>
-              <span id="stripEnd">…</span>
+              <span id="stripStart"></span>
+              <span id="stripEnd"></span>
             </div>
-          </div>
-
-          <!-- Legend Bar -->
-          <div class="legend">
-            <span class="legend-item"><span class="dot dot-disrupted"></span>Disrupted</span>
-            <span class="legend-item"><span class="dot dot-impacted"></span>Impacted</span>
-            <span class="legend-item"><span class="dot dot-degraded"></span>Degraded</span>
-            <span class="legend-item"><span class="dot dot-operational"></span>Operating Normally</span>
-            <span class="legend-item"><span class="dot dot-no_data"></span>No Data</span>
+            <ul class="legend" aria-label="Legend">
+              <li><span class="dot dot-disrupted"></span>Disrupted</li>
+              <li><span class="dot dot-degraded"></span>Degraded</li>
+              <li><span class="dot dot-impacted"></span>Impacted</li>
+              <li><span class="dot dot-resolved"></span>Resolved</li>
+              <li><span class="dot dot-no_data"></span>No data</li>
+            </ul>
           </div>
         </section>
 
-        <!-- Search & Filter Controls Panel -->
-        <section class="panel filter-panel" data-animate>
+        <section class="panel filter-panel" aria-label="Filters">
           <div class="filter-bar">
-            <div class="search-input-wrapper">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <input type="text" id="globalSearchInput" placeholder="Search incidents, services, or updates..." aria-label="Search incidents" />
-              <button type="button" class="search-clear-btn" id="searchClearBtn" hidden aria-label="Clear search">✕</button>
-            </div>
-
-            <div class="severity-filter-group">
-              <button type="button" class="sev-filter-btn active" data-severity="all">All Severities</button>
-              <button type="button" class="sev-filter-btn" data-severity="disrupted">Disrupted</button>
-              <button type="button" class="sev-filter-btn" data-severity="impacted">Impacted</button>
-              <button type="button" class="sev-filter-btn" data-severity="degraded">Degraded</button>
+            <label class="search-field">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+              <input type="search" id="globalSearchInput" placeholder="Search incidents, services, regions" aria-label="Search incidents" />
+            </label>
+            <div class="segmented" id="severityFilter" role="group" aria-label="Worst severity">
+              <button type="button" class="seg-btn" data-severity="all" aria-pressed="true">All</button>
+              <button type="button" class="seg-btn" data-severity="disrupted" aria-pressed="false">Disrupted</button>
+              <button type="button" class="seg-btn" data-severity="degraded" aria-pressed="false">Degraded</button>
+              <button type="button" class="seg-btn" data-severity="impacted" aria-pressed="false">Impacted</button>
             </div>
           </div>
-
-          <!-- Active Filter Chips Tag Bar -->
-          <div class="active-filters-bar" id="activeFiltersBar" hidden>
-            <span class="active-filters-label">Active Filters:</span>
-            <div class="chips-container" id="activeChipsContainer"></div>
-            <button type="button" class="clear-all-btn" id="clearAllFiltersBtn">Clear All</button>
+          <div class="active-filters" id="activeFiltersBar" hidden>
+            <div class="chips" id="activeChipsContainer"></div>
+            <button type="button" class="link-btn" id="clearAllFiltersBtn">Clear filters</button>
           </div>
         </section>
 
-        <!-- Service Status by Region Section -->
-        <section class="panel services-panel" data-animate>
+        <section class="panel" aria-labelledby="openTitle">
           <div class="panel-header">
             <div>
-              <h3>Services Status Breakdown</h3>
-              <span class="panel-sub">Latest archived status of services per region</span>
-            </div>
-            <div class="services-header-controls">
-              <label class="toggle-switch">
-                <input type="checkbox" id="impactedOnlyToggle" />
-                <span class="toggle-slider"></span>
-                <span class="toggle-label">Impacted Only</span>
-              </label>
+              <h2 id="openTitle">Open incidents</h2>
+              <p class="panel-sub">Per-service status from the latest AWS snapshot</p>
             </div>
           </div>
-          <div id="regionServices" class="region-services-list"></div>
+          <div id="openIncidents"></div>
         </section>
 
-        <!-- Incidents List Section -->
-        <section class="panel incidents-panel" data-animate>
+        <section class="panel" aria-labelledby="logTitle">
           <div class="panel-header">
             <div>
-              <h3>Incident Log & Timeline</h3>
-              <span class="panel-sub" id="incidentListSubtitle">Full timelines, newest events first</span>
+              <h2 id="logTitle">Incident log</h2>
+              <p class="panel-sub" id="incidentListSubtitle"></p>
             </div>
-            <div class="sort-controls">
-              <select id="incidentSortSelect" class="select-input" aria-label="Sort order">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="updates">Most Updates</option>
-              </select>
-            </div>
+            <select id="incidentSortSelect" class="select" aria-label="Sort incidents">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="updates">Most updates</option>
+            </select>
           </div>
 
-          <div id="incidentList" class="incident-list"></div>
+          <div id="incidentList" class="incident-list" aria-live="polite"></div>
+          <div class="list-footer">
+            <button type="button" class="btn" id="showMoreBtn" hidden>Show more</button>
+          </div>
 
-          <div id="emptyState" class="empty-state" hidden>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <p class="empty-title">No matching incidents found</p>
-            <p class="empty-desc">Try clearing your filters or searching for another term.</p>
-            <button type="button" class="strip-btn strip-btn-active" id="emptyStateResetBtn">Reset All Filters</button>
+          <div id="emptyState" class="state" hidden>
+            <p class="state-title">No incidents match these filters</p>
+            <button type="button" class="btn" id="emptyStateResetBtn">Clear filters</button>
+          </div>
+          <div id="loadingState" class="state">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+          </div>
+          <div id="errorState" class="state state-error" hidden>
+            <p class="state-title">The archive couldn't be loaded</p>
+            <p class="state-desc" id="errorMessage"></p>
           </div>
         </section>
       </main>
     </div>
 
-    <!-- Site Footer -->
     <footer class="site-footer">
-      <div class="footer-inner">
-        <p>
-          Data extracted from official <code>services.json</code>, <code>historyevents.json</code>, and <code>currentevents.json</code>.
-          Rebuilt and verified automatically on every git snapshot. Not affiliated with Amazon Web Services.
-        </p>
-        <p class="footer-links">
-          <a href="https://status.aws.amazon.com/" target="_blank" rel="noopener">Official AWS Status</a> ·
-          <a href="https://github.com/mimobn/aws-status-archive" target="_blank" rel="noopener">Source Code</a> ·
-          <a href="#" id="apiDocsLink">API Reference</a>
-        </p>
-      </div>
+      <p>
+        Built from AWS's public <code>services.json</code>, <code>historyevents.json</code> and <code>currentevents.json</code>.
+        Updated daily<span id="rebuiltAt"></span>. Not affiliated with Amazon Web Services.
+      </p>
+      <p>
+        <a href="https://health.aws.amazon.com/health/status" target="_blank" rel="noopener">AWS Health Dashboard</a> ·
+        <a href="https://github.com/mimobn/aws-status-archive" target="_blank" rel="noopener">Source on GitHub</a>
+      </p>
     </footer>
 
-    <!-- Incident Details Modal -->
-    <div id="incidentModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-card">
+    <div id="incidentModal" class="modal-overlay" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
         <div class="modal-header">
           <div>
-            <h3 id="modalTitle" class="modal-title">Incident Details</h3>
-            <span id="modalSub" class="modal-sub"></span>
+            <h2 id="modalTitle" class="modal-title"></h2>
+            <p id="modalSub" class="modal-sub"></p>
           </div>
-          <button type="button" id="modalCloseBtn" class="modal-close-btn" aria-label="Close modal">✕</button>
+          <button type="button" id="modalCloseBtn" class="icon-btn" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
         </div>
         <div id="modalBody" class="modal-body"></div>
         <div class="modal-footer">
-          <button type="button" id="modalCopyBtn" class="action-btn">🔗 Copy Permalink</button>
-          <button type="button" id="modalRawBtn" class="action-btn">View Raw JSON</button>
+          <button type="button" id="modalCopyBtn" class="btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>
+            <span>Copy link</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Toast Notification Overlay -->
-    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+    <div id="toastContainer" class="toasts" role="status" aria-live="polite"></div>
 
-    <!-- Main JavaScript App -->
     <script src="app.js"></script>
   </body>
 </html>

@@ -16,11 +16,12 @@ Usage: python scripts/check_integrity.py [--db out/status.db]
 """
 
 import argparse
+import json
 import os
 import sqlite3
 import sys
 
-from rebuild import DB_PATH, build_metadata, rebuild
+from rebuild import DB_PATH, build_metadata, rebuild, with_guids
 
 
 def run_checks(conn, incidents):
@@ -59,7 +60,11 @@ def run_checks(conn, incidents):
         "LEFT JOIN updates u ON i.incident_key = u.incident_key "
         "WHERE u.guid IS NULL"
     ).fetchone()[0]
-    check("every incident has updates", empty_incidents == 0, f"{empty_incidents} empty")
+    # Empty-log incidents are allowed but we warn about them
+    if empty_incidents > 0:
+        check("every incident has updates", False, f"{empty_incidents} empty (warning, allowed)")
+    else:
+        check("every incident has updates", True)
 
     duplicate_guids = conn.execute(
         "SELECT count(*) FROM (SELECT guid FROM updates GROUP BY guid HAVING count(*) > 1)"
@@ -108,15 +113,54 @@ def run_checks(conn, incidents):
         )
         expected_meta = build_metadata(incidents)
         for mk, mv in expected_meta.items():
-            if mk == "rebuilt_at":
+            if mk == "rebuilt_at" or mk == "snapshot_fetched_at":
                 check(f"metadata.{mk} exists", mk in meta_rows)
                 continue
             db_val = meta_rows.get(mk)
+            # Metadata values are stored as JSON
+            expected_json = json.dumps(mv)
             check(
                 f"metadata.{mk} matches",
-                db_val == str(mv),
-                f"db {db_val!r} vs rebuild {str(mv)!r}",
+                db_val == expected_json,
+                f"db {db_val!r} vs rebuild {expected_json!r}",
             )
+
+    # Compare per-update content (guid, published, severity, title)
+    db_updates = {}
+    for guid, incident_key, published, severity, title in conn.execute(
+        "SELECT guid, incident_key, published, severity, title FROM updates"
+    ).fetchall():
+        db_updates[guid] = {
+            "incident_key": incident_key,
+            "published": published,
+            "severity": severity,
+            "title": title,
+        }
+
+    rebuild_updates = {}
+    for incident in incidents:
+        for update in incident.get("updates", []):
+            rebuild_updates[update["guid"]] = {
+                "incident_key": incident["key"],
+                "published": update["published"],
+                "severity": update["severity"],
+                "title": update["title"],
+            }
+
+    for guid, rebuild_update in rebuild_updates.items():
+        db_update = db_updates.get(guid)
+        if db_update is None:
+            check(f"update {guid} exists in db", False)
+            continue
+        if db_update != rebuild_update:
+            check(
+                f"update {guid} matches",
+                False,
+                f"db {db_update} vs rebuild {rebuild_update}",
+            )
+        else:
+            # Don't print OK for every individual update
+            pass
 
     return results
 
@@ -125,6 +169,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", default=DB_PATH)
     args = parser.parse_args()
+
+    # Fail clearly if DB is missing
+    if not os.path.exists(args.db):
+        print(f"[FAIL] database not found: {args.db}")
+        return 1
 
     failures = []
     try:
@@ -135,6 +184,7 @@ def main():
 
     try:
         incidents = rebuild()
+        with_guids(incidents)
         for name, ok, detail in run_checks(conn, incidents):
             print(f"[{'ok' if ok else 'FAIL'}] {name}" + (f" - {detail}" if detail and not ok else ""))
             if not ok:

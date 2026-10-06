@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for the integrity checker."""
 
+import json
 import os
 import sqlite3
 import sys
@@ -23,6 +24,8 @@ CREATE TABLE IF NOT EXISTS updates (
 );
 CREATE TABLE IF NOT EXISTS incidents (
     incident_key TEXT PRIMARY KEY,
+    arn TEXT,
+    open INTEGER NOT NULL DEFAULT 0,
     started_at TEXT,
     last_update TEXT,
     update_count INTEGER,
@@ -61,12 +64,16 @@ def one_incident_rebuild():
 
 
 def build_db(path, incidents, updates):
+    # Ensure parent directory exists
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
     conn = sqlite3.connect(path)
     conn.executescript(SCHEMA)
     for key, started, count, title in incidents:
         conn.execute(
-            "INSERT INTO incidents VALUES (?, ?, ?, ?, ?)",
-            (key, started, started, count, title),
+            "INSERT INTO incidents (incident_key, arn, open, started_at, last_update, update_count, title) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (key, None, 0, started, started, count, title),
         )
     for guid, key, published, severity, title, desc in updates:
         conn.execute(
@@ -75,7 +82,7 @@ def build_db(path, incidents, updates):
         )
     meta = build_metadata(one_incident_rebuild() if len(incidents) == 1 else [])
     for k, v in meta.items():
-        conn.execute("INSERT INTO metadata VALUES (?, ?)", (k, str(v)))
+        conn.execute("INSERT INTO metadata VALUES (?, ?)", (k, json.dumps(v)))
     conn.commit()
     conn.close()
 
