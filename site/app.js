@@ -10,6 +10,8 @@
 const DATA_URL = "parsed/incidents.json";
 const METADATA_URL = "parsed/metadata.json";
 const PAGE_SIZE = 20;
+const GRID_PAGE_SIZE = 25;
+const GRID_DAYS = 7;
 const WINDOW_DAYS = 90;
 const DAY_MS = 86400000;
 const GLOBAL_REGION = "Global Services";
@@ -51,10 +53,18 @@ const state = {
   regionQuery: "",
   sort: "newest",
   limit: PAGE_SIZE,
+  view: "services",
+  serviceRows: [],
+  gridEnd: null,
+  gridOnlyEvents: true,
+  gridLimit: GRID_PAGE_SIZE,
+  gridSubtitle: "",
+  eventsSubtitle: "",
   stripEnd: null,
   stripShowAll: false,
   stripFocusDay: null,
   stripByDay: {},
+  archiveSpan: null,
   modalIncident: null,
   lastFocus: null,
 };
@@ -160,6 +170,18 @@ function severityBadge(severity) {
   return `<span class="badge">${severityDot(severity)}${escapeHtml(SEVERITY_LABEL[severity] || severity)}</span>`;
 }
 
+const SEVERITY_ICON = {
+  disrupted: '<circle cx="12" cy="12" r="9"></circle><path d="M9 9l6 6M15 9l-6 6"></path>',
+  degraded: '<path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17v.01"></path>',
+  impacted: '<circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path>',
+  resolved: '<circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l3 3 5-6"></path>',
+};
+
+function severityIcon(severity) {
+  const body = SEVERITY_ICON[severity] || '<circle cx="12" cy="12" r="9"></circle>';
+  return `<svg class="sev-icon sev-color-${escapeHtml(severity)}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+
 function storageGet(key) {
   try {
     return localStorage.getItem(key);
@@ -223,6 +245,73 @@ function daySeverity(updates) {
   return worstOf(updates.map((u) => u.severity).filter((s) => s !== "operational"));
 }
 
+// Per-day status of one service across an incident. A status carries forward
+// from the update that set it until the next one, so a multi-day incident
+// fills every day it lasted; the day it recovers shows as "resolved".
+function dayStatuses(timeline, firstDay, lastDay) {
+  const out = {};
+  let idx = 0;
+  let carried = null;
+  for (let key = firstDay; key <= lastDay; key = addDays(key, 1)) {
+    const end = dayToMs(key) + DAY_MS;
+    const today = [];
+    while (idx < timeline.length && timeline[idx].at < end) {
+      today.push(timeline[idx].severity);
+      idx += 1;
+    }
+    const active = [carried, ...today].filter((sev) => sev && sev !== "operational");
+    if (active.length) out[key] = worstOf(active);
+    else if (today.includes("operational")) out[key] = "resolved";
+    if (today.length) carried = today[today.length - 1];
+  }
+  return out;
+}
+
+// One row per service that ever had an archived event, with a status per day.
+function buildServiceRows(incidents) {
+  const rows = new Map();
+  const today = todayKey();
+  for (const incident of incidents) {
+    if (incident._updates.length === 0) continue;
+    const firstDay = dayKey(incident._updates[0].published);
+    const lastUpdateDay = dayKey(incident._latest.published);
+    const lastDay = incident.open ? today : lastUpdateDay;
+    const incidentTimeline = incident._updates.map((u) => ({ at: new Date(u.published).getTime(), severity: u.severity }));
+
+    const members = [[incident.service, incident.service_name || "Multiple services", incidentTimeline, lastDay]];
+    for (const [slug, svc] of Object.entries(incident.services || {})) {
+      if (slug === incident.service || !svc.max || svc.max === "operational") continue;
+      const own = (svc.transitions || [])
+        .map((t) => ({ at: new Date(t.published).getTime(), severity: t.severity }))
+        .filter((t) => Number.isFinite(t.at))
+        .sort((a, b) => a.at - b.at);
+      // Without its own history a service follows the incident, but one AWS
+      // already lists as recovered must not be carried forward to today.
+      const until = !own.length && svc.current === "operational" ? lastUpdateDay : lastDay;
+      members.push([slug, svc.service_name || slug, own.length ? own : incidentTimeline, until]);
+    }
+
+    for (const [slug, name, timeline, until] of members) {
+      // Some service ids carry no region suffix, so the same id can appear in
+      // incidents of different regions: a row is a service in one region.
+      const rowKey = `${slug}|${incident._region}`;
+      let row = rows.get(rowKey);
+      if (!row) {
+        row = { slug, name, region: incident._region, cells: {}, label: `${name} ${incident._region} ${slug}`.toLowerCase() };
+        rows.set(rowKey, row);
+      }
+      const statuses = dayStatuses(timeline, firstDay, until);
+      for (const day in statuses) {
+        const existing = row.cells[day];
+        if (!existing || SEVERITY_RANK[statuses[day]] > SEVERITY_RANK[existing.severity]) {
+          row.cells[day] = { severity: statuses[day], incident };
+        }
+      }
+    }
+  }
+  return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name) || a.region.localeCompare(b.region));
+}
+
 /* ---------- Filtering ---------- */
 
 function matches(incident, { ignoreDate = false } = {}) {
@@ -272,6 +361,8 @@ function render() {
   renderOpenIncidents();
   renderChips();
   renderList(sortIncidents(filtered));
+  renderServiceGrid();
+  renderView(filtered.length);
   writeHash();
 }
 
@@ -327,7 +418,9 @@ function renderStats(incidents) {
     if (sev === "resolved") resolvedDays += 1;
     else if (SEVERITY_RANK[sev] > 0) impactDays += 1;
   }
-  const spanDays = first ? daysBetween(first, last) + 1 : 0;
+  // Measure against the whole archive period so filtered views stay comparable.
+  const span = state.archiveSpan;
+  const spanDays = first && span ? daysBetween(span.first, span.last) + 1 : 0;
   const noDataDays = spanDays - Object.keys(byDay).length;
 
   const stat = (label, value, sub) => `
@@ -341,7 +434,7 @@ function renderStats(incidents) {
     stat("Incidents", incidents.length.toLocaleString("en-US"), plural(totalUpdates, "status update")),
     stat("Impact days", `${impactDays}<small> / ${spanDays}</small>`, "Days with a non-operational update"),
     stat("Resolved-only days", resolvedDays, "Days with only resolution updates"),
-    stat("No-data days", noDataDays, "No incident updates archived"),
+    stat("No-data days", Math.max(0, noDataDays), "No incident updates archived"),
   ].join("");
 }
 
@@ -465,17 +558,112 @@ function renderList(incidents) {
   const shown = incidents.slice(0, state.limit);
   $("incidentList").innerHTML = shown.map(incidentCard).join("");
 
-  $("incidentListSubtitle").textContent =
+  state.eventsSubtitle =
     incidents.length === state.incidents.length
-      ? plural(incidents.length, "incident")
-      : `${incidents.length} of ${plural(state.incidents.length, "incident")}`;
-  $("emptyState").hidden = incidents.length > 0;
+      ? plural(incidents.length, "event")
+      : `${incidents.length} of ${plural(state.incidents.length, "event")}`;
 
   const remaining = incidents.length - shown.length;
   const more = $("showMoreBtn");
   more.hidden = remaining <= 0;
   more.textContent =
     remaining > PAGE_SIZE ? `Show ${PAGE_SIZE} more (${remaining} remaining)` : `Show ${remaining} more`;
+}
+
+function renderView(matchingIncidents) {
+  const services = state.view === "services";
+  document.querySelectorAll("#viewToggle .seg-btn").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.view === state.view));
+  });
+  $("servicesView").hidden = !services;
+  $("eventsView").hidden = services;
+  $("incidentListSubtitle").textContent = services ? state.gridSubtitle : state.eventsSubtitle;
+  $("emptyState").hidden = services || matchingIncidents > 0;
+}
+
+function gridRows() {
+  let rows = state.serviceRows;
+  if (state.region) rows = rows.filter((row) => row.region === state.region);
+  if (state.query) {
+    const q = state.query.toLowerCase();
+    const byLabel = rows.filter((row) => row.label.includes(q));
+    // No service name matches: fall back to services of incidents that do.
+    rows = byLabel.length
+      ? byLabel
+      : rows.filter((row) => Object.values(row.cells).some((cell) => cell.incident._search.includes(q)));
+  }
+  return rows;
+}
+
+function renderServiceGrid() {
+  const container = $("serviceGrid");
+  const rows = gridRows();
+  const allDays = rows.flatMap((row) => Object.keys(row.cells)).sort();
+  const today = todayKey();
+  const latest = allDays[allDays.length - 1] || today;
+  const end = state.gridEnd || latest;
+  const days = Array.from({ length: GRID_DAYS }, (_, i) => addDays(end, -i));
+  const start = days[days.length - 1];
+
+  $("gridEndInput").value = end;
+  $("gridEndInput").max = today;
+  $("gridNewer").disabled = end >= today;
+  $("gridLatest").disabled = end === latest;
+  $("gridOnlyEvents").checked = state.gridOnlyEvents;
+
+  const sevOk = (cell) => state.severity === "all" || cell.severity === state.severity;
+  const inWindow = (row) => days.some((day) => row.cells[day] && sevOk(row.cells[day]));
+  const worstInWindow = (row) => Math.max(...days.map((day) => SEVERITY_RANK[row.cells[day]?.severity] ?? -9));
+  const active = rows.filter(inWindow).sort((a, b) => worstInWindow(b) - worstInWindow(a));
+  const onlyActive = state.gridOnlyEvents || state.severity !== "all";
+  const visible = onlyActive ? active : [...active, ...rows.filter((row) => !inWindow(row))];
+
+  state.gridSubtitle = `${plural(rows.length, "service")} with archived events · ${active.length} affected ${fmtDay(start)} – ${fmtDay(end)}`;
+
+  const more = $("gridMoreBtn");
+  if (visible.length === 0) {
+    const earlier = allDays.filter((day) => day < start).pop();
+    container.innerHTML = `<div class="state">
+      <p class="state-title">No reported events between ${fmtDay(start)} and ${fmtDay(end)}</p>
+      <p class="state-desc">That means AWS posted nothing for these services, not that they were confirmed healthy.</p>
+      ${earlier ? `<button type="button" class="btn" data-grid-end="${earlier}">Go to the previous events (${fmtDay(earlier)})</button>` : ""}
+    </div>`;
+    more.hidden = true;
+    return;
+  }
+
+  const shown = visible.slice(0, state.gridLimit);
+  const head = days
+    .map((day) => `<th scope="col" class="day-col">${day === today ? "Today" : escapeHtml(fmtDay(day).replace(/, \d{4}$/, ""))}</th>`)
+    .join("");
+  const body = shown
+    .map((row) => {
+      const cells = days
+        .map((day) => {
+          const cell = row.cells[day];
+          if (!cell || !sevOk(cell)) {
+            return `<td class="day-col"><span class="cell-none" title="No reported event">–<span class="sr-only">No reported event</span></span></td>`;
+          }
+          const label = `${fmtDay(day)}: ${SEVERITY_LABEL[cell.severity]} — ${cell.incident.title}`;
+          return `<td class="day-col"><button type="button" class="cell-btn" data-open-modal="${escapeHtml(cell.incident.key)}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${severityIcon(cell.severity)}</button></td>`;
+        })
+        .join("");
+      return `<tr><th scope="row" class="svc-col"><span class="svc-name">${escapeHtml(row.name)}</span><span class="svc-region">${escapeHtml(row.region)}</span></th>${cells}</tr>`;
+    })
+    .join("");
+
+  container.innerHTML = `<table class="svc-table">
+      <thead><tr><th scope="col" class="svc-col">Service</th>${head}</tr></thead>
+      <tbody>${body}</tbody>
+    </table>
+    <ul class="legend grid-legend" aria-label="Legend">
+      ${["disrupted", "degraded", "impacted", "resolved"].map((sev) => `<li>${severityIcon(sev)}${SEVERITY_LABEL[sev]}</li>`).join("")}
+      <li><span class="cell-none">–</span>No reported event</li>
+    </ul>`;
+
+  const remaining = visible.length - shown.length;
+  more.hidden = remaining <= 0;
+  more.textContent = remaining > GRID_PAGE_SIZE ? `Show ${GRID_PAGE_SIZE} more (${remaining} remaining)` : `Show ${remaining} more`;
 }
 
 function incidentCard(incident) {
@@ -544,7 +732,7 @@ function hideTooltip() {
 function toggleDay(day) {
   if (!state.stripByDay[day]) return;
   state.stripFocusDay = day;
-  setFilter({ date: state.date === day ? null : day });
+  setFilter({ date: state.date === day ? null : day, gridEnd: day });
   document.querySelector(`#daysStrip .bar[data-day="${day}"]`)?.focus();
 }
 
@@ -871,6 +1059,7 @@ function writeHash() {
   if (state.severity !== "all") params.set("sev", state.severity);
   if (state.date) params.set("date", state.date);
   if (state.query) params.set("q", state.query);
+  if (state.view === "events") params.set("view", "events");
   if (state.modalIncident) params.set("incident", state.modalIncident._short);
   const target = params.toString() ? `#${params}` : "";
   if (location.hash !== target) {
@@ -889,7 +1078,9 @@ function readHash() {
   state.severity = FILTER_SEVERITIES.includes(sev) ? sev : "all";
   state.date = date && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(dayToMs(date)) ? date : null;
   state.query = (params.get("q") || "").trim();
+  state.view = params.get("view") === "events" ? "events" : "services";
   state.limit = PAGE_SIZE;
+  state.gridLimit = GRID_PAGE_SIZE;
 
   const wanted = params.get("incident");
   return wanted ? state.incidents.find((i) => i.key === wanted || i._short === wanted) || null : null;
@@ -898,7 +1089,7 @@ function readHash() {
 /* ---------- Event wiring ---------- */
 
 function setFilter(changes) {
-  Object.assign(state, changes, { limit: PAGE_SIZE });
+  Object.assign(state, changes, { limit: PAGE_SIZE, gridLimit: GRID_PAGE_SIZE });
   render();
 }
 
@@ -943,6 +1134,28 @@ function setupEvents() {
   $("emptyStateResetBtn").addEventListener("click", clearAll);
 
   $("incidentSortSelect").addEventListener("change", (e) => setFilter({ sort: e.target.value }));
+
+  $("viewToggle").addEventListener("click", (e) => {
+    const btn = e.target.closest(".seg-btn");
+    if (btn) setFilter({ view: btn.dataset.view });
+  });
+  const gridEnd = () => $("gridEndInput").value || todayKey();
+  const clampDay = (day) => (day > todayKey() ? todayKey() : day);
+  $("gridOlder").addEventListener("click", () => setFilter({ gridEnd: addDays(gridEnd(), -GRID_DAYS) }));
+  $("gridNewer").addEventListener("click", () => setFilter({ gridEnd: clampDay(addDays(gridEnd(), GRID_DAYS)) }));
+  $("gridLatest").addEventListener("click", () => setFilter({ gridEnd: null }));
+  $("gridEndInput").addEventListener("change", (e) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setFilter({ gridEnd: clampDay(e.target.value) });
+  });
+  $("gridOnlyEvents").addEventListener("change", (e) => setFilter({ gridOnlyEvents: e.target.checked }));
+  $("serviceGrid").addEventListener("click", (e) => {
+    const jump = e.target.closest("[data-grid-end]");
+    if (jump) setFilter({ gridEnd: jump.dataset.gridEnd });
+  });
+  $("gridMoreBtn").addEventListener("click", () => {
+    state.gridLimit += GRID_PAGE_SIZE;
+    render();
+  });
   $("showMoreBtn").addEventListener("click", () => {
     const firstNew = state.limit;
     state.limit += PAGE_SIZE;
@@ -1003,6 +1216,9 @@ async function init() {
   try {
     const [incidents, metadata] = await Promise.all([loadJson(DATA_URL), loadJson(METADATA_URL).catch(() => null)]);
     state.incidents = incidents.map(prepare);
+    state.serviceRows = buildServiceRows(state.incidents);
+    const all = buildDayMap(state.incidents);
+    state.archiveSpan = all.first ? { first: all.first, last: all.last } : null;
     state.metadata = metadata;
   } catch (err) {
     console.error(err);

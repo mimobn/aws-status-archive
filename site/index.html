@@ -168,19 +168,49 @@
         <section class="panel" aria-labelledby="logTitle">
           <div class="panel-header">
             <div>
-              <h2 id="logTitle">Incident log</h2>
+              <h2 id="logTitle">Service history</h2>
               <p class="panel-sub" id="incidentListSubtitle"></p>
             </div>
-            <select id="incidentSortSelect" class="select" aria-label="Sort incidents">
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="updates">Most updates</option>
-            </select>
+            <div class="segmented" id="viewToggle" role="group" aria-label="View">
+              <button type="button" class="seg-btn" data-view="services" aria-pressed="true">List of services</button>
+              <button type="button" class="seg-btn" data-view="events" aria-pressed="false">List of events</button>
+            </div>
           </div>
 
-          <div id="incidentList" class="incident-list" aria-live="polite"></div>
-          <div class="list-footer">
-            <button type="button" class="btn" id="showMoreBtn" hidden>Show more</button>
+          <div id="servicesView">
+            <div class="grid-controls">
+              <div class="segmented" role="group" aria-label="Week">
+                <button type="button" class="seg-btn seg-arrow" id="gridNewer" aria-label="Newer week">‹</button>
+                <button type="button" class="seg-btn seg-arrow" id="gridOlder" aria-label="Older week">›</button>
+                <button type="button" class="seg-btn" id="gridLatest">Latest events</button>
+              </div>
+              <label class="date-field">
+                <span>Week ending</span>
+                <input type="date" id="gridEndInput" class="select" />
+              </label>
+              <label class="check">
+                <input type="checkbox" id="gridOnlyEvents" checked />
+                <span>Only services with events this week</span>
+              </label>
+            </div>
+            <div class="grid-wrap" id="serviceGrid"></div>
+            <div class="list-footer">
+              <button type="button" class="btn" id="gridMoreBtn" hidden>Show more</button>
+            </div>
+          </div>
+
+          <div id="eventsView" hidden>
+            <div class="events-toolbar">
+              <select id="incidentSortSelect" class="select" aria-label="Sort incidents">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="updates">Most updates</option>
+              </select>
+            </div>
+            <div id="incidentList" class="incident-list" aria-live="polite"></div>
+            <div class="list-footer">
+              <button type="button" class="btn" id="showMoreBtn" hidden>Show more</button>
+            </div>
           </div>
 
           <div id="emptyState" class="state" hidden>

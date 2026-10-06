@@ -513,6 +513,43 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
 .skeleton { width: 100%; height: 76px; border-radius: var(--radius-sm); background: var(--surface-2); animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.5; } }
 
+/* ---------- Service history grid ---------- */
+.grid-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+.date-field, .check { display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted); }
+.check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.events-toolbar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+
+.grid-wrap { overflow-x: auto; }
+.svc-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.svc-table th, .svc-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-soft); }
+.svc-table thead th { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-align: center; white-space: nowrap; }
+.svc-table .svc-col { text-align: left; font-weight: 400; min-width: 200px; position: sticky; left: 0; background: var(--surface); }
+.svc-table thead .svc-col { font-weight: 600; }
+.svc-table tbody tr:hover .svc-col, .svc-table tbody tr:hover td { background: var(--surface-2); }
+.svc-name { display: block; font-weight: 500; }
+.svc-region { display: block; font-size: 0.76rem; color: var(--text-subtle); }
+.day-col { width: 72px; text-align: center; }
+.cell-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.cell-btn:hover { background: var(--surface-hover); }
+.cell-none { color: var(--text-subtle); opacity: 0.6; }
+.sev-icon { flex: none; color: var(--unknown); }
+.sev-color-impacted { color: var(--impacted); }
+.sev-color-degraded { color: var(--degraded); }
+.sev-color-disrupted { color: var(--disrupted); }
+.sev-color-resolved { color: var(--resolved); }
+.grid-legend { margin-top: 14px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
 /* ---------- Footer ---------- */
 .site-footer {
   max-width: 1280px;
@@ -615,6 +652,9 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
   .filter-bar .segmented { width: 100%; }
   .filter-bar .seg-btn { flex: 1; padding: 0 6px; }
   .strip { gap: 1px; }
+  .svc-table .svc-col { min-width: 132px; }
+  .svc-table th, .svc-table td { padding: 8px 6px; }
+  .day-col { width: 44px; }
   .incident { grid-template-columns: 4px minmax(0, 1fr); }
   .incident-side { grid-column: 2; flex-direction: row; align-items: center; margin-top: 10px; }
   .modal-overlay { padding: 0; align-items: flex-end; }
