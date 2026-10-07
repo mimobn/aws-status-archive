@@ -3034,6 +3034,17 @@
   },
   {
     "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1790553600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-1",
+    "region_name": "Ireland",
+    "service": "aws-mcp-eu-west-1",
+    "service_name": "AWS MCP Server"
+  },
+  {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
     "launch_date": 1777507200,
     "locale": [
       "EU"
@@ -3052,6 +3063,61 @@
     "region_id": "us-east-1",
     "region_name": "N. Virginia",
     "service": "aws-mcp-us-east-1",
+    "service_name": "AWS MCP Server"
+  },
+  {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1790553600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "aws-mcp-eu-west-2",
+    "service_name": "AWS MCP Server"
+  },
+  {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1790553600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-1",
+    "region_name": "Tokyo",
+    "service": "aws-mcp-ap-northeast-1",
+    "service_name": "AWS MCP Server"
+  },
+  {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1790553600,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-2",
+    "region_name": "Oregon",
+    "service": "aws-mcp-us-west-2",
+    "service_name": "AWS MCP Server"
+  },
+  {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1790553600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-1",
+    "region_name": "Singapore",
+    "service": "aws-mcp-ap-southeast-1",
+    "service_name": "AWS MCP Server"
+  },
+  {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1790553600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-2",
+    "region_name": "Sydney",
+    "service": "aws-mcp-ap-southeast-2",
     "service_name": "AWS MCP Server"
   },
   {
