@@ -383,6 +383,7 @@ function render() {
   renderList(sortIncidents(filtered));
   renderServiceGrid();
   renderView(filtered.length);
+  renderHeaderMeta(filtered.length);
   writeHash();
 }
 
@@ -1307,14 +1308,22 @@ async function loadJson(url) {
   return response.json();
 }
 
-function renderHeaderMeta() {
-  const total = state.incidents.reduce((sum, i) => sum + i._updates.length, 0);
+function renderHeaderMeta(filtered) {
   const meta = state.metadata;
   const range =
     meta?.archive_earliest_date && meta?.archive_latest_date
-      ? ` · ${fmtDay(meta.archive_earliest_date)} – ${fmtDay(meta.archive_latest_date)}`
+      ? `${fmtDay(meta.archive_earliest_date)} – ${fmtDay(meta.archive_latest_date)}`
       : "";
-  $("updatedAt").textContent = `${plural(state.incidents.length, "incident")} · ${plural(total, "status update")}${range}`;
+  // With filters on, say what the numbers below cover.
+  const scope = [
+    state.region,
+    state.severity !== "all" ? `worst status ${SEVERITY_LABEL[state.severity].toLowerCase()}` : null,
+    state.date ? fmtDay(state.date) : null,
+    state.query ? `"${state.query}"` : null,
+  ].filter(Boolean);
+  $("updatedAt").textContent = scope.length
+    ? `${filtered} of ${plural(state.incidents.length, "incident")} · ${scope.join(" · ")}`
+    : `Archive covers ${range || "the period AWS has published"}`;
   const rebuilt = meta?.rebuilt_at ? dayKey(meta.rebuilt_at) : null;
   $("rebuiltAt").textContent = rebuilt ? ` · last rebuilt ${fmtDay(rebuilt)}` : "";
 }
@@ -1344,7 +1353,6 @@ async function init() {
   }
 
   $("loadingState").hidden = true;
-  renderHeaderMeta();
   const incident = readHash();
   render();
   if (incident) openModal(incident);

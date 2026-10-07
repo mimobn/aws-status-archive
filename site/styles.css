@@ -695,6 +695,7 @@ html:not([data-theme]) .theme-icon[data-mode="auto"],
   .filter-bar .segmented { width: 100%; }
   .filter-bar .seg-btn { flex: 1; padding: 0 6px; }
   .strip-year, .strip-months { gap: 1px; }
+  .month-label:nth-child(even) { display: none; }
   .cal-label { min-width: 96px; }
   .svc-table .svc-col { min-width: 132px; }
   .svc-table th, .svc-table td { padding: 8px 6px; }
