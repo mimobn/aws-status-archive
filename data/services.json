@@ -5296,6 +5296,39 @@
   },
   {
     "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1791158400,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-north-1",
+    "region_name": "Stockholm",
+    "service": "securityagent-eu-north-1",
+    "service_name": "AWS Security Agent"
+  },
+  {
+    "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1791158400,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-3",
+    "region_name": "Paris",
+    "service": "securityagent-eu-west-3",
+    "service_name": "AWS Security Agent"
+  },
+  {
+    "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1791158400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-2",
+    "region_name": "Ohio",
+    "service": "securityagent-us-east-2",
+    "service_name": "AWS Security Agent"
+  },
+  {
+    "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
     "launch_date": 1776124800,
     "locale": [
       "EU"
@@ -5329,6 +5362,28 @@
   },
   {
     "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1791158400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-2",
+    "region_name": "Seoul",
+    "service": "securityagent-ap-northeast-2",
+    "service_name": "AWS Security Agent"
+  },
+  {
+    "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1791158400,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "securityagent-eu-west-2",
+    "service_name": "AWS Security Agent"
+  },
+  {
+    "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
     "launch_date": 1776124800,
     "locale": [
       "AP"
@@ -5358,6 +5413,17 @@
     "region_id": "ap-southeast-2",
     "region_name": "Sydney",
     "service": "securityagent-ap-southeast-2",
+    "service_name": "AWS Security Agent"
+  },
+  {
+    "event_type_code": "AWS_SECURITYAGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1791158400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "ca-central-1",
+    "region_name": "Canada-Central",
+    "service": "securityagent-ca-central-1",
     "service_name": "AWS Security Agent"
   },
   {
