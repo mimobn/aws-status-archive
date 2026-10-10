@@ -6274,6 +6274,17 @@
     "event_type_code": "AWS_IOT_DEVICE_MANAGEMENT_OPERATIONAL_ISSUE",
     "launch_date": 1562716800,
     "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-5",
+    "region_name": "Malaysia",
+    "service": "awsiotdevicemanagement-ap-southeast-5",
+    "service_name": "AWS IoT Device Management"
+  },
+  {
+    "event_type_code": "AWS_IOT_DEVICE_MANAGEMENT_OPERATIONAL_ISSUE",
+    "launch_date": 1562716800,
+    "locale": [
       "NA"
     ],
     "region_id": "ca-central-1",
@@ -6309,6 +6320,28 @@
     "locale": [
       "EU"
     ],
+    "region_id": "eu-south-1",
+    "region_name": "Milan",
+    "service": "awsiotdevicemanagement-eu-south-1",
+    "service_name": "AWS IoT Device Management"
+  },
+  {
+    "event_type_code": "AWS_IOT_DEVICE_MANAGEMENT_OPERATIONAL_ISSUE",
+    "launch_date": 1562716800,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-south-2",
+    "region_name": "Spain",
+    "service": "awsiotdevicemanagement-eu-south-2",
+    "service_name": "AWS IoT Device Management"
+  },
+  {
+    "event_type_code": "AWS_IOT_DEVICE_MANAGEMENT_OPERATIONAL_ISSUE",
+    "launch_date": 1562716800,
+    "locale": [
+      "EU"
+    ],
     "region_id": "eu-west-1",
     "region_name": "Ireland",
     "service": "awsiotdevicemanagement-eu-west-1",
@@ -6334,6 +6367,17 @@
     "region_id": "eu-west-3",
     "region_name": "Paris",
     "service": "awsiotdevicemanagement-eu-west-3",
+    "service_name": "AWS IoT Device Management"
+  },
+  {
+    "event_type_code": "AWS_IOT_DEVICE_MANAGEMENT_OPERATIONAL_ISSUE",
+    "launch_date": 1562716800,
+    "locale": [
+      "ME"
+    ],
+    "region_id": "il-central-1",
+    "region_name": "Tel Aviv",
+    "service": "awsiotdevicemanagement-il-central-1",
     "service_name": "AWS IoT Device Management"
   },
   {

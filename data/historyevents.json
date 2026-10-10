@@ -2780,7 +2780,7 @@
         {
           "current_status": "1",
           "previous_status": "0",
-          "service": "awsiotdevicemanagement",
+          "service": "awsiotdevicemanagement-eu-south-2",
           "service_name": "AWS IoT Device Management",
           "timestamp": 1791130496000
         },
@@ -3004,7 +3004,7 @@
         {
           "current_status": "0",
           "previous_status": "1",
-          "service": "awsiotdevicemanagement",
+          "service": "awsiotdevicemanagement-eu-south-2",
           "service_name": "AWS IoT Device Management",
           "timestamp": 1791140213000
         },
@@ -3223,7 +3223,7 @@
           "max": "1",
           "service_name": "AWS IoT Core"
         },
-        "awsiotdevicemanagement": {
+        "awsiotdevicemanagement-eu-south-2": {
           "current": "0",
           "max": "1",
           "service_name": "AWS IoT Device Management"
