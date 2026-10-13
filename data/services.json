@@ -21268,6 +21268,50 @@
   },
   {
     "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1612483200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-north-1",
+    "region_name": "Stockholm",
+    "service": "aws-glue-eu-north-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1612483200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-south-1",
+    "region_name": "Mumbai",
+    "service": "aws-glue-ap-south-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1612483200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-3",
+    "region_name": "Paris",
+    "service": "aws-glue-eu-west-3",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1605139200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-2",
+    "region_name": "Ohio",
+    "service": "aws-glue-us-east-2",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
     "launch_date": 1633564800,
     "locale": [
       "AF"
@@ -21275,6 +21319,39 @@
     "region_id": "af-south-1",
     "region_name": "Cape Town",
     "service": "aws-glue-af-south-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1605139200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-1",
+    "region_name": "Ireland",
+    "service": "aws-glue-eu-west-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1605139200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-central-1",
+    "region_name": "Frankfurt",
+    "service": "aws-glue-eu-central-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1616025600,
+    "locale": [
+      "SA"
+    ],
+    "region_id": "sa-east-1",
+    "region_name": "Sao Paulo",
+    "service": "aws-glue-sa-east-1",
     "service_name": "AWS Glue DataBrew"
   },
   {
@@ -21292,11 +21369,11 @@
     "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
     "launch_date": 1605139200,
     "locale": [
-      "AP"
+      "NA"
     ],
-    "region_id": "ap-northeast-1",
-    "region_name": "Tokyo",
-    "service": "aws-glue-ap-northeast-1",
+    "region_id": "us-east-1",
+    "region_name": "N. Virginia",
+    "service": "aws-glue-us-east-1",
     "service_name": "AWS Glue DataBrew"
   },
   {
@@ -21314,11 +21391,55 @@
     "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
     "launch_date": 1612483200,
     "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "aws-glue-eu-west-2",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1628121600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-south-1",
+    "region_name": "Milan",
+    "service": "aws-glue-eu-south-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1605139200,
+    "locale": [
       "AP"
     ],
-    "region_id": "ap-south-1",
-    "region_name": "Mumbai",
-    "service": "aws-glue-ap-south-1",
+    "region_id": "ap-northeast-1",
+    "region_name": "Tokyo",
+    "service": "aws-glue-ap-northeast-1",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1605139200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-2",
+    "region_name": "Oregon",
+    "service": "aws-glue-us-west-2",
+    "service_name": "AWS Glue DataBrew"
+  },
+  {
+    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
+    "launch_date": 1612483200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-1",
+    "region_name": "N. California",
+    "service": "aws-glue-us-west-1",
     "service_name": "AWS Glue DataBrew"
   },
   {
@@ -21352,127 +21473,6 @@
     "region_id": "ca-central-1",
     "region_name": "Canada-Central",
     "service": "aws-glue-ca-central-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1605139200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-central-1",
-    "region_name": "Frankfurt",
-    "service": "aws-glue-eu-central-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1612483200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-north-1",
-    "region_name": "Stockholm",
-    "service": "aws-glue-eu-north-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1628121600,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-south-1",
-    "region_name": "Milan",
-    "service": "aws-glue-eu-south-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1605139200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-west-1",
-    "region_name": "Ireland",
-    "service": "aws-glue-eu-west-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1612483200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-west-2",
-    "region_name": "London",
-    "service": "aws-glue-eu-west-2",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1612483200,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-west-3",
-    "region_name": "Paris",
-    "service": "aws-glue-eu-west-3",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1616025600,
-    "locale": [
-      "SA"
-    ],
-    "region_id": "sa-east-1",
-    "region_name": "Sao Paulo",
-    "service": "aws-glue-sa-east-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1605139200,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-east-1",
-    "region_name": "N. Virginia",
-    "service": "aws-glue-us-east-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1605139200,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-east-2",
-    "region_name": "Ohio",
-    "service": "aws-glue-us-east-2",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1612483200,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-west-1",
-    "region_name": "N. California",
-    "service": "aws-glue-us-west-1",
-    "service_name": "AWS Glue DataBrew"
-  },
-  {
-    "event_type_code": "AWS_DATABREW_OPERATIONAL_ISSUE",
-    "launch_date": 1605139200,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-west-2",
-    "region_name": "Oregon",
-    "service": "aws-glue-us-west-2",
     "service_name": "AWS Glue DataBrew"
   },
   {
@@ -22162,6 +22162,17 @@
   },
   {
     "event_type_code": "AWS_DEVOPS_AGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1790208000,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-north-1",
+    "region_name": "Stockholm",
+    "service": "devops-agent-eu-north-1",
+    "service_name": "AWS DevOps Agent"
+  },
+  {
+    "event_type_code": "AWS_DEVOPS_AGENT_OPERATIONAL_ISSUE",
     "launch_date": 1783555200,
     "locale": [
       "AP"
@@ -22169,6 +22180,28 @@
     "region_id": "ap-south-1",
     "region_name": "Mumbai",
     "service": "devops-agent-ap-south-1",
+    "service_name": "AWS DevOps Agent"
+  },
+  {
+    "event_type_code": "AWS_DEVOPS_AGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1790208000,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-3",
+    "region_name": "Paris",
+    "service": "devops-agent-eu-west-3",
+    "service_name": "AWS DevOps Agent"
+  },
+  {
+    "event_type_code": "AWS_DEVOPS_AGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1790208000,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-2",
+    "region_name": "Ohio",
+    "service": "devops-agent-us-east-2",
     "service_name": "AWS DevOps Agent"
   },
   {
@@ -22213,6 +22246,17 @@
     "region_id": "us-east-1",
     "region_name": "N. Virginia",
     "service": "devops-agent-us-east-1",
+    "service_name": "AWS DevOps Agent"
+  },
+  {
+    "event_type_code": "AWS_DEVOPS_AGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1790208000,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-2",
+    "region_name": "Seoul",
+    "service": "devops-agent-ap-northeast-2",
     "service_name": "AWS DevOps Agent"
   },
   {
@@ -47536,6 +47580,18 @@
     "region_id": "ap-northeast-3",
     "region_name": "Osaka",
     "service": "pcs-ap-northeast-3",
+    "service_name": "AWS Parallel Computing Service",
+    "short_name": "PCS"
+  },
+  {
+    "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
+    "launch_date": 1790899200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-5",
+    "region_name": "Malaysia",
+    "service": "pcs-ap-southeast-5",
     "service_name": "AWS Parallel Computing Service",
     "short_name": "PCS"
   },
