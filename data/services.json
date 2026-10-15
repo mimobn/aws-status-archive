@@ -41450,13 +41450,35 @@
   },
   {
     "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
-    "launch_date": 1593734400,
+    "launch_date": 1512345600,
     "locale": [
-      "AP"
+      "EU"
     ],
-    "region_id": "ap-northeast-1",
-    "region_name": "Tokyo",
-    "service": "lex-ap-northeast-1",
+    "region_id": "eu-west-1",
+    "region_name": "Ireland",
+    "service": "lex-eu-west-1",
+    "service_name": "Amazon Lex"
+  },
+  {
+    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
+    "launch_date": 1587513600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-central-1",
+    "region_name": "Frankfurt",
+    "service": "lex-eu-central-1",
+    "service_name": "Amazon Lex"
+  },
+  {
+    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
+    "launch_date": 1493164800,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-1",
+    "region_name": "N. Virginia",
+    "service": "lex-us-east-1",
     "service_name": "Amazon Lex"
   },
   {
@@ -41468,6 +41490,39 @@
     "region_id": "ap-northeast-2",
     "region_name": "Seoul",
     "service": "lex-ap-northeast-2",
+    "service_name": "Amazon Lex"
+  },
+  {
+    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
+    "launch_date": 1587513600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "lex-eu-west-2",
+    "service_name": "Amazon Lex"
+  },
+  {
+    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
+    "launch_date": 1593734400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-1",
+    "region_name": "Tokyo",
+    "service": "lex-ap-northeast-1",
+    "service_name": "Amazon Lex"
+  },
+  {
+    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
+    "launch_date": 1524614400,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-2",
+    "region_name": "Oregon",
+    "service": "lex-us-west-2",
     "service_name": "Amazon Lex"
   },
   {
@@ -41501,61 +41556,6 @@
     "region_id": "ca-central-1",
     "region_name": "Canada-Central",
     "service": "lex-ca-central-1",
-    "service_name": "Amazon Lex"
-  },
-  {
-    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
-    "launch_date": 1587513600,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-central-1",
-    "region_name": "Frankfurt",
-    "service": "lex-eu-central-1",
-    "service_name": "Amazon Lex"
-  },
-  {
-    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
-    "launch_date": 1512345600,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-west-1",
-    "region_name": "Ireland",
-    "service": "lex-eu-west-1",
-    "service_name": "Amazon Lex"
-  },
-  {
-    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
-    "launch_date": 1587513600,
-    "locale": [
-      "EU"
-    ],
-    "region_id": "eu-west-2",
-    "region_name": "London",
-    "service": "lex-eu-west-2",
-    "service_name": "Amazon Lex"
-  },
-  {
-    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
-    "launch_date": 1493164800,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-east-1",
-    "region_name": "N. Virginia",
-    "service": "lex-us-east-1",
-    "service_name": "Amazon Lex"
-  },
-  {
-    "event_type_code": "AWS_LEX_OPERATIONAL_ISSUE",
-    "launch_date": 1524614400,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-west-2",
-    "region_name": "Oregon",
-    "service": "lex-us-west-2",
     "service_name": "Amazon Lex"
   },
   {
