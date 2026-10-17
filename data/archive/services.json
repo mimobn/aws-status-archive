@@ -61592,6 +61592,17 @@
   },
   {
     "event_type_code": "AWS_TRANSFORM_OPERATIONAL_ISSUE",
+    "launch_date": 1792022400,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-1",
+    "region_name": "Singapore",
+    "service": "transform-ap-southeast-1",
+    "service_name": "AWS Transform"
+  },
+  {
+    "event_type_code": "AWS_TRANSFORM_OPERATIONAL_ISSUE",
     "launch_date": 1764547200,
     "locale": [
       "AP"
