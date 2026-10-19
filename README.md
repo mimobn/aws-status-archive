@@ -1,8 +1,36 @@
-# status-archive
+# AWS Status Archive
 
-A long-term, reproducible archive of AWS public service health events.
+**AWS outages shouldn't disappear after 12 months.**
 
-AWS's public Service Health Dashboard provides a Service History covering the previous 12 months. Once events fall outside that rolling window, they are no longer available through the public Service History in the same way. This project continuously archives the public data published by AWS so that historical service health information can be preserved and analyzed independently.
+The [AWS Health Dashboard](https://health.aws.amazon.com/health/status) only shows the last 12 months of service history. This project snapshots AWS's public health data into Git every day and keeps every event permanently, so past outages stay searchable after AWS drops them.
+
+**[Browse the live archive →](https://mimobn.github.io/aws-status-archive/)**
+
+![The archive: a daily status calendar, open incidents with per-service impact, and a service-by-day history grid](docs/screenshot.png)
+
+## Why it exists
+
+* **AWS forgets, the archive doesn't.** As of October 2026 the archive holds 39 incidents; AWS's own dashboard still lists 28 of them. The other 11 aged out of AWS's window and are kept here.
+* **Every snapshot is a Git commit.** The raw AWS JSON is committed daily, so any number on the site can be traced back to what AWS published, and the whole dataset can be rebuilt from history.
+* **No report is not "healthy".** Days when AWS posted nothing are shown as *no data*, never as operational, so the archive doesn't overstate uptime.
+
+## What you get
+
+* **Daily status calendar** by year or month, counting an incident on every day it was in progress.
+* **Service history** in the same two views as the AWS dashboard: a list of services with a status per day, and a list of events.
+* **Incident details** with the full update timeline and every affected service, ranked by the worst status it reached.
+* **Open incidents** with live per-service status from the latest snapshot.
+* **Filters** by Region, severity, day and text, all kept in the URL so any view can be shared.
+* **CSV and JSON export** of whatever is filtered.
+* **A read-only API** (FastAPI + SQLite) for your own analysis.
+
+Run it locally with one command (needs Python 3.13+ and [uv](https://docs.astral.sh/uv/)):
+
+```bash
+uv run python scripts/serve.py
+```
+
+Then open http://127.0.0.1:8000/.
 
 ## Table of Contents
 
@@ -12,13 +40,9 @@ AWS's public Service Health Dashboard provides a Service History covering the pr
 * [API](#api)
 * [Tests](#tests)
 * [Data](#data)
-
-  * [Data Sources](#data-sources)
-  * [Data Semantics](#data-semantics)
-  * [Metrics](#metrics)
-  * [Day Classification](#day-classification)
-  * [Severity Levels](#severity-levels)
 * [Technology](#technology)
+* [Contributing](#contributing)
+* [License](#license)
 
 ## The Idea
 
@@ -55,12 +79,8 @@ The site is static and is rebuilt automatically when a new archive snapshot is a
 
 Everything displayed on the site is derived from the archived AWS data. No incidents or status observations are manually seeded or fabricated.
 
-### Site Features
-
-* **Interactive filters**: Region, severity, date, and search filters sync to the URL hash for shareable permalinks (e.g., `#region=eu-west-1&sev=degraded&date=2024-01-15`)
-* **Archive freshness**: A header pill displays the latest archive date
-* **Data export**: Download incidents as JSON or CSV for offline analysis
-* **Timeline heatmap**: Visual breakdown of incident activity across days
+Every view has a shareable URL. For example, Mumbai incidents with a worst status of impacted:
+`https://mimobn.github.io/aws-status-archive/#region=Asia+Pacific+%28Mumbai%29&sev=impacted`
 
 ## Quick Start
 
@@ -105,12 +125,12 @@ Then open **http://127.0.0.1:8000/** in your browser.
 Start the local API:
 
 ```bash
-uv run uvicorn api.main:app --port 8000
+uv run uvicorn api.main:app --port 8001
 ```
 
 The interactive API documentation is available at:
 
-**http://localhost:8000/docs**
+**http://localhost:8001/docs**
 
 ## API
 
@@ -308,3 +328,13 @@ The project is built with:
 * GitHub Pages
 
 The archive itself is stored in Git, while the generated SQLite and JSON data provide the structured data used by the API and static website.
+
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the project, the tests, and the rules the data model depends on.
+
+## License
+
+The code is released under the [MIT License](LICENSE).
+
+The archived data is AWS's public Service Health Dashboard data, republished unmodified in `data/`. This project is not affiliated with or endorsed by Amazon Web Services.

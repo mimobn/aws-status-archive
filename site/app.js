@@ -1323,7 +1323,9 @@ function renderHeaderMeta(filtered) {
   ].filter(Boolean);
   $("updatedAt").textContent = scope.length
     ? `${filtered} of ${plural(state.incidents.length, "incident")} · ${scope.join(" · ")}`
-    : `Archive covers ${range || "the period AWS has published"}`;
+    : range
+      ? `Incidents from ${range.replace(" – ", " to ")} · updated daily`
+      : "Updated daily";
   const rebuilt = meta?.rebuilt_at ? dayKey(meta.rebuilt_at) : null;
   $("rebuiltAt").textContent = rebuilt ? ` · last rebuilt ${fmtDay(rebuilt)}` : "";
 }
