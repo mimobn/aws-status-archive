@@ -45539,6 +45539,18 @@
   },
   {
     "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
+    "launch_date": 1792368000,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-south-2",
+    "region_name": "Hyderabad",
+    "service": "pcs-ap-south-2",
+    "service_name": "AWS Parallel Computing Service",
+    "short_name": "PCS"
+  },
+  {
+    "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
     "launch_date": 1727308800,
     "locale": [
       "AP"
