@@ -44347,6 +44347,18 @@
   },
   {
     "event_type_code": "AWS_AIRFLOW_OPERATIONAL_ISSUE",
+    "launch_date": 1792627200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "mx-central-1",
+    "region_name": "Mexico-Central",
+    "service": "airflow-mx-central-1",
+    "service_name": "Amazon Managed Workflows for Apache Airflow",
+    "short_name": "AWS Airflow"
+  },
+  {
+    "event_type_code": "AWS_AIRFLOW_OPERATIONAL_ISSUE",
     "launch_date": 1715817600,
     "locale": [
       "NA"
