@@ -481,6 +481,28 @@
   },
   {
     "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1792627200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "ca-central-1",
+    "region_name": "Canada-Central",
+    "service": "agent-registry-ca-central-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1792627200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-central-1",
+    "region_name": "Frankfurt",
+    "service": "agent-registry-eu-central-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
     "launch_date": 1788134400,
     "locale": [
       "EU"
@@ -492,6 +514,17 @@
   },
   {
     "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1792627200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "agent-registry-eu-west-2",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
     "launch_date": 1788134400,
     "locale": [
       "NA"
@@ -499,6 +532,17 @@
     "region_id": "us-east-1",
     "region_name": "N. Virginia",
     "service": "agent-registry-us-east-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1792627200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-2",
+    "region_name": "Ohio",
+    "service": "agent-registry-us-east-2",
     "service_name": "AWS Agent Registry"
   },
   {
