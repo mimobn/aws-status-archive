@@ -45667,6 +45667,18 @@
   },
   {
     "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
+    "launch_date": 1793145600,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "ca-central-1",
+    "region_name": "Canada-Central",
+    "service": "pcs-ca-central-1",
+    "service_name": "AWS Parallel Computing Service",
+    "short_name": "PCS"
+  },
+  {
+    "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
     "launch_date": 1727308800,
     "locale": [
       "EU"

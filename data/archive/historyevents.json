@@ -1,4 +1,20 @@
 {
+  "apigateway-us-west-2": [
+    {
+      "arn": "arn:aws:health:us-west-2::event/APIGATEWAY/AWS_APIGATEWAY_OPERATIONAL_ISSUE/AWS_APIGATEWAY_OPERATIONAL_ISSUE_63501_D2C0654F167",
+      "date": "1793323718",
+      "event_log": [
+        {
+          "message": "Between 7:27 AM and 8:47 AM PDT, and between 10:47 AM and 4:15 PM PDT, we experienced intermittent invoke error rates and latencies for HTTP APIs in the US-WEST-2 Region. During this time, customers would have observed increased latency or errors when invoking HTTP APIs, with elevated errors occurring between 3:12 PM and 3:45 PM PDT. This represented the period of highest customer impact with the majority of affected customers experiencing errors or increased latencies during this window. Majority of retry attempts for affected requests were succeeding. We communicated to impacted customers via the Your Account view of the AWS Health Dashboard during both impact windows. We identified the root cause to be an issue with an internal subsystem and by 3:45 PM we applied the necessary mitigation actions to remediate the issue. By 4:00 PM, we saw initial signs of recovery and continued to monitor for sustained recovery. We confirmed full recovery at 4:15 PM. We recommend that customers retry failed requests. The issue is resolved and the service is operating normally.",
+          "status": "1",
+          "summary": "Increased invoke error rates",
+          "timestamp": 1793323718
+        }
+      ],
+      "status": "1",
+      "summary": "[RESOLVED] Increased invoke error rates"
+    }
+  ],
   "bedrock-us-east-1": [
     {
       "arn": "arn:aws:health:us-east-1::event/BEDROCK/AWS_BEDROCK_OPERATIONAL_ISSUE/AWS_BEDROCK_OPERATIONAL_ISSUE_588F5_70C147423A3",
