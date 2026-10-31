@@ -60121,6 +60121,17 @@
   },
   {
     "event_type_code": "AWS_TEXTRACT_OPERATIONAL_ISSUE",
+    "launch_date": 1791763200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-northeast-1",
+    "region_name": "Tokyo",
+    "service": "textract-ap-northeast-1",
+    "service_name": "Amazon Textract"
+  },
+  {
+    "event_type_code": "AWS_TEXTRACT_OPERATIONAL_ISSUE",
     "launch_date": 1605139200,
     "locale": [
       "AP"
@@ -60183,6 +60194,17 @@
     "region_id": "eu-central-1",
     "region_name": "Frankfurt",
     "service": "textract-eu-central-1",
+    "service_name": "Amazon Textract"
+  },
+  {
+    "event_type_code": "AWS_TEXTRACT_OPERATIONAL_ISSUE",
+    "launch_date": 1791763200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-central-2",
+    "region_name": "Zurich",
+    "service": "textract-eu-central-2",
     "service_name": "Amazon Textract"
   },
   {
