@@ -58412,6 +58412,17 @@
   },
   {
     "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
+    "launch_date": 1793577600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-7",
+    "region_name": "Thailand",
+    "service": "ses-ap-southeast-7",
+    "service_name": "Amazon Simple Email Service"
+  },
+  {
+    "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
     "launch_date": 1572393600,
     "locale": [
       "AP"
@@ -58577,6 +58588,17 @@
   },
   {
     "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
+    "launch_date": 1793577600,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-4",
+    "region_name": "Melbourne",
+    "service": "ses-ap-southeast-4",
+    "service_name": "Amazon Simple Email Service"
+  },
+  {
+    "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
     "launch_date": 1617840000,
     "locale": [
       "EU"
@@ -58672,6 +58694,17 @@
     "region_id": "ca-west-1",
     "region_name": "Calgary",
     "service": "ses-ca-west-1",
+    "service_name": "Amazon Simple Email Service"
+  },
+  {
+    "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
+    "launch_date": 1793577600,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-south-2",
+    "region_name": "Spain",
+    "service": "ses-eu-south-2",
     "service_name": "Amazon Simple Email Service"
   },
   {
