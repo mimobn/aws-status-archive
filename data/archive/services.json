@@ -20090,6 +20090,17 @@
   },
   {
     "event_type_code": "AWS_DOCDB_OPERATIONAL_ISSUE",
+    "launch_date": 1793836800,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-east-2",
+    "region_name": "Taipei",
+    "service": "docdb-ap-east-2",
+    "service_name": "Amazon DocumentDB"
+  },
+  {
+    "event_type_code": "AWS_DOCDB_OPERATIONAL_ISSUE",
     "launch_date": 1557273600,
     "locale": [
       "AP"
@@ -20196,6 +20207,17 @@
     "region_id": "ap-southeast-5",
     "region_name": "Malaysia",
     "service": "docdb-ap-southeast-5",
+    "service_name": "Amazon DocumentDB"
+  },
+  {
+    "event_type_code": "AWS_DOCDB_OPERATIONAL_ISSUE",
+    "launch_date": 1793836800,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-6",
+    "region_name": "New Zealand",
+    "service": "docdb-ap-southeast-6",
     "service_name": "Amazon DocumentDB"
   },
   {
