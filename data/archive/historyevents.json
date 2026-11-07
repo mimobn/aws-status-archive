@@ -3166,6 +3166,652 @@
       "summary": "[RESOLVED] Increased Error Rates"
     }
   ],
+  "ec2-us-west-2": [
+    {
+      "arn": "arn:aws:health:us-west-2::event/EC2/AWS_EC2_OPERATIONAL_ISSUE/AWS_EC2_OPERATIONAL_ISSUE_62978_C9C1126888D",
+      "date": "1794005465",
+      "event_log": [
+        {
+          "message": "We are experiencing elevated launch failures in the US-WEST-2 Region.",
+          "status": "1",
+          "summary": "Elevated Launch Failures",
+          "timestamp": 1794005465
+        },
+        {
+          "message": "We are experiencing elevated launch failures in the US-WEST-2 Region caused by an issue with the EBS service. Services that depend on EBS or EC2 will experience failure rates of their own. We are working to mitigate the issues. We will provide you with another update by 4:00 PM PST or sooner if new information becomes available.",
+          "status": "1",
+          "summary": "Elevated Launch Failures",
+          "timestamp": 1794007152
+        },
+        {
+          "message": "We can confirm EC2 instance launch failures affecting all AZs (usw2-az1, usw2-az2, usw2-az3, usw2-az4) in the US-WEST-2 Region. We have identified the issue to be caused by a  subsystem that supports EBS Volumes required during instance launch. Services that instantiate new instances, such as cross-region data copy for DataSync, within the US-WEST-2 Region as either the source or destination are also affected. We recommend that customers do not mutate running instances at this time that would result in the replacement or creation of a new EC2 instance in the Region. Running EC2 instances and already created EBS volumes continue to operate as normal. \n\nWe are seeing early signs of recovery, and continue to take steps to restore launches within the Region. We will update this post by 5:30 PM PST or earlier if we have new information to share.",
+          "status": "1",
+          "summary": "Elevated Launch Failures",
+          "timestamp": 1794010112
+        },
+        {
+          "message": "Between 2:35 PM and 4:21 PM PST, we experienced elevated EC2 instance launch failures affecting all AZs (usw2-az1, usw2-az2, usw2-az3, usw2-az4) in the US-WEST-2 Region. EC2 Instance Launches, AWS services that instantiated new instances, as well as services such as DataSync or AWS Backup which require new instances to support data transfers to or from the US-WEST-2 Region were affected. Our engineers were automatically engaged and immediately began investigating the root cause. We identified the issue to be caused by a subsystem that supports EBS Volumes required during instance launch. We began remediation of that issue at 3:20 PM, and completed full recovery at 4:21 PM. We recommend customers retry requests that failed during this time. Running EC2 instances and already created EBS volumes were not impacted and continued to operate as normal. The issue has been resolved and all AWS services are now operating normally.",
+          "status": "0",
+          "summary": "[RESOLVED] Elevated Launch Failures",
+          "timestamp": 1794013936
+        }
+      ],
+      "impacted_service_status_changes": [
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "airflow-us-west-2",
+          "service_name": "Amazon Managed Workflows for Apache Airflow",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "appstream2-us-west-2",
+          "service_name": "Amazon WorkSpaces Applications",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "backup-us-west-2",
+          "service_name": "AWS Backup",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "batch-us-west-2",
+          "service_name": "AWS Batch",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "bedrock-agentcore-us-west-2",
+          "service_name": "Bedrock AgentCore",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "cloudshell-us-west-2",
+          "service_name": "AWS CloudShell",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "cloudwatch-us-west-2",
+          "service_name": "Amazon CloudWatch",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "codebuild-us-west-2",
+          "service_name": "AWS CodeBuild",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "codepipeline-us-west-2",
+          "service_name": "AWS CodePipeline",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "datasync-us-west-2",
+          "service_name": "AWS DataSync",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "devicefarm-us-west-2",
+          "service_name": "AWS Device Farm",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "docdb-us-west-2",
+          "service_name": "Amazon DocumentDB",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "ecs-us-west-2",
+          "service_name": "Amazon Elastic Container Service",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "elasticbeanstalk-us-west-2",
+          "service_name": "AWS Elastic Beanstalk",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "elb-us-west-2",
+          "service_name": "Amazon Elastic Load Balancing",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "elemental-us-west-2",
+          "service_name": "AWS Elemental",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "emr-us-west-2",
+          "service_name": "Amazon Elastic MapReduce",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "emrserverless-us-west-2",
+          "service_name": "Amazon EMR Serverless",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "events-us-west-2",
+          "service_name": "Amazon EventBridge",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "fargate-us-west-2",
+          "service_name": "AWS Fargate",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "gamelift-us-west-2",
+          "service_name": "Amazon GameLift Servers",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "gameliftstreams-us-west-2",
+          "service_name": "Amazon GameLift Streams",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "glue-us-west-2",
+          "service_name": "AWS Glue",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "healthimaging-us-west-2",
+          "service_name": "AWS HealthImaging",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "mq-us-west-2",
+          "service_name": "Amazon MQ",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "omics-us-west-2",
+          "service_name": "AWS HealthOmics",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "pcs-us-west-2",
+          "service_name": "AWS Parallel Computing Service",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "rds-us-west-2",
+          "service_name": "Amazon Relational Database Service",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "sagemaker-us-west-2",
+          "service_name": "Amazon SageMaker",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "state-us-west-2",
+          "service_name": "AWS Step Functions",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "vmimportexport-us-west-2",
+          "service_name": "VM Import/Export",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "1",
+          "previous_status": "0",
+          "service": "workspaces-us-west-2",
+          "service_name": "Amazon WorkSpaces",
+          "timestamp": 1794005465000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "airflow-us-west-2",
+          "service_name": "Amazon Managed Workflows for Apache Airflow",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "appstream2-us-west-2",
+          "service_name": "Amazon WorkSpaces Applications",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "backup-us-west-2",
+          "service_name": "AWS Backup",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "batch-us-west-2",
+          "service_name": "AWS Batch",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "bedrock-agentcore-us-west-2",
+          "service_name": "Bedrock AgentCore",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "cloudshell-us-west-2",
+          "service_name": "AWS CloudShell",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "cloudwatch-us-west-2",
+          "service_name": "Amazon CloudWatch",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "codebuild-us-west-2",
+          "service_name": "AWS CodeBuild",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "codepipeline-us-west-2",
+          "service_name": "AWS CodePipeline",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "datasync-us-west-2",
+          "service_name": "AWS DataSync",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "devicefarm-us-west-2",
+          "service_name": "AWS Device Farm",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "docdb-us-west-2",
+          "service_name": "Amazon DocumentDB",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "ecs-us-west-2",
+          "service_name": "Amazon Elastic Container Service",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "elasticbeanstalk-us-west-2",
+          "service_name": "AWS Elastic Beanstalk",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "elb-us-west-2",
+          "service_name": "Amazon Elastic Load Balancing",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "elemental-us-west-2",
+          "service_name": "AWS Elemental",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "emr-us-west-2",
+          "service_name": "Amazon Elastic MapReduce",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "emrserverless-us-west-2",
+          "service_name": "Amazon EMR Serverless",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "events-us-west-2",
+          "service_name": "Amazon EventBridge",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "fargate-us-west-2",
+          "service_name": "AWS Fargate",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "gamelift-us-west-2",
+          "service_name": "Amazon GameLift Servers",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "gameliftstreams-us-west-2",
+          "service_name": "Amazon GameLift Streams",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "glue-us-west-2",
+          "service_name": "AWS Glue",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "healthimaging-us-west-2",
+          "service_name": "AWS HealthImaging",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "mq-us-west-2",
+          "service_name": "Amazon MQ",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "omics-us-west-2",
+          "service_name": "AWS HealthOmics",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "pcs-us-west-2",
+          "service_name": "AWS Parallel Computing Service",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "rds-us-west-2",
+          "service_name": "Amazon Relational Database Service",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "sagemaker-us-west-2",
+          "service_name": "Amazon SageMaker",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "state-us-west-2",
+          "service_name": "AWS Step Functions",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "vmimportexport-us-west-2",
+          "service_name": "VM Import/Export",
+          "timestamp": 1794013936000
+        },
+        {
+          "current_status": "0",
+          "previous_status": "1",
+          "service": "workspaces-us-west-2",
+          "service_name": "Amazon WorkSpaces",
+          "timestamp": 1794013936000
+        }
+      ],
+      "impacted_services": {
+        "airflow-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon Managed Workflows for Apache Airflow"
+        },
+        "appstream2-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon WorkSpaces Applications"
+        },
+        "backup-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Backup"
+        },
+        "batch-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Batch"
+        },
+        "bedrock-agentcore-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Bedrock AgentCore"
+        },
+        "cloudshell-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS CloudShell"
+        },
+        "cloudwatch-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon CloudWatch"
+        },
+        "codebuild-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS CodeBuild"
+        },
+        "codepipeline-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS CodePipeline"
+        },
+        "datasync-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS DataSync"
+        },
+        "devicefarm-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Device Farm"
+        },
+        "docdb-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon DocumentDB"
+        },
+        "ecs-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon Elastic Container Service"
+        },
+        "elasticbeanstalk-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Elastic Beanstalk"
+        },
+        "elb-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon Elastic Load Balancing"
+        },
+        "elemental-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Elemental"
+        },
+        "emr-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon Elastic MapReduce"
+        },
+        "emrserverless-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon EMR Serverless"
+        },
+        "events-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon EventBridge"
+        },
+        "fargate-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Fargate"
+        },
+        "gamelift-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon GameLift Servers"
+        },
+        "gameliftstreams-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon GameLift Streams"
+        },
+        "glue-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Glue"
+        },
+        "healthimaging-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS HealthImaging"
+        },
+        "mq-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon MQ"
+        },
+        "omics-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS HealthOmics"
+        },
+        "pcs-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Parallel Computing Service"
+        },
+        "rds-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon Relational Database Service"
+        },
+        "sagemaker-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon SageMaker"
+        },
+        "state-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "AWS Step Functions"
+        },
+        "vmimportexport-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "VM Import/Export"
+        },
+        "workspaces-us-west-2": {
+          "current": "0",
+          "max": "1",
+          "service_name": "Amazon WorkSpaces"
+        }
+      },
+      "status": "1",
+      "summary": "[RESOLVED] Elevated Launch Failures"
+    }
+  ],
   "glue-us-east-1": [
     {
       "arn": "arn:aws:health:us-east-1::event/GLUE/AWS_GLUE_OPERATIONAL_ISSUE/AWS_GLUE_OPERATIONAL_ISSUE_3A92B_7824AB2D84B",
