@@ -5635,7 +5635,7 @@
           "current_status": "3",
           "previous_status": "0",
           "service": "quicksight-me-central-1",
-          "service_name": "Amazon Quick Suite",
+          "service_name": "AWS Quick",
           "timestamp": 1772369485000
         },
         {
@@ -6455,7 +6455,7 @@
         "quicksight-me-central-1": {
           "current": "3",
           "max": "3",
-          "service_name": "Amazon Quick Suite"
+          "service_name": "AWS Quick"
         },
         "ram-me-central-1": {
           "current": "3",

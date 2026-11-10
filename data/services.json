@@ -5996,6 +5996,17 @@
     "service_name": "AWS Agent Registry"
   },
   {
+    "event_type_code": "AWS_AGENT_REGISTRY_OPERATIONAL_ISSUE",
+    "launch_date": 1794096000,
+    "locale": [
+      "GC"
+    ],
+    "region_id": "us-gov-west-1",
+    "region_name": "US-West",
+    "service": "agent-registry-us-gov-west-1",
+    "service_name": "AWS Agent Registry"
+  },
+  {
     "event_type_code": "AWS_DSQL_OPERATIONAL_ISSUE",
     "launch_date": 1778457600,
     "locale": [
@@ -49324,7 +49335,7 @@
     "region_id": "eu-north-1",
     "region_name": "Stockholm",
     "service": "quicksight-eu-north-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49335,7 +49346,7 @@
     "region_id": "ap-south-1",
     "region_name": "Mumbai",
     "service": "quicksight-ap-south-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49346,7 +49357,7 @@
     "region_id": "eu-west-3",
     "region_name": "Paris",
     "service": "quicksight-eu-west-3",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49357,7 +49368,7 @@
     "region_id": "ap-southeast-3",
     "region_name": "Jakarta",
     "service": "quicksight-ap-southeast-3",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49368,7 +49379,7 @@
     "region_id": "us-east-2",
     "region_name": "Ohio",
     "service": "quicksight-us-east-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49379,7 +49390,7 @@
     "region_id": "af-south-1",
     "region_name": "Cape Town",
     "service": "quicksight-af-south-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49390,7 +49401,7 @@
     "region_id": "eu-west-1",
     "region_name": "Ireland",
     "service": "quicksight-eu-west-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49401,7 +49412,7 @@
     "region_id": "me-central-1",
     "region_name": "UAE",
     "service": "quicksight-me-central-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49412,7 +49423,7 @@
     "region_id": "eu-central-1",
     "region_name": "Frankfurt",
     "service": "quicksight-eu-central-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49423,7 +49434,7 @@
     "region_id": "sa-east-1",
     "region_name": "Sao Paulo",
     "service": "quicksight-sa-east-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49434,7 +49445,7 @@
     "region_id": "us-east-1",
     "region_name": "N. Virginia",
     "service": "quicksight-us-east-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49445,7 +49456,7 @@
     "region_id": "ap-northeast-2",
     "region_name": "Seoul",
     "service": "quicksight-ap-northeast-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49456,7 +49467,7 @@
     "region_id": "ap-southeast-5",
     "region_name": "Malaysia",
     "service": "quicksight-ap-southeast-5",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49467,7 +49478,7 @@
     "region_id": "eu-west-2",
     "region_name": "London",
     "service": "quicksight-eu-west-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49478,7 +49489,7 @@
     "region_id": "eu-south-1",
     "region_name": "Milan",
     "service": "quicksight-eu-south-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49489,7 +49500,7 @@
     "region_id": "ap-northeast-1",
     "region_name": "Tokyo",
     "service": "quicksight-ap-northeast-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49500,7 +49511,7 @@
     "region_id": "us-west-2",
     "region_name": "Oregon",
     "service": "quicksight-us-west-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49511,7 +49522,7 @@
     "region_id": "ap-southeast-1",
     "region_name": "Singapore",
     "service": "quicksight-ap-southeast-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49522,7 +49533,7 @@
     "region_id": "ap-southeast-2",
     "region_name": "Sydney",
     "service": "quicksight-ap-southeast-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49533,7 +49544,7 @@
     "region_id": "il-central-1",
     "region_name": "Tel Aviv",
     "service": "quicksight-il-central-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49544,7 +49555,7 @@
     "region_id": "ca-central-1",
     "region_name": "Canada-Central",
     "service": "quicksight-ca-central-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49555,7 +49566,7 @@
     "region_id": "eu-south-2",
     "region_name": "Spain",
     "service": "quicksight-eu-south-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49566,7 +49577,7 @@
     "region_id": "eu-central-2",
     "region_name": "Zurich",
     "service": "quicksight-eu-central-2",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49577,7 +49588,7 @@
     "region_id": "us-gov-east-1",
     "region_name": "US-East",
     "service": "quicksight-us-gov-east-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_QUICKSIGHT_OPERATIONAL_ISSUE",
@@ -49588,7 +49599,7 @@
     "region_id": "us-gov-west-1",
     "region_name": "US-West",
     "service": "quicksight-us-gov-west-1",
-    "service_name": "Amazon Quick Suite"
+    "service_name": "AWS Quick"
   },
   {
     "event_type_code": "AWS_RDS_OPERATIONAL_ISSUE",
