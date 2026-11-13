@@ -47757,6 +47757,18 @@
   },
   {
     "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
+    "launch_date": 1794441600,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-1",
+    "region_name": "N. California",
+    "service": "pcs-us-west-1",
+    "service_name": "AWS Parallel Computing Service",
+    "short_name": "PCS"
+  },
+  {
+    "event_type_code": "AWS_PCS_OPERATIONAL_ISSUE",
     "launch_date": 1727308800,
     "locale": [
       "AP"
