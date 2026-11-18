@@ -22392,6 +22392,17 @@
     "service_name": "AWS DevOps Agent"
   },
   {
+    "event_type_code": "AWS_DEVOPS_AGENT_OPERATIONAL_ISSUE",
+    "launch_date": 1794700800,
+    "locale": [
+      "GC"
+    ],
+    "region_id": "us-gov-west-1",
+    "region_name": "US-West",
+    "service": "devops-agent-us-gov-west-1",
+    "service_name": "AWS DevOps Agent"
+  },
+  {
     "event_type_code": "AWS_DEVOPS-GURU_OPERATIONAL_ISSUE",
     "launch_date": 1621468800,
     "locale": [
@@ -58435,6 +58446,17 @@
   },
   {
     "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
+    "launch_date": 1793923200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-southeast-6",
+    "region_name": "New Zealand",
+    "service": "ses-ap-southeast-6",
+    "service_name": "Amazon Simple Email Service"
+  },
+  {
+    "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
     "launch_date": 1604534400,
     "locale": [
       "EU"
@@ -58677,6 +58699,17 @@
   },
   {
     "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
+    "launch_date": 1793923200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "mx-central-1",
+    "region_name": "Mexico-Central",
+    "service": "ses-mx-central-1",
+    "service_name": "Amazon Simple Email Service"
+  },
+  {
+    "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
     "launch_date": 1604534400,
     "locale": [
       "NA"
@@ -58717,6 +58750,17 @@
     "region_id": "il-central-1",
     "region_name": "Tel Aviv",
     "service": "ses-il-central-1",
+    "service_name": "Amazon Simple Email Service"
+  },
+  {
+    "event_type_code": "AWS_SES_OPERATIONAL_ISSUE",
+    "launch_date": 1793923200,
+    "locale": [
+      "AP"
+    ],
+    "region_id": "ap-east-2",
+    "region_name": "Taipei",
+    "service": "ses-ap-east-2",
     "service_name": "Amazon Simple Email Service"
   },
   {
