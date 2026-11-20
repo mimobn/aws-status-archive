@@ -1,5 +1,38 @@
 [
   {
+    "event_type_code": "AWS_ABUSE_SIGNAL_API_OPERATIONAL_ISSUE",
+    "launch_date": 1794355200,
+    "locale": [
+      "EU"
+    ],
+    "region_id": "eu-west-2",
+    "region_name": "London",
+    "service": "abuse-signal-api-eu-west-2",
+    "service_name": "AWS Abuse Signal API"
+  },
+  {
+    "event_type_code": "AWS_ABUSE_SIGNAL_API_OPERATIONAL_ISSUE",
+    "launch_date": 1794355200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-east-1",
+    "region_name": "N. Virginia",
+    "service": "abuse-signal-api-us-east-1",
+    "service_name": "AWS Abuse Signal API"
+  },
+  {
+    "event_type_code": "AWS_ABUSE_SIGNAL_API_OPERATIONAL_ISSUE",
+    "launch_date": 1794355200,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "us-west-2",
+    "region_name": "Oregon",
+    "service": "abuse-signal-api-us-west-2",
+    "service_name": "AWS Abuse Signal API"
+  },
+  {
     "event_type_code": "AWS_ACCOUNT_OPERATIONAL_ISSUE",
     "launch_date": 1634256000,
     "locale": [
