@@ -42832,6 +42832,28 @@
   },
   {
     "event_type_code": "AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE",
+    "launch_date": 1795132800,
+    "locale": [
+      "GC"
+    ],
+    "region_id": "us-gov-east-1",
+    "region_name": "US-East",
+    "service": "multipleservices-us-gov-east-1",
+    "service_name": "Multiple services"
+  },
+  {
+    "event_type_code": "AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE",
+    "launch_date": 1795132800,
+    "locale": [
+      "GC"
+    ],
+    "region_id": "us-gov-west-1",
+    "region_name": "US-West",
+    "service": "multipleservices-us-gov-west-1",
+    "service_name": "Multiple services"
+  },
+  {
+    "event_type_code": "AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE",
     "launch_date": 1645660800,
     "locale": [
       "NA"
