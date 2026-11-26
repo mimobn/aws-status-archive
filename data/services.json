@@ -46842,17 +46842,6 @@
     "service_name": "AWS HealthOmics"
   },
   {
-    "event_type_code": "AWS_ONE_OPERATIONAL_ISSUE",
-    "launch_date": 1714435200,
-    "locale": [
-      "NA"
-    ],
-    "region_id": "us-east-1",
-    "region_name": "N. Virginia",
-    "service": "one-us-east-1",
-    "service_name": "Amazon One Enterprise"
-  },
-  {
     "event_type_code": "AWS_ES_OPERATIONAL_ISSUE",
     "launch_date": 1756339200,
     "locale": [
