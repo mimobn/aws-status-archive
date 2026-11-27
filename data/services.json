@@ -3154,6 +3154,17 @@
     "service_name": "AWS MCP Server"
   },
   {
+    "event_type_code": "AWS_MCP_OPERATIONAL_ISSUE",
+    "launch_date": 1795737600,
+    "locale": [
+      "NA"
+    ],
+    "region_id": "ca-central-1",
+    "region_name": "Canada-Central",
+    "service": "aws-mcp-ca-central-1",
+    "service_name": "AWS MCP Server"
+  },
+  {
     "event_type_code": "AWS_MGH_JOURNEYS_OPERATIONAL_ISSUE",
     "launch_date": 1705449600,
     "locale": [
